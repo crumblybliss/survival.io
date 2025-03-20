@@ -133,13 +133,21 @@
             height: 130px;
             object-fit: cover;
             border-radius: 6px;
+            transition: 0.3s;
         }
 
-        .product h3 {
-            font-size: 14px;
+        .product img:hover {
+            opacity: 0.8;
+        }
+
+        .product a {
+            text-decoration: none;
             color: navy;
-            margin: 10px 0 5px;
             font-weight: bold;
+        }
+
+        .product a:hover {
+            color: #4CAF50;
         }
 
         .price {
@@ -204,16 +212,20 @@
         <div class="products-container">
             <!-- Featured Product 1 -->
             <div class="product">
-                <h3>Survival Bracelet 2</h3>
-                <img src="3.jpg" alt="Survival Bracelet 2">
+                <a href="products.html#survival-bracelet-2">
+                    <img src="3.jpg" alt="Survival Bracelet 2">
+                    <h3>Survival Bracelet 2</h3>
+                </a>
                 <p class="price">$15.00</p>
                 <paypal-add-to-cart-button data-id="AQJAZ5DJLULM6"></paypal-add-to-cart-button>
             </div>
 
             <!-- Featured Product 2 -->
             <div class="product">
-                <h3>Braided Bracelet</h3>
-                <img src="6.jpg" alt="Braided Bracelet">
+                <a href="products.html#braided-bracelet">
+                    <img src="6.jpg" alt="Braided Bracelet">
+                    <h3>Braided Bracelet</h3>
+                </a>
                 <p class="price">$20.00</p>
                 <paypal-add-to-cart-button data-id="TBGCSV22U2JYC"></paypal-add-to-cart-button>
             </div>
