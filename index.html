@@ -151,7 +151,7 @@
     </header>
 
     <main>
-        <!-- Product 1 -->
+        <!-- Product 1: Keychain -->
         <div class="product">
             <div class="product-box">
                 <h2>Keychain</h2>
@@ -159,21 +159,23 @@
                 <p class="description">Durable keychain for everyday use.</p>
                 <p class="price">$5.00</p>
                 <a href="https://forms.gle/WrZ68jnUL4deKWB77"><button>Buy Now</button></a>
+                <paypal-add-to-cart-button data-id="NGRF9T2H5BUQL"></paypal-add-to-cart-button>
             </div>
         </div>
 
-        <!-- Product 2 -->
+        <!-- Product 2: Bead Bracelet -->
         <div class="product">
             <div class="product-box">
-                <h2>Survival Bracelet 1</h2>
-                <img src="4.jpeg" alt="Survival Bracelet 1">
-                <p class="description">Stylish and durable survival bracelet.</p>
+                <h2>Bead Bracelet</h2>
+                <img src="7.jpg" alt="Bead Bracelet">
+                <p class="description">Bead Bracelet</p>
                 <p class="price">$15.00</p>
                 <a href="https://forms.gle/BFn9FVP7AECJj9wn6"><button>Buy Now</button></a>
+                <paypal-add-to-cart-button data-id="2JYUTZM5EWKMN"></paypal-add-to-cart-button>
             </div>
         </div>
 
-        <!-- Product 3 -->
+        <!-- Product 3: Survival Bracelet 2 -->
         <div class="product">
             <div class="product-box">
                 <h2>Survival Bracelet 2</h2>
@@ -181,28 +183,13 @@
                 <p class="description">Premium-quality survival bracelet for outdoor enthusiasts.</p>
                 <p class="price">$15.00</p>
                 <a href="https://forms.gle/gJ8WBh2xiX2fiGEPA"><button>Buy Now</button></a>
-                
-                <!-- PayPal Add to Cart Button -->
                 <paypal-add-to-cart-button data-id="AQJAZ5DJLULM6"></paypal-add-to-cart-button>
-            </div>
-        </div>
-
-        <!-- Product 4 -->
-        <div class="product">
-            <div class="product-box">
-                <h2>Survival Bracelet 3</h2>
-                <img src="20.jpg" alt="Survival Bracelet 3">
-                <p class="description">Compact and stylish survival bracelet.</p>
-                <p class="price">$15.00</p>
-                <a href="https://forms.gle/WrZ68jnUL4deKWB77"><button>Buy Now</button></a>
-                
-                <!-- PayPal Add to Cart Button -->
-                <paypal-add-to-cart-button data-id="2GMD2YH57BJ4W"></paypal-add-to-cart-button>
             </div>
         </div>
     </main>
 
     <footer>
+        <p>If you want different colors, email <a href="mailto:cheapbraclet@outlook.com" style="color: #4CAF50;">cheapbraclet@outlook.com</a></p>
         <p class="all-rights-reserved">&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
         <paypal-cart-button data-id="pp-view-cart"></paypal-cart-button>
         <button class="donate-button" onclick="window.location.href='https://www.paypal.com/ncp/payment/C474MBZ4JC84S'">Donate</button>
@@ -213,6 +200,8 @@
         cartPaypal.Cart({ id: "pp-view-cart" });
         cartPaypal.AddToCart({ id: "2GMD2YH57BJ4W" });
         cartPaypal.AddToCart({ id: "AQJAZ5DJLULM6" });
+        cartPaypal.AddToCart({ id: "NGRF9T2H5BUQL" });
+        cartPaypal.AddToCart({ id: "2JYUTZM5EWKMN" });
     </script>
 </body>
 </html>
