@@ -5,9 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Reviews</title>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <!-- Firebase SDK (Modular) -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        // ✅ Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ✅ Submit a Review
+        async function submitReview() {
+            const name = document.getElementById("name").value.trim();
+            const comment = document.getElementById("comment").value.trim();
+            const rating = parseInt(document.getElementById("rating").value);
+
+            if (!name || !comment) {
+                alert("Please fill out all fields.");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "reviews"), {
+                    name: name,
+                    comment: comment,
+                    rating: rating,
+                    timestamp: serverTimestamp()
+                });
+
+                alert("Review submitted successfully!");
+                document.getElementById("name").value = "";
+                document.getElementById("comment").value = "";
+                loadReviews(); // Refresh reviews
+            } catch (error) {
+                console.error("Error submitting review:", error);
+                alert("Error submitting review. Check console.");
+            }
+        }
+
+        // ✅ Load Reviews
+        async function loadReviews() {
+            const reviewsList = document.getElementById("reviews-list");
+            const averageRatingDiv = document.getElementById("average-rating");
+            reviewsList.innerHTML = "";
+            let totalRating = 0, count = 0;
+
+            try {
+                const q = query(collection(db, "reviews"), orderBy("timestamp", "desc"));
+                const snapshot = await getDocs(q);
+
+                snapshot.forEach(doc => {
+                    const review = doc.data();
+                    const reviewElement = document.createElement("div");
+                    reviewElement.classList.add("review");
+                    reviewElement.innerHTML = `
+                        <strong>${review.name}</strong> - <span class="stars">${"⭐".repeat(review.rating)}</span>
+                        <p>${review.comment}</p>
+                    `;
+                    reviewsList.appendChild(reviewElement);
+                    totalRating += review.rating;
+                    count++;
+                });
+
+                // ✅ Calculate and display average rating
+                if (count > 0) {
+                    const averageRating = (totalRating / count).toFixed(1);
+                    averageRatingDiv.innerHTML = `<h3>Average Rating: ${averageRating} ⭐</h3>`;
+                } else {
+                    averageRatingDiv.innerHTML = `<h3>No reviews yet.</h3>`;
+                }
+            } catch (error) {
+                console.error("Error loading reviews:", error);
+            }
+        }
+
+        // ✅ Load reviews on page load
+        window.onload = loadReviews;
+
+        // Expose functions to global scope
+        window.submitReview = submitReview;
+    </script>
 
     <style>
         body {
@@ -69,87 +156,6 @@
         <div id="average-rating"></div>
         <div id="reviews-list"></div>
     </div>
-
-    <script>
-        // ✅ Initialize Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // ✅ Submit a Review
-        function submitReview() {
-            const name = document.getElementById("name").value.trim();
-            const comment = document.getElementById("comment").value.trim();
-            const rating = parseInt(document.getElementById("rating").value);
-
-            if (!name || !comment) {
-                alert("Please fill out all fields.");
-                return;
-            }
-
-            db.collection("reviews").add({
-                name: name,
-                comment: comment,
-                rating: rating,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            })
-            .then(() => {
-                alert("Review submitted successfully!");
-                document.getElementById("name").value = "";
-                document.getElementById("comment").value = "";
-                loadReviews(); // Refresh reviews
-            })
-            .catch(error => {
-                console.error("Error submitting review:", error);
-                alert("Error submitting review. Check console.");
-            });
-        }
-
-        // ✅ Load Reviews
-        function loadReviews() {
-            const reviewsList = document.getElementById("reviews-list");
-            const averageRatingDiv = document.getElementById("average-rating");
-            reviewsList.innerHTML = "";
-            let totalRating = 0, count = 0;
-
-            db.collection("reviews").orderBy("timestamp", "desc").get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    const review = doc.data();
-                    const reviewElement = document.createElement("div");
-                    reviewElement.classList.add("review");
-                    reviewElement.innerHTML = `
-                        <strong>${review.name}</strong> - <span class="stars">${"⭐".repeat(review.rating)}</span>
-                        <p>${review.comment}</p>
-                    `;
-                    reviewsList.appendChild(reviewElement);
-                    totalRating += review.rating;
-                    count++;
-                });
-
-                // ✅ Calculate and display average rating
-                if (count > 0) {
-                    const averageRating = (totalRating / count).toFixed(1);
-                    averageRatingDiv.innerHTML = `<h3>Average Rating: ${averageRating} ⭐</h3>`;
-                } else {
-                    averageRatingDiv.innerHTML = `<h3>No reviews yet.</h3>`;
-                }
-            })
-            .catch(error => {
-                console.error("Error loading reviews:", error);
-            });
-        }
-
-        // ✅ Load reviews on page load
-        window.onload = loadReviews;
-    </script>
 
 </body>
 </html>
