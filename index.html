@@ -9,92 +9,126 @@
     <script src="https://www.paypalobjects.com/ncp/cart/cart.js" data-merchant-id="YZBS9R98C23HG"></script>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: navy;
-            color: white;
+        /* Global Reset */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
-        header {
-            background-color: #343a40;
-            padding: 15px;
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: navy;
+            color: white;
             text-align: center;
+            padding-bottom: 50px;
         }
 
-        header nav ul {
-            list-style-type: none;
+        /* Header */
+        header {
+            background-color: #003366;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        header h1 {
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 10px 0 0;
             padding: 0;
         }
 
-        header nav ul li {
+        nav ul li {
             display: inline;
-            margin-right: 15px;
+            margin: 0 15px;
         }
 
-        header nav ul li a {
+        nav ul li a {
             color: white;
             text-decoration: none;
+            font-size: 14px;
+            transition: 0.3s;
         }
 
-        main {
-            padding: 15px;
-            display: flex;
-            flex-wrap: wrap;
+        nav ul li a:hover {
+            color: #4CAF50;
+        }
+
+        /* Product Grid */
+        .products-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
             justify-content: center;
-            gap: 10px;
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
         }
 
         .product {
-            width: 150px;
+            background-color: white;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            transition: 0.3s;
             text-align: center;
         }
 
-        .product-box {
-            background-color: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        .product:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
         }
 
         .product img {
             width: 100%;
-            height: auto;
-            border-radius: 5px;
+            height: 130px;
+            object-fit: cover;
+            border-radius: 6px;
         }
 
         .product h2 {
             font-size: 14px;
             color: navy;
-            margin: 5px 0;
+            margin: 10px 0 5px;
+            font-weight: bold;
         }
 
         .price {
+            font-size: 13px;
             font-weight: bold;
             color: navy;
-            font-size: 13px;
         }
 
-        .description {
-            font-size: 11px;
-            color: navy;
-            margin-bottom: 5px;
+        .paypal-button {
+            margin-top: 5px;
         }
 
+        /* Footer */
         footer {
-            background-color: #343a40;
-            padding: 10px;
-            text-align: center;
+            background-color: #003366;
+            padding: 15px;
             font-size: 12px;
+            margin-top: 20px;
+        }
+
+        footer a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
         }
 
         .donate-button {
             background-color: #4CAF50;
             color: white;
-            padding: 7px 20px;
+            padding: 8px 15px;
             font-size: 12px;
-            border-radius: 8px;
+            border-radius: 5px;
             border: none;
             cursor: pointer;
             transition: 0.3s;
@@ -118,65 +152,70 @@
         </nav>
     </header>
 
-    <main>
+    <div class="products-container">
         <!-- Product 1: Keychain -->
         <div class="product">
-            <div class="product-box">
-                <h2>Keychain</h2>
-                <img src="6.jpeg" alt="Keychain">
-                <p class="description">Durable keychain.</p>
-                <p class="price">$5.00</p>
+            <h2>Keychain</h2>
+            <img src="6.jpeg" alt="Keychain">
+            <p class="price">$5.00</p>
+            <div class="paypal-button">
                 <paypal-add-to-cart-button data-id="NGRF9T2H5BUQL"></paypal-add-to-cart-button>
             </div>
         </div>
 
         <!-- Product 2: Bead Bracelet -->
         <div class="product">
-            <div class="product-box">
-                <h2>Bead Bracelet</h2>
-                <img src="7.jpg" alt="Bead Bracelet">
-                <p class="description">Stylish & lightweight.</p>
-                <p class="price">$15.00</p>
+            <h2>Bead Bracelet</h2>
+            <img src="7.jpg" alt="Bead Bracelet">
+            <p class="price">$15.00</p>
+            <div class="paypal-button">
                 <paypal-add-to-cart-button data-id="2JYUTZM5EWKMN"></paypal-add-to-cart-button>
             </div>
         </div>
 
         <!-- Product 3: Survival Bracelet 2 -->
         <div class="product">
-            <div class="product-box">
-                <h2>Survival Bracelet 2</h2>
-                <img src="10.jpg" alt="Survival Bracelet 2">
-                <p class="description">Outdoor ready.</p>
-                <p class="price">$15.00</p>
+            <h2>Survival Bracelet 2</h2>
+            <img src="10.jpg" alt="Survival Bracelet 2">
+            <p class="price">$15.00</p>
+            <div class="paypal-button">
                 <paypal-add-to-cart-button data-id="AQJAZ5DJLULM6"></paypal-add-to-cart-button>
             </div>
         </div>
 
         <!-- Product 4: Survival Bracelet 3 -->
         <div class="product">
-            <div class="product-box">
-                <h2>Survival Bracelet 3</h2>
-                <img src="20.jpg" alt="Survival Bracelet 3">
-                <p class="description">Compact & tough.</p>
-                <p class="price">$15.00</p>
+            <h2>Survival Bracelet 3</h2>
+            <img src="20.jpg" alt="Survival Bracelet 3">
+            <p class="price">$15.00</p>
+            <div class="paypal-button">
                 <paypal-add-to-cart-button data-id="2GMD2YH57BJ4W"></paypal-add-to-cart-button>
             </div>
         </div>
 
         <!-- Product 5: Survival Dog Collar -->
         <div class="product">
-            <div class="product-box">
-                <h2>Survival Dog Collar</h2>
-                <img src="pic1.jpg" alt="Survival Dog Collar">
-                <p class="description">Tactical for pets.</p>
-                <p class="price">$30.00</p>
+            <h2>Survival Dog Collar</h2>
+            <img src="pic1.jpg" alt="Survival Dog Collar">
+            <p class="price">$30.00</p>
+            <div class="paypal-button">
                 <paypal-add-to-cart-button data-id="UYT6RM32KL98Q"></paypal-add-to-cart-button>
             </div>
         </div>
-    </main>
+
+        <!-- Product 6: Braided Bracelet -->
+        <div class="product">
+            <h2>Braided Bracelet</h2>
+            <img src="braided.jpg" alt="Braided Bracelet">
+            <p class="price">$20.00</p>
+            <div class="paypal-button">
+                <paypal-add-to-cart-button data-id="BRAIDED12345"></paypal-add-to-cart-button>
+            </div>
+        </div>
+    </div>
 
     <footer>
-        <p>If you want different colors, email <a href="mailto:cheapbraclet@outlook.com" style="color: #4CAF50;">cheapbraclet@outlook.com</a></p>
+        <p>If you want different colors, email <a href="mailto:cheapbraclet@outlook.com">cheapbraclet@outlook.com</a></p>
         <p>&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
         
         <paypal-cart-button data-id="pp-view-cart"></paypal-cart-button>
@@ -194,6 +233,8 @@
         cartPaypal.AddToCart({ id: "AQJAZ5DJLULM6" });
         cartPaypal.AddToCart({ id: "2GMD2YH57BJ4W" });
         cartPaypal.AddToCart({ id: "UYT6RM32KL98Q" });
+        cartPaypal.AddToCart({ id: "BRAIDED12345" });
     </script>
 </body>
 </html>
+
