@@ -3,247 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Commits - Survival Bracelets Store</title>
+    <title>Customer Reviews</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
     <style>
-        /* Global Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* General Styles */
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             background-color: navy;
             color: white;
             text-align: center;
-            padding-bottom: 50px;
+            padding: 20px;
         }
 
-        /* Header */
-        header {
-            background-color: #003366;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-
-        header h1 {
+        h1 {
             font-size: 24px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
         }
 
-        nav ul {
-            list-style: none;
-            margin: 10px 0 0;
-            padding: 0;
-        }
-
-        nav ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-
-        nav ul li a:hover {
-            color: #4CAF50;
-        }
-
-        /* Reviews Section */
-        .reviews-container {
-            max-width: 800px;
-            margin: auto;
-            padding: 30px 20px;
-        }
-
-        .reviews-container h2 {
-            font-size: 26px;
-            margin-bottom: 20px;
-            color: #4CAF50;
-        }
-
-        .average-rating {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: gold;
-        }
-
-        .review {
+        .review-form {
             background-color: white;
             color: black;
             padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .review h3 {
-            color: navy;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        .review p {
-            font-size: 15px;
-            line-height: 1.6;
-        }
-
-        .stars {
-            color: #FFD700;
-            font-size: 16px;
-            margin-top: 5px;
-        }
-
-        /* Review Form */
-        .review-form {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #002244;
             border-radius: 8px;
+            max-width: 400px;
+            margin: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
-        .review-form input, .review-form textarea, .review-form select {
+        input, textarea, select {
             width: 100%;
             padding: 10px;
-            margin-bottom: 10px;
-            border: none;
-            border-radius: 5px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
         }
 
-        .review-form button {
+        button {
             background-color: #4CAF50;
             color: white;
-            padding: 10px 15px;
-            font-size: 16px;
-            border-radius: 5px;
+            padding: 10px;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
-            transition: 0.3s;
         }
 
-        .review-form button:hover {
+        button:hover {
             background-color: #45a049;
         }
 
-        /* Footer */
-        footer {
-            background-color: #003366;
-            padding: 15px;
-            font-size: 12px;
+        .reviews-container {
             margin-top: 20px;
+            max-width: 600px;
+            margin: auto;
+            background-color: white;
+            color: black;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
-        footer a {
-            color: #4CAF50;
-            text-decoration: none;
-            font-weight: bold;
+        .review {
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .stars {
+            color: gold;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Customer Commits</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="products.html">Products</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="commits.html">Commits</a></li>
-            </ul>
-        </nav>
-    </header>
 
-    <!-- Customer Reviews Section -->
-    <section class="reviews-container">
-        <h2>What Our Customers Say</h2>
+    <h1>Customer Reviews</h1>
 
-        <p class="average-rating">⭐ Average Rating: <span id="averageRating">No reviews yet</span></p>
-
-        <div id="reviews-list">
-            <!-- Reviews will be added here dynamically -->
-        </div>
-    </section>
-
-    <!-- Review Form -->
-    <section class="review-form">
+    <div class="review-form">
         <h2>Leave a Review</h2>
-        <input type="text" id="reviewerName" placeholder="Your Name" required>
-        <textarea id="reviewText" placeholder="Write your review here..." required></textarea>
-        <label for="reviewStars">Rating:</label>
-        <select id="reviewStars">
+        <input type="text" id="name" placeholder="Your Name" required>
+        <textarea id="comment" placeholder="Your Review" rows="4" required></textarea>
+        <select id="rating">
             <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
             <option value="4">⭐⭐⭐⭐ - Very Good</option>
-            <option value="3">⭐⭐⭐ - Average</option>
-            <option value="2">⭐⭐ - Poor</option>
-            <option value="1">⭐ - Bad</option>
+            <option value="3">⭐⭐⭐ - Good</option>
+            <option value="2">⭐⭐ - Fair</option>
+            <option value="1">⭐ - Poor</option>
         </select>
-        <button onclick="addReview()">Submit Review</button>
-    </section>
+        <button onclick="submitReview()">Submit Review</button>
+    </div>
 
-    <footer>
-        <p>&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
-        <p>Have a review? Email us at <a href="mailto:cheapbraclet@outlook.com">cheapbraclet@outlook.com</a></p>
-    </footer>
+    <div class="reviews-container">
+        <h2>Recent Reviews</h2>
+        <div id="reviews-list"></div>
+    </div>
 
-    <!-- JavaScript for Reviews -->
     <script>
-        let reviews = [];
+        // ✅ Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
 
-        function addReview() {
-            const name = document.getElementById('reviewerName').value.trim();
-            const text = document.getElementById('reviewText').value.trim();
-            const stars = parseInt(document.getElementById('reviewStars').value);
+        // ✅ Initialize Firebase App and Firestore
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-            if (name === "" || text === "") {
-                alert("Please fill out all fields before submitting!");
+        // ✅ Submit a Review
+        function submitReview() {
+            const name = document.getElementById("name").value;
+            const comment = document.getElementById("comment").value;
+            const rating = document.getElementById("rating").value;
+
+            if (name === "" || comment === "") {
+                alert("Please fill out all fields.");
                 return;
             }
 
-            const newReview = {
+            db.collection("reviews").add({
                 name: name,
-                text: text,
-                stars: stars
-            };
-
-            reviews.push(newReview);
-            document.getElementById('reviewerName').value = "";
-            document.getElementById('reviewText').value = "";
-            document.getElementById('reviewStars').value = "5";
-
-            displayReviews();
-        }
-
-        function displayReviews() {
-            const reviewList = document.getElementById("reviews-list");
-            reviewList.innerHTML = "";
-
-            let totalStars = 0;
-
-            reviews.forEach(review => {
-                totalStars += review.stars;
-
-                const reviewHTML = `
-                    <div class="review">
-                        <h3>${review.name}</h3>
-                        <p>"${review.text}"</p>
-                        <div class="stars">${"⭐".repeat(review.stars)}</div>
-                    </div>
-                `;
-                reviewList.innerHTML += reviewHTML;
+                comment: comment,
+                rating: parseInt(rating),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                alert("Review submitted successfully!");
+                document.getElementById("name").value = "";
+                document.getElementById("comment").value = "";
+                loadReviews(); // Refresh reviews
+            })
+            .catch(error => {
+                console.error("Error submitting review:", error);
             });
-
-            const averageRating = reviews.length > 0 ? (totalStars / reviews.length).toFixed(1) : "No reviews yet";
-            document.getElementById("averageRating").innerText = averageRating;
         }
+
+        // ✅ Load Reviews from Firestore
+        function loadReviews() {
+            const reviewsList = document.getElementById("reviews-list");
+            reviewsList.innerHTML = "";
+
+            db.collection("reviews").orderBy("timestamp", "desc").get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    const review = doc.data();
+                    const reviewElement = document.createElement("div");
+                    reviewElement.classList.add("review");
+                    reviewElement.innerHTML = `
+                        <strong>${review.name}</strong> - <span class="stars">${"⭐".repeat(review.rating)}</span>
+                        <p>${review.comment}</p>
+                    `;
+                    reviewsList.appendChild(reviewElement);
+                });
+            })
+            .catch(error => {
+                console.error("Error loading reviews:", error);
+            });
+        }
+
+        // ✅ Load reviews on page load
+        window.onload = loadReviews;
     </script>
+
 </body>
 </html>
+
