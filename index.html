@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survival Bracelets Store</title>
-    
+
     <!-- PayPal Cart Script -->
     <script src="https://www.paypalobjects.com/ncp/cart/cart.js" data-merchant-id="YZBS9R98C23HG"></script>
 
@@ -158,7 +158,6 @@
                 <img src="6.jpeg" alt="Keychain">
                 <p class="description">Durable keychain for everyday use.</p>
                 <p class="price">$5.00</p>
-                <a href="https://forms.gle/WrZ68jnUL4deKWB77"><button>Buy Now</button></a>
                 <paypal-add-to-cart-button data-id="NGRF9T2H5BUQL"></paypal-add-to-cart-button>
             </div>
         </div>
@@ -168,9 +167,8 @@
             <div class="product-box">
                 <h2>Bead Bracelet</h2>
                 <img src="7.jpg" alt="Bead Bracelet">
-                <p class="description">Bead Bracelet</p>
+                <p class="description">Stylish and comfortable bead bracelet.</p>
                 <p class="price">$15.00</p>
-                <a href="https://forms.gle/BFn9FVP7AECJj9wn6"><button>Buy Now</button></a>
                 <paypal-add-to-cart-button data-id="2JYUTZM5EWKMN"></paypal-add-to-cart-button>
             </div>
         </div>
@@ -182,26 +180,55 @@
                 <img src="10.jpg" alt="Survival Bracelet 2">
                 <p class="description">Premium-quality survival bracelet for outdoor enthusiasts.</p>
                 <p class="price">$15.00</p>
-                <a href="https://forms.gle/gJ8WBh2xiX2fiGEPA"><button>Buy Now</button></a>
                 <paypal-add-to-cart-button data-id="AQJAZ5DJLULM6"></paypal-add-to-cart-button>
+            </div>
+        </div>
+
+        <!-- Product 4: Survival Bracelet 3 -->
+        <div class="product">
+            <div class="product-box">
+                <h2>Survival Bracelet 3</h2>
+                <img src="20.jpg" alt="Survival Bracelet 3">
+                <p class="description">Compact and stylish survival bracelet.</p>
+                <p class="price">$15.00</p>
+                <paypal-add-to-cart-button data-id="2GMD2YH57BJ4W"></paypal-add-to-cart-button>
+            </div>
+        </div>
+
+        <!-- Product 5: Survival Dog Collar -->
+        <div class="product">
+            <div class="product-box">
+                <h2>Survival Dog Collar</h2>
+                <img src="pic1.jpg" alt="Survival Dog Collar">
+                <p class="description">Tactical survival collar for your pet.</p>
+                <p class="price">$30.00</p>
+                <paypal-add-to-cart-button data-id="UYT6RM32KL98Q"></paypal-add-to-cart-button>
             </div>
         </div>
     </main>
 
     <footer>
-        <p>If you want different colors, email <a href="mailto:cheapbraclet@outlook.com" style="color: #4CAF50;">cheapbraclet@outlook.com</a></p>
+        <p>
+            If you want different colors, email 
+            <a href="mailto:cheapbraclet@outlook.com" style="color: #4CAF50;">cheapbraclet@outlook.com</a>
+        </p>
         <p class="all-rights-reserved">&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
+        
         <paypal-cart-button data-id="pp-view-cart"></paypal-cart-button>
-        <button class="donate-button" onclick="window.location.href='https://www.paypal.com/ncp/payment/C474MBZ4JC84S'">Donate</button>
+        
+        <button class="donate-button" onclick="window.location.href='https://www.paypal.com/ncp/payment/C474MBZ4JC84S'">
+            Donate
+        </button>
     </footer>
 
     <!-- Initialize PayPal Buttons -->
     <script>
         cartPaypal.Cart({ id: "pp-view-cart" });
-        cartPaypal.AddToCart({ id: "2GMD2YH57BJ4W" });
-        cartPaypal.AddToCart({ id: "AQJAZ5DJLULM6" });
         cartPaypal.AddToCart({ id: "NGRF9T2H5BUQL" });
         cartPaypal.AddToCart({ id: "2JYUTZM5EWKMN" });
+        cartPaypal.AddToCart({ id: "AQJAZ5DJLULM6" });
+        cartPaypal.AddToCart({ id: "2GMD2YH57BJ4W" });
+        cartPaypal.AddToCart({ id: "UYT6RM32KL98Q" });
     </script>
 </body>
 </html>
