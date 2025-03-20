@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Commits - Survival Bracelets Store</title>
+
+    <style>
+        /* Global Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: navy;
+            color: white;
+            text-align: center;
+            padding-bottom: 50px;
+        }
+
+        /* Header */
+        header {
+            background-color: #003366;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        header h1 {
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 10px 0 0;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #4CAF50;
+        }
+
+        /* Reviews Section */
+        .reviews-container {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px 20px;
+        }
+
+        .reviews-container h2 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+
+        .average-rating {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: gold;
+        }
+
+        .review {
+            background-color: white;
+            color: black;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .review h3 {
+            color: navy;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .review p {
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .stars {
+            color: #FFD700;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        /* Review Form */
+        .review-form {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #002244;
+            border-radius: 8px;
+        }
+
+        .review-form input, .review-form textarea, .review-form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .review-form button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .review-form button:hover {
+            background-color: #45a049;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #003366;
+            padding: 15px;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+
+        footer a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Customer Commits</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="commits.html">Commits</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Customer Reviews Section -->
+    <section class="reviews-container">
+        <h2>What Our Customers Say</h2>
+
+        <p class="average-rating">⭐ Average Rating: <span id="averageRating">No reviews yet</span></p>
+
+        <div id="reviews-list">
+            <!-- Reviews will be added here dynamically -->
+        </div>
+    </section>
+
+    <!-- Review Form -->
+    <section class="review-form">
+        <h2>Leave a Review</h2>
+        <input type="text" id="reviewerName" placeholder="Your Name" required>
+        <textarea id="reviewText" placeholder="Write your review here..." required></textarea>
+        <label for="reviewStars">Rating:</label>
+        <select id="reviewStars">
+            <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
+            <option value="4">⭐⭐⭐⭐ - Very Good</option>
+            <option value="3">⭐⭐⭐ - Average</option>
+            <option value="2">⭐⭐ - Poor</option>
+            <option value="1">⭐ - Bad</option>
+        </select>
+        <button onclick="addReview()">Submit Review</button>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
+        <p>Have a review? Email us at <a href="mailto:cheapbraclet@outlook.com">cheapbraclet@outlook.com</a></p>
+    </footer>
+
+    <!-- JavaScript for Reviews -->
+    <script>
+        let reviews = [];
+
+        function addReview() {
+            const name = document.getElementById('reviewerName').value.trim();
+            const text = document.getElementById('reviewText').value.trim();
+            const stars = parseInt(document.getElementById('reviewStars').value);
+
+            if (name === "" || text === "") {
+                alert("Please fill out all fields before submitting!");
+                return;
+            }
+
+            const newReview = {
+                name: name,
+                text: text,
+                stars: stars
+            };
+
+            reviews.push(newReview);
+            document.getElementById('reviewerName').value = "";
+            document.getElementById('reviewText').value = "";
+            document.getElementById('reviewStars').value = "5";
+
+            displayReviews();
+        }
+
+        function displayReviews() {
+            const reviewList = document.getElementById("reviews-list");
+            reviewList.innerHTML = "";
+
+            let totalStars = 0;
+
+            reviews.forEach(review => {
+                totalStars += review.stars;
+
+                const reviewHTML = `
+                    <div class="review">
+                        <h3>${review.name}</h3>
+                        <p>"${review.text}"</p>
+                        <div class="stars">${"⭐".repeat(review.stars)}</div>
+                    </div>
+                `;
+                reviewList.innerHTML += reviewHTML;
+            });
+
+            const averageRating = reviews.length > 0 ? (totalStars / reviews.length).toFixed(1) : "No reviews yet";
+            document.getElementById("averageRating").innerText = averageRating;
+        }
+    </script>
+</body>
+</html>
