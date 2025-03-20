@@ -66,6 +66,7 @@
     <!-- Reviews Display -->
     <div class="reviews-container">
         <h2>Recent Reviews</h2>
+        <div id="average-rating"></div>
         <div id="reviews-list"></div>
     </div>
 
@@ -114,7 +115,9 @@
         // ✅ Load Reviews
         function loadReviews() {
             const reviewsList = document.getElementById("reviews-list");
+            const averageRatingDiv = document.getElementById("average-rating");
             reviewsList.innerHTML = "";
+            let totalRating = 0, count = 0;
 
             db.collection("reviews").orderBy("timestamp", "desc").get()
             .then(snapshot => {
@@ -127,7 +130,17 @@
                         <p>${review.comment}</p>
                     `;
                     reviewsList.appendChild(reviewElement);
+                    totalRating += review.rating;
+                    count++;
                 });
+
+                // ✅ Calculate and display average rating
+                if (count > 0) {
+                    const averageRating = (totalRating / count).toFixed(1);
+                    averageRatingDiv.innerHTML = `<h3>Average Rating: ${averageRating} ⭐</h3>`;
+                } else {
+                    averageRatingDiv.innerHTML = `<h3>No reviews yet.</h3>`;
+                }
             })
             .catch(error => {
                 console.error("Error loading reviews:", error);
