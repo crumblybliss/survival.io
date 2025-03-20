@@ -158,9 +158,7 @@
             <h2>Keychain</h2>
             <img src="1.jpg" alt="Keychain">
             <p class="price">$5.00</p>
-            <div class="paypal-button">
-                <paypal-add-to-cart-button data-id="NGRF9T2H5BUQL"></paypal-add-to-cart-button>
-            </div>
+            <paypal-add-to-cart-button data-id="NGRF9T2H5BUQL"></paypal-add-to-cart-button>
         </div>
 
         <!-- Product 2: Bead Bracelet -->
@@ -168,29 +166,23 @@
             <h2>Bead Bracelet</h2>
             <img src="2.jpg" alt="Bead Bracelet">
             <p class="price">$15.00</p>
-            <div class="paypal-button">
-                <paypal-add-to-cart-button data-id="2JYUTZM5EWKMN"></paypal-add-to-cart-button>
-            </div>
+            <paypal-add-to-cart-button data-id="2JYUTZM5EWKMN"></paypal-add-to-cart-button>
         </div>
 
-        <!-- Product 3: Survival Bracelet -->
+        <!-- Product 3: Survival Bracelet 2 -->
         <div class="product">
-            <h2>Survival Bracelet</h2>
-            <img src="3.jpg" alt="Survival Bracelet">
+            <h2>Survival Bracelet 2</h2>
+            <img src="3.jpg" alt="Survival Bracelet 2">
             <p class="price">$15.00</p>
-            <div class="paypal-button">
-                <paypal-add-to-cart-button data-id="AQJAZ5DJLULM6"></paypal-add-to-cart-button>
-            </div>
+            <paypal-add-to-cart-button data-id="AQJAZ5DJLULM6"></paypal-add-to-cart-button>
         </div>
 
-        <!-- Product 4: Tactical Bracelet -->
+        <!-- Product 4: Survival Bracelet 3 -->
         <div class="product">
-            <h2>Tactical Bracelet</h2>
-            <img src="4.jpg" alt="Tactical Bracelet">
+            <h2>Survival Bracelet 3</h2>
+            <img src="4.jpg" alt="Survival Bracelet 3">
             <p class="price">$15.00</p>
-            <div class="paypal-button">
-                <paypal-add-to-cart-button data-id="2GMD2YH57BJ4W"></paypal-add-to-cart-button>
-            </div>
+            <paypal-add-to-cart-button data-id="2GMD2YH57BJ4W"></paypal-add-to-cart-button>
         </div>
 
         <!-- Product 5: Survival Dog Collar -->
@@ -198,9 +190,7 @@
             <h2>Survival Dog Collar</h2>
             <img src="5.jpg" alt="Survival Dog Collar">
             <p class="price">$30.00</p>
-            <div class="paypal-button">
-                <paypal-add-to-cart-button data-id="28WUEJGJYA2XL"></paypal-add-to-cart-button>
-            </div>
+            <paypal-add-to-cart-button data-id="28WUEJGJYA2XL"></paypal-add-to-cart-button>
         </div>
 
         <!-- Product 6: Braided Bracelet -->
@@ -208,19 +198,7 @@
             <h2>Braided Bracelet</h2>
             <img src="6.jpg" alt="Braided Bracelet">
             <p class="price">$20.00</p>
-            <div class="paypal-button">
-                <paypal-add-to-cart-button data-id="BRAIDED12345"></paypal-add-to-cart-button>
-            </div>
-        </div>
-
-        <!-- Product 7: Multi-Function Bracelet -->
-        <div class="product">
-            <h2>Multi-Function Bracelet</h2>
-            <img src="7.jpg" alt="Multi-Function Bracelet">
-            <p class="price">$15.00</p>
-            <div class="paypal-button">
-                <paypal-add-to-cart-button data-id="MULTIFUNCTION123"></paypal-add-to-cart-button>
-            </div>
+            <paypal-add-to-cart-button data-id="BRAIDED12345"></paypal-add-to-cart-button>
         </div>
     </div>
 
@@ -234,5 +212,16 @@
             Donate
         </button>
     </footer>
+
+    <!-- Initialize PayPal Buttons -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof cartPaypal !== "undefined") {
+                cartPaypal.Cart({ id: "pp-view-cart" });
+            } else {
+                console.error("PayPal cart script not loaded.");
+            }
+        });
+    </script>
 </body>
 </html>
