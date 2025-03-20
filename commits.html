@@ -19,10 +19,11 @@
 
         /* General Styles */
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             background-color: navy;
             color: white;
             text-align: center;
+            padding-bottom: 50px;
         }
 
         /* Header */
@@ -40,8 +41,8 @@
 
         nav ul {
             list-style: none;
+            margin: 10px 0 0;
             padding: 0;
-            margin-top: 10px;
         }
 
         nav ul li {
@@ -196,16 +197,16 @@
         };
 
         // ✅ Initialize Firebase App and Firestore
-        const app = firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         // ✅ Submit a Review
         function submitReview() {
-            const name = document.getElementById("name").value;
-            const comment = document.getElementById("comment").value;
-            const rating = document.getElementById("rating").value;
+            const name = document.getElementById("name").value.trim();
+            const comment = document.getElementById("comment").value.trim();
+            const rating = parseInt(document.getElementById("rating").value);
 
-            if (name === "" || comment === "") {
+            if (!name || !comment) {
                 alert("Please fill out all fields.");
                 return;
             }
@@ -213,7 +214,7 @@
             db.collection("reviews").add({
                 name: name,
                 comment: comment,
-                rating: parseInt(rating),
+                rating: rating,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             })
             .then(() => {
