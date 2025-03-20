@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survival Bracelets Store</title>
 
-    <!-- PayPal SDK -->
-    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD"></script>
+    <!-- PayPal Cart Script -->
+    <script src="https://www.paypalobjects.com/ncp/cart/cart.js" data-merchant-id="YZBS9R98C23HG"></script>
 
     <style>
         /* Global Reset */
@@ -143,6 +143,7 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="products.html">Products</a></li>
                 <li><a href="about.html">About</a></li>
+                <li><paypal-cart-button data-id="pp-view-cart"></paypal-cart-button></li>
             </ul>
         </nav>
     </header>
@@ -153,7 +154,7 @@
             <h2>Keychain</h2>
             <img src="1.jpg" alt="Keychain">
             <p class="price">$5.00</p>
-            <div id="paypal-button-keychain"></div>
+            <paypal-add-to-cart-button data-id="NGRF9T2H5BUQL"></paypal-add-to-cart-button>
         </div>
 
         <!-- Product 2: Bead Bracelet -->
@@ -161,7 +162,7 @@
             <h2>Bead Bracelet</h2>
             <img src="2.jpg" alt="Bead Bracelet">
             <p class="price">$15.00</p>
-            <div id="paypal-button-bead"></div>
+            <paypal-add-to-cart-button data-id="2JYUTZM5EWKMN"></paypal-add-to-cart-button>
         </div>
 
         <!-- Product 3: Survival Bracelet 2 -->
@@ -169,7 +170,7 @@
             <h2>Survival Bracelet 2</h2>
             <img src="3.jpg" alt="Survival Bracelet 2">
             <p class="price">$15.00</p>
-            <div id="paypal-button-bracelet2"></div>
+            <paypal-add-to-cart-button data-id="AQJAZ5DJLULM6"></paypal-add-to-cart-button>
         </div>
 
         <!-- Product 4: Survival Bracelet 3 -->
@@ -177,7 +178,7 @@
             <h2>Survival Bracelet 3</h2>
             <img src="4.jpg" alt="Survival Bracelet 3">
             <p class="price">$15.00</p>
-            <div id="paypal-button-bracelet3"></div>
+            <paypal-add-to-cart-button data-id="2GMD2YH57BJ4W"></paypal-add-to-cart-button>
         </div>
 
         <!-- Product 5: Survival Dog Collar -->
@@ -185,7 +186,7 @@
             <h2>Survival Dog Collar</h2>
             <img src="5.jpg" alt="Survival Dog Collar">
             <p class="price">$30.00</p>
-            <div id="paypal-button-dogcollar"></div>
+            <paypal-add-to-cart-button data-id="28WUEJGJYA2XL"></paypal-add-to-cart-button>
         </div>
 
         <!-- Product 6: Braided Bracelet -->
@@ -193,7 +194,7 @@
             <h2>Braided Bracelet</h2>
             <img src="6.jpg" alt="Braided Bracelet">
             <p class="price">$20.00</p>
-            <div id="paypal-button-braided"></div>
+            <paypal-add-to-cart-button data-id="BRAIDED12345"></paypal-add-to-cart-button>
         </div>
     </div>
 
@@ -201,37 +202,32 @@
         <p>If you want different colors, email <a href="mailto:cheapbraclet@outlook.com">cheapbraclet@outlook.com</a></p>
         <p>&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
 
-        <button class="donate-button" onclick="window.location.href='https://www.paypal.com/donate'">
+        <paypal-cart-button data-id="pp-view-cart"></paypal-cart-button>
+
+        <button class="donate-button" onclick="window.location.href='https://www.paypal.com/ncp/payment/C474MBZ4JC84S'">
             Donate
         </button>
     </footer>
 
-    <!-- PayPal Buttons Script -->
+    <!-- Initialize PayPal Buttons -->
     <script>
-        function renderPayPalButton(id, price) {
-            paypal.Buttons({
-                createOrder: function(data, actions) {
-                    return actions.order.create({
-                        purchase_units: [{
-                            amount: { value: price }
-                        }]
-                    });
-                },
-                onApprove: function(data, actions) {
-                    return actions.order.capture().then(function(details) {
-                        alert('Transaction completed by ' + details.payer.name.given_name);
-                    });
-                }
-            }).render(id);
-        }
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof cartPaypal !== "undefined") {
+                cartPaypal.Cart({ id: "pp-view-cart" });
 
-        renderPayPalButton('#paypal-button-keychain', '5.00');
-        renderPayPalButton('#paypal-button-bead', '15.00');
-        renderPayPalButton('#paypal-button-bracelet2', '15.00');
-        renderPayPalButton('#paypal-button-bracelet3', '15.00');
-        renderPayPalButton('#paypal-button-dogcollar', '30.00');
-        renderPayPalButton('#paypal-button-braided', '20.00');
+                // Initialize AddToCart buttons
+                const productIds = [
+                    "NGRF9T2H5BUQL", "2JYUTZM5EWKMN", "AQJAZ5DJLULM6",
+                    "2GMD2YH57BJ4W", "28WUEJGJYA2XL", "BRAIDED12345"
+                ];
+                
+                productIds.forEach(id => {
+                    cartPaypal.AddToCart({ id: id });
+                });
+            } else {
+                console.error("PayPal cart script not loaded.");
+            }
+        });
     </script>
 </body>
 </html>
-
