@@ -1,9 +1,13 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survival Bracelets Store</title>
+    
+    <!-- PayPal Cart Script -->
+    <script src="https://www.paypalobjects.com/ncp/cart/cart.js" data-merchant-id="YZBS9R98C23HG"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -139,6 +143,9 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="products.html">Products</a></li>
                 <li><a href="about.html">About</a></li>
+                <li>
+                    <paypal-cart-button data-id="pp-view-cart"></paypal-cart-button>
+                </li>
             </ul>
         </nav>
     </header>
@@ -160,7 +167,7 @@
             <div class="product-box">
                 <h2>Survival Bracelet 1</h2>
                 <img src="4.jpeg" alt="Survival Bracelet 1">
-                <p class="description"></p>
+                <p class="description">Stylish and durable survival bracelet.</p>
                 <p class="price">$15.00</p>
                 <a href="https://forms.gle/BFn9FVP7AECJj9wn6"><button>Buy Now</button></a>
             </div>
@@ -174,6 +181,9 @@
                 <p class="description">Premium-quality survival bracelet for outdoor enthusiasts.</p>
                 <p class="price">$15.00</p>
                 <a href="https://forms.gle/gJ8WBh2xiX2fiGEPA"><button>Buy Now</button></a>
+                
+                <!-- PayPal Add to Cart Button -->
+                <paypal-add-to-cart-button data-id="AQJAZ5DJLULM6"></paypal-add-to-cart-button>
             </div>
         </div>
 
@@ -183,26 +193,26 @@
                 <h2>Survival Bracelet 3</h2>
                 <img src="20.jpg" alt="Survival Bracelet 3">
                 <p class="description">Compact and stylish survival bracelet.</p>
-                <p class="price">$20.00</p>
+                <p class="price">$15.00</p>
                 <a href="https://forms.gle/WrZ68jnUL4deKWB77"><button>Buy Now</button></a>
-            </div>
-        </div>
-
-        <!-- Product 5 -->
-        <div class="product">
-            <div class="product-box">
-                <h2>Survival Dog Collar</h2>
-                <img src="pic 1.jpg" alt="Survival Dog Collar">
-                <p class="description">Tactical survival collar for your pet.</p>
-                <p class="price">$30.00</p>
-                <a href="https://forms.gle/uTaNRuoENKkJ3zEq5"><button>Buy Now</button></a>
+                
+                <!-- PayPal Add to Cart Button -->
+                <paypal-add-to-cart-button data-id="2GMD2YH57BJ4W"></paypal-add-to-cart-button>
             </div>
         </div>
     </main>
 
     <footer>
         <p class="all-rights-reserved">&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
+        <paypal-cart-button data-id="pp-view-cart"></paypal-cart-button>
         <button class="donate-button" onclick="window.location.href='https://www.paypal.com/ncp/payment/C474MBZ4JC84S'">Donate</button>
     </footer>
+
+    <!-- Initialize PayPal Buttons -->
+    <script>
+        cartPaypal.Cart({ id: "pp-view-cart" });
+        cartPaypal.AddToCart({ id: "2GMD2YH57BJ4W" });
+        cartPaypal.AddToCart({ id: "AQJAZ5DJLULM6" });
+    </script>
 </body>
 </html>
