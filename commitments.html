@@ -10,38 +10,22 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
     <style>
-        /* Global Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* General Styles */
         body {
             font-family: 'Arial', sans-serif;
             background-color: navy;
             color: white;
             text-align: center;
-            padding-bottom: 50px;
         }
 
-        /* Header */
         header {
             background-color: #003366;
             padding: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
-        header h1 {
-            font-size: 24px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-
         nav ul {
             list-style: none;
-            margin: 10px 0 0;
+            margin: 0;
             padding: 0;
         }
 
@@ -53,211 +37,160 @@
         nav ul li a {
             color: white;
             text-decoration: none;
-            font-size: 14px;
-            transition: 0.3s;
         }
 
-        nav ul li a:hover {
-            color: #4CAF50;
-        }
-
-        /* PayPal Button Styling */
-        #paypal-cart-button {
-            display: inline-block;
-            margin-top: -5px;
-        }
-
-        /* Comment Section */
         .comments-container {
-            max-width: 800px;
-            margin: auto;
-            padding: 30px 20px;
-            background-color: white;
+            max-width: 600px;
+            background: white;
             color: black;
+            margin: 20px auto;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             text-align: left;
         }
 
-        .comments-container h2 {
-            font-size: 26px;
-            margin-bottom: 15px;
-            color: #4CAF50;
-        }
-
-        .comment-box {
+        input, textarea, select, button {
             width: 100%;
             padding: 10px;
-            margin-top: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            margin: 8px 0;
+            border-radius: 4px;
             font-size: 16px;
         }
 
-        .stars {
-            color: gold;
-            font-size: 20px;
-            margin-top: 10px;
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
 
-        .comment-list {
-            margin-top: 20px;
-        }
+        button:hover { background-color: #45a049; }
 
         .comment {
             border-bottom: 1px solid #ddd;
             padding: 10px;
         }
 
-        .comment strong {
-            color: navy;
-        }
-
-        .comment-form button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border: none;
-            background-color: #4CAF50;
-            color: white;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .comment-form button:hover {
-            background-color: #45a049;
-        }
-
-        /* Footer */
-        footer {
-            background-color: #003366;
-            padding: 15px;
-            font-size: 12px;
-            margin-top: 20px;
-        }
-
-        footer a {
-            color: #4CAF50;
-            text-decoration: none;
-            font-weight: bold;
-        }
+        .stars { color: gold; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Comments</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="products.html">Products</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><div id="paypal-cart-button"></div></li>
-            </ul>
-        </nav>
-    </header>
 
-    <!-- Comment Section -->
-    <section class="comments-container">
-        <h2>Leave a Comment</h2>
-        <form class="comment-form">
-            <input type="text" id="name" class="comment-box" placeholder="Your Name" required>
-            <textarea id="comment" class="comment-box" placeholder="Write your comment here..." rows="4" required></textarea>
-            <select id="rating" class="comment-box">
-                <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
-                <option value="4">⭐⭐⭐⭐ - Very Good</option>
-                <option value="3">⭐⭐⭐ - Good</option>
-                <option value="2">⭐⭐ - Fair</option>
-                <option value="1">⭐ - Poor</option>
-            </select>
-            <button type="button" onclick="submitComment()">Submit Comment</button>
-        </form>
+<header>
+    <h1>Comments</h1>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><div id="paypal-cart-button"></div></li>
+        </ul>
+    </nav>
+</header>
 
-        <h2>Recent Comments</h2>
-        <div id="average-rating"></div>
-        <div id="comments-list" class="comment-list"></div>
-    </section>
+<!-- Comment Section -->
+<section class="comments-container">
+    <h2>Leave a Comment</h2>
+    <input type="text" id="name" placeholder="Your Name" required>
+    <textarea id="comment" placeholder="Write your comment here..." rows="4" required></textarea>
+    <select id="rating">
+        <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
+        <option value="4">⭐⭐⭐⭐ - Very Good</option>
+        <option value="3">⭐⭐⭐ - Good</option>
+        <option value="2">⭐⭐ - Fair</option>
+        <option value="1">⭐ - Poor</option>
+    </select>
+    <button onclick="submitComment()">Submit Comment</button>
 
-    <!-- Firebase Configuration -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+    <h2>Recent Comments</h2>
+    <div id="average-rating"></div>
+    <div id="comments-list"></div>
+</section>
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+<script>
+    // ✅ Initialize Firebase (Replace with your actual Firebase credentials)
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
 
-        // Submit a Comment
-        function submitComment() {
-            const name = document.getElementById("name").value.trim();
-            const comment = document.getElementById("comment").value.trim();
-            const rating = parseInt(document.getElementById("rating").value);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-            if (!name || !comment) {
-                alert("Please fill out all fields.");
-                return;
+    // ✅ Submit Comment
+    function submitComment() {
+        const name = document.getElementById("name").value.trim();
+        const comment = document.getElementById("comment").value.trim();
+        const rating = parseInt(document.getElementById("rating").value);
+
+        if (!name || !comment) {
+            alert("Please fill out all fields.");
+            return;
+        }
+
+        db.collection("comments").add({
+            name: name,
+            comment: comment,
+            rating: rating,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        })
+        .then(() => {
+            alert("Comment submitted successfully!");
+            document.getElementById("name").value = "";
+            document.getElementById("comment").value = "";
+            loadComments(); // Refresh comments
+        })
+        .catch(error => {
+            console.error("Error submitting comment:", error);
+            alert("Error submitting comment. Check console.");
+        });
+    }
+
+    // ✅ Load Comments
+    function loadComments() {
+        const commentsList = document.getElementById("comments-list");
+        const averageRatingDiv = document.getElementById("average-rating");
+        commentsList.innerHTML = "";
+        let totalRating = 0, count = 0;
+
+        db.collection("comments").orderBy("timestamp", "desc").get()
+        .then(snapshot => {
+            snapshot.forEach(doc => {
+                const comment = doc.data();
+                const commentElement = document.createElement("div");
+                commentElement.classList.add("comment");
+                commentElement.innerHTML = `<strong>${comment.name}</strong> - <span class="stars">${"⭐".repeat(comment.rating)}</span>
+                                            <p>${comment.comment}</p>`;
+                commentsList.appendChild(commentElement);
+                totalRating += comment.rating;
+                count++;
+            });
+
+            if (count > 0) {
+                const averageRating = (totalRating / count).toFixed(1);
+                averageRatingDiv.innerHTML = `<h3>Average Rating: ${averageRating} ⭐</h3>`;
+            } else {
+                averageRatingDiv.innerHTML = `<h3>No comments yet.</h3>`;
             }
+        })
+        .catch(error => {
+            console.error("Error loading comments:", error);
+        });
+    }
 
-            db.collection("comments").add({
-                name: name,
-                comment: comment,
-                rating: rating,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            })
-            .then(() => {
-                alert("Comment submitted successfully!");
-                document.getElementById("name").value = "";
-                document.getElementById("comment").value = "";
-                loadComments(); // Refresh comments
-            })
-            .catch(error => {
-                console.error("Error submitting comment:", error);
-                alert("Error submitting comment. Check console.");
-            });
-        }
+    // ✅ Load comments on page load
+    window.onload = loadComments;
+</script>
 
-        // Load Comments
-        function loadComments() {
-            const commentsList = document.getElementById("comments-list");
-            const averageRatingDiv = document.getElementById("average-rating");
-            commentsList.innerHTML = "";
-            let totalRating = 0, count = 0;
+<footer>
+    <p>&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
+</footer>
 
-            db.collection("comments").orderBy("timestamp", "desc").get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    const comment = doc.data();
-                    const commentElement = document.createElement("div");
-                    commentElement.classList.add("comment");
-                    commentElement.innerHTML = `<strong>${comment.name}</strong> - <span class="stars">${"⭐".repeat(comment.rating)}</span>
-                                                <p>${comment.comment}</p>`;
-                    commentsList.appendChild(commentElement);
-                    totalRating += comment.rating;
-                    count++;
-                });
-
-                if (count > 0) {
-                    const averageRating = (totalRating / count).toFixed(1);
-                    averageRatingDiv.innerHTML = `<h3>Average Rating: ${averageRating} ⭐</h3>`;
-                } else {
-                    averageRatingDiv.innerHTML = `<h3>No comments yet.</h3>`;
-                }
-            })
-            .catch(error => {
-                console.error("Error loading comments:", error);
-            });
-        }
-
-        window.onload = loadComments;
-    </script>
-
-    <footer>
-        <p>&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
-    </footer>
 </body>
 </html>
+
