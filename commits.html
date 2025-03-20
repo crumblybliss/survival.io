@@ -10,14 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
     <style>
-        /* Global Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* General Styles */
         body {
             font-family: Arial, sans-serif;
             background-color: navy;
@@ -25,44 +17,7 @@
             text-align: center;
             padding-bottom: 50px;
         }
-
-        /* Header */
-        header {
-            background-color: #003366;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-
-        header h1 {
-            font-size: 24px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-
-        nav ul {
-            list-style: none;
-            margin: 10px 0 0;
-            padding: 0;
-        }
-
-        nav ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-
-        nav ul li a:hover {
-            color: #4CAF50;
-        }
-
-        /* Review Form */
-        .review-form {
+        .review-form, .reviews-container {
             background-color: white;
             color: black;
             padding: 20px;
@@ -72,93 +27,29 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             text-align: left;
         }
-
-        .review-form h2 {
-            text-align: center;
-        }
-
-        input, textarea, select {
+        input, textarea, select, button {
             width: 100%;
             padding: 10px;
             margin: 8px 0;
-            border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 16px;
         }
-
         button {
             background-color: #4CAF50;
             color: white;
-            padding: 10px;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            transition: 0.3s;
         }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        /* Reviews Container */
-        .reviews-container {
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: white;
-            color: black;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            text-align: left;
-        }
-
-        .reviews-container h2 {
-            text-align: center;
-        }
-
-        .review {
-            border-bottom: 1px solid #ddd;
-            padding: 10px;
-        }
-
-        .stars {
-            color: gold;
-        }
-
-        /* Footer */
-        footer {
-            background-color: #003366;
-            padding: 15px;
-            font-size: 14px;
-            margin-top: 20px;
-            color: white;
-        }
-
-        footer a {
-            color: #4CAF50;
-            text-decoration: none;
-            font-weight: bold;
-        }
+        button:hover { background-color: #45a049; }
+        .review { border-bottom: 1px solid #ddd; padding: 10px; }
+        .stars { color: gold; }
     </style>
 </head>
 <body>
 
-    <!-- Header & Navigation -->
-    <header>
-        <h1>Customer Reviews</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="products.html">Products</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="commits.html">Reviews</a></li>
-            </ul>
-        </nav>
-    </header>
+    <h1>Customer Reviews</h1>
 
-    <!-- Review Submission Form -->
+    <!-- Review Form -->
     <div class="review-form">
         <h2>Leave a Review</h2>
         <input type="text" id="name" placeholder="Your Name" required>
@@ -179,12 +70,6 @@
         <div id="reviews-list"></div>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
-        <p>Need a custom order? Email us at <a href="mailto:cheapbraclet@outlook.com">cheapbraclet@outlook.com</a></p>
-    </footer>
-
     <script>
         // ✅ Initialize Firebase
         const firebaseConfig = {
@@ -195,8 +80,6 @@
             messagingSenderId: "704462603548",
             appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
         };
-
-        // ✅ Initialize Firebase App and Firestore
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
@@ -225,10 +108,11 @@
             })
             .catch(error => {
                 console.error("Error submitting review:", error);
+                alert("Error submitting review. Check console.");
             });
         }
 
-        // ✅ Load Reviews from Firestore
+        // ✅ Load Reviews
         function loadReviews() {
             const reviewsList = document.getElementById("reviews-list");
             reviewsList.innerHTML = "";
