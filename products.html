@@ -3,23 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products</title>
+    <title>Products - CrumblyBliss</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #0a1d37; /* Dark Navy Blue Background */
-            color: #f1f1f1; /* Light text color for contrast */
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            height: 100vh;
+            background-color: #0a1d37; /* Navy Blue */
+            color: #f1f1f1;
             text-align: center;
         }
 
-        /* Profile Picture */
-        #profile-pic {
+        .profile-pic {
             position: fixed;
             top: 20px;
             left: 20px;
@@ -27,199 +20,134 @@
             height: 60px;
             border-radius: 50%;
             cursor: pointer;
-            display: none;
-            border: 3px solid #00bcd4; /* Aqua blue border for futuristic look */
-            box-shadow: 0 0 15px rgba(0, 188, 212, 0.6); /* Glowing effect */
-            transition: all 0.3s ease-in-out;
+            border: 3px solid #fff;
         }
 
-        #profile-pic:hover {
-            transform: scale(1.1);
+        .nav-menu {
+            padding: 10px;
+            background: #001f3d; /* Dark Navy */
         }
 
-        /* Navigation Bar */
-        #nav-menu {
+        .nav-menu ul {
+            list-style: none;
+            padding: 0;
             display: flex;
             justify-content: center;
-            margin: 20px 0;
-            width: 100%;
         }
 
-        #nav-menu a {
-            color: #00bcd4;
-            text-decoration: none;
+        .nav-menu ul li {
             margin: 0 15px;
+        }
+
+        .nav-menu ul li a {
+            color: white;
+            text-decoration: none;
             font-weight: bold;
-            transition: 0.3s ease;
         }
 
-        #nav-menu a:hover {
-            color: #f1f1f1;
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 8px;
         }
 
-        /* Product Cards */
-        .product-container {
+        .product {
+            background: #003c5a; /* Medium Navy */
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .product-card {
-            background-color: #1c2b47;
-            width: 250px;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .product-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(0, 188, 212, 0.5);
-        }
-
-        .product-card img {
-            width: 100%;
-            height: auto;
+        .product input {
+            padding: 5px;
+            margin-right: 10px;
             border-radius: 5px;
-            margin-bottom: 15px;
+            border: none;
+            width: 120px;
         }
 
-        .product-card h3 {
-            color: #00bcd4;
-            font-size: 18px;
-            margin: 10px 0;
-        }
-
-        .product-card p {
-            color: #f1f1f1;
-            font-size: 16px;
-        }
-
-        .product-card .price {
-            color: #00bcd4;
-            font-size: 20px;
-            margin: 10px 0;
-        }
-
-        .product-card button {
-            background-color: #00bcd4;
-            color: #fff;
-            padding: 10px 20px;
+        button {
+            padding: 10px;
+            background: #00bcd4;
+            color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
-        .product-card button:hover {
-            background-color: #0097a7;
-            box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4);
-        }
-
-        /* Responsive Design */
-        @media screen and (max-width: 600px) {
-            #profile-pic {
-                width: 50px;
-                height: 50px;
-            }
-
-            .product-card {
-                width: 100%;
-                max-width: 300px;
-            }
+        button:hover {
+            background: #0097a7;
         }
     </style>
 </head>
 <body>
 
     <!-- Profile Picture -->
-    <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
+    <img id="profile-pic" src="default-profile.png" alt="Profile Picture" class="profile-pic" onclick="window.location.href='profile.html'">
 
-    <!-- Navigation Bar -->
-    <div id="nav-menu">
-        <a href="index.html">Home</a> | 
-        <a href="cart.html">Cart</a> | 
-        <a href="profile.html">Profile</a>
-    </div>
+    <!-- Navigation Menu -->
+    <nav class="nav-menu">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="commitments.html">Commitments</a></li>
+            <li><a href="cart.html">Cart 🛒</a></li>
+        </ul>
+    </nav>
 
-    <!-- Product Container -->
-    <div class="product-container">
-        <!-- Product 1 - Paracord Survival Bracelet -->
-        <div class="product-card">
-            <img src="paracord-bracelet.jpg" alt="Paracord Survival Bracelet">
-            <h3>Paracord Survival Bracelet</h3>
-            <p>Essential for outdoor adventures, this bracelet doubles as survival gear.</p>
-            <p class="price">$19.99</p>
-            <button>Add to Cart</button>
-        </div>
+    <div class="container">
+        <h1>Our Products</h1>
 
-        <!-- Product 2 - Gold Charm Bracelet -->
-        <div class="product-card">
-            <img src="gold-charm-bracelet.jpg" alt="Gold Charm Bracelet">
-            <h3>Gold Charm Bracelet</h3>
-            <p>Elegant charm bracelet with a luxurious gold finish.</p>
-            <p class="price">$29.99</p>
-            <button>Add to Cart</button>
-        </div>
-
-        <!-- Product 3 - Leather Wrap Bracelet -->
-        <div class="product-card">
-            <img src="leather-wrap-bracelet.jpg" alt="Leather Wrap Bracelet">
-            <h3>Leather Wrap Bracelet</h3>
-            <p>Stylish leather wrap bracelet, perfect for any casual outfit.</p>
-            <p class="price">$19.99</p>
-            <button>Add to Cart</button>
-        </div>
-
-        <!-- Product 4 - Beaded Bracelet -->
-        <div class="product-card">
-            <img src="beaded-bracelet.jpg" alt="Beaded Bracelet">
-            <h3>Beaded Bracelet</h3>
-            <p>Colorful and vibrant, this beaded bracelet is a fun accessory.</p>
-            <p class="price">$14.99</p>
-            <button>Add to Cart</button>
-        </div>
-
-        <!-- Product 5 - Diamond Bracelet -->
-        <div class="product-card">
-            <img src="diamond-bracelet.jpg" alt="Diamond Bracelet">
-            <h3>Diamond Bracelet</h3>
-            <p>A luxurious diamond-studded bracelet for those special occasions.</p>
-            <p class="price">$99.99</p>
-            <button>Add to Cart</button>
-        </div>
-
-        <!-- Product 6 - Rope Survival Bracelet -->
-        <div class="product-card">
-            <img src="rope-survival-bracelet.jpg" alt="Rope Survival Bracelet">
-            <h3>Rope Survival Bracelet</h3>
-            <p>This survival bracelet comes with a built-in rope for emergency use.</p>
-            <p class="price">$18.99</p>
-            <button>Add to Cart</button>
-        </div>
-
-        <!-- Product 7 - Silver Charm Bracelet -->
-        <div class="product-card">
-            <img src="silver-charm-bracelet.jpg" alt="Silver Charm Bracelet">
-            <h3>Silver Charm Bracelet</h3>
-            <p>A delicate silver bracelet with customizable charms.</p>
-            <p class="price">$25.99</p>
-            <button>Add to Cart</button>
-        </div>
-
-        <!-- Product 8 - Stainless Steel Bracelet -->
-        <div class="product-card">
-            <img src="stainless-steel-bracelet.jpg" alt="Stainless Steel Bracelet">
-            <h3>Stainless Steel Bracelet</h3>
-            <p>Durable and sleek, this stainless steel bracelet is perfect for everyday wear.</p>
-            <p class="price">$24.99</p>
-            <button>Add to Cart</button>
+        <div id="products-list">
+            <!-- Products will be loaded dynamically -->
         </div>
     </div>
+
+    <script>
+        const products = [
+            { name: "Paracord Survival Bracelet", price: 12.99 },
+            { name: "Chocolate Chip Cookies", price: 5.99 },
+            { name: "Oatmeal Raisin Cookies", price: 6.49 },
+            { name: "Peanut Butter Cookies", price: 5.49 }
+        ];
+
+        function loadProducts() {
+            const productList = document.getElementById("products-list");
+            productList.innerHTML = "";
+
+            products.forEach((product, index) => {
+                const productDiv = document.createElement("div");
+                productDiv.classList.add("product");
+
+                productDiv.innerHTML = `
+                    <span>${product.name} - $${product.price.toFixed(2)}</span>
+                    <input type="text" id="color-${index}" placeholder="Enter color">
+                    <button onclick="addToCart(${index})">Add to Cart</button>
+                `;
+
+                productList.appendChild(productDiv);
+            });
+        }
+
+        function addToCart(index) {
+            const colorInput = document.getElementById(`color-${index}`).value || "No color specified";
+            const product = products[index];
+
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.push({ name: product.name, price: product.price, color: colorInput });
+            localStorage.setItem("cart", JSON.stringify(cart));
+
+            alert(`${product.name} added to cart with color: ${colorInput}`);
+        }
+
+        window.onload = loadProducts;
+    </script>
 
 </body>
 </html>
