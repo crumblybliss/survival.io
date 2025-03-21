@@ -14,9 +14,15 @@
         .product img { width: 100%; border-radius: 8px; }
         button { padding: 10px; margin-top: 10px; border: none; cursor: pointer; background: #28a745; color: white; border-radius: 5px; width: 100%; }
         button:hover { background: #218838; }
+
+        /* Profile Picture */
+        .profile-pic { position: absolute; top: 10px; left: 10px; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; border: 2px solid white; }
     </style>
 </head>
 <body>
+
+    <!-- ✅ Profile Picture (Top-Left Corner) -->
+    <img id="profile-pic" class="profile-pic" src="default-profile.png" alt="Profile" onclick="goToProfile()">
 
     <!-- ✅ Navigation Menu -->
     <nav>
@@ -81,13 +87,33 @@
     </div>
 
     <script>
+        // ✅ Redirect to Profile Page
+        function goToProfile() {
+            window.location.href = "profile.html";
+        }
+
+        // ✅ Load Profile Picture if User is Logged In
+        function loadProfile() {
+            let user = JSON.parse(localStorage.getItem("user"));
+            if (!user) {
+                window.location.href = "login.html"; // Redirect to login if not logged in
+            } else if (user.profilePic) {
+                document.getElementById("profile-pic").src = user.profilePic;
+            }
+        }
+
+        // ✅ Add Item to Cart and Save in Local Storage
         function addToCart(name, price) {
             let cart = JSON.parse(localStorage.getItem("cart")) || [];
             cart.push({ name, price });
             localStorage.setItem("cart", JSON.stringify(cart));
             alert(name + " added to cart!");
         }
+
+        // ✅ Run when Page Loads
+        window.onload = loadProfile;
     </script>
 
 </body>
 </html>
+
