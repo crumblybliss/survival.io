@@ -95,10 +95,16 @@
         // ✅ Load Profile Picture if User is Logged In
         function loadProfile() {
             let user = JSON.parse(localStorage.getItem("user"));
-            if (!user) {
-                window.location.href = "login.html"; // Redirect to login if not logged in
-            } else if (user.profilePic) {
-                document.getElementById("profile-pic").src = user.profilePic;
+            
+            // Debugging: Log user data
+            console.log("User Data:", user);
+
+            if (!user && window.location.pathname !== "/login.html") {
+                window.location.href = "login.html"; // Redirect only if NOT on login page
+            } else if (user) {
+                // Load profile picture if it exists
+                let profilePic = user.profilePic || "default-profile.png";
+                document.getElementById("profile-pic").src = profilePic;
             }
         }
 
@@ -111,9 +117,11 @@
         }
 
         // ✅ Run when Page Loads
-        window.onload = loadProfile;
+        window.onload = function () {
+            console.log("Loading Profile...");
+            loadProfile();
+        };
     </script>
 
 </body>
 </html>
-
