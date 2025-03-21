@@ -1,105 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Reviews</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; text-align: center; }
-        .container { max-width: 500px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        .nav-menu { display: none; padding: 10px; background: #007BFF; }
-        .nav-menu ul { list-style: none; padding: 0; }
-        .nav-menu ul li { display: inline; margin: 0 10px; }
-        .nav-menu ul li a { color: white; text-decoration: none; font-weight: bold; }
-        button { padding: 10px; margin: 10px; border: none; cursor: pointer; }
-        .btn-primary { background: #007BFF; color: white; border-radius: 5px; }
-        .btn-danger { background: #dc3545; color: white; border-radius: 5px; }
-        .review { border-bottom: 1px solid #ddd; padding: 10px; text-align: left; }
-        .stars { color: gold; }
-        input, select { padding: 8px; margin: 5px; width: 90%; border: 1px solid #ddd; border-radius: 5px; }
-    </style>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+        authDomain: "survival-f35e2.firebaseapp.com",
+        projectId: "survival-f35e2",
+        storageBucket: "survival-f35e2.appspot.com",
+        messagingSenderId: "704462603548",
+        appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
-        document.getElementById("google-login-btn").addEventListener("click", async () => {
-            try {
-                await signInWithPopup(auth, provider);
-                window.location.href = "index.html";
-            } catch (error) {
-                alert(error.message);
-            }
-        });
+    function updateUI(user) {
+        if (user) {
+            userInfo.innerHTML = `Logged in as: <strong>${user.email}</strong>`;
+            loginSection.style.display = "none";
+            logoutBtn.style.display = "block";
+            reviewForm.style.display = "block";
+            navMenu.style.display = "block";
+            profilePic.style.display = "block";
+            profilePic.src = user.photoURL || "default-profile.png";
+        } else {
+            userInfo.innerHTML = "";
+            loginSection.style.display = "block";
+            logoutBtn.style.display = "none";
+            reviewForm.style.display = "none";
+            navMenu.style.display = "none";
+            profilePic.style.display = "none";
+        }
+    }
 
-        document.getElementById("signup-btn").addEventListener("click", async () => {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                window.location.href = "index.html";
-            } catch (error) {
-                alert(error.message);
-            }
-        });
+    onAuthStateChanged(auth, (user) => {
+        updateUI(user);
+    });
 
-        document.getElementById("email-login-btn").addEventListener("click", async () => {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                window.location.href = "index.html";
-            } catch (error) {
-                alert(error.message);
-            }
-        });
-    </script>
-</head>
-<body>
-    <nav id="nav-menu" class="nav-menu">
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="products.html">Products</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="commitments.html">Commitments</a></li>
-        </ul>
-    </nav>
-    <div class="container">
-        <div id="login-section">
-            <button id="google-login-btn" class="btn-primary">Sign in with Google</button>
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="password" placeholder="Password">
-            <button id="email-login-btn" class="btn-primary">Login</button>
-            <button id="signup-btn" class="btn-primary">Sign Up</button>
-        </div>
-        <button id="logout-btn" class="btn-danger" style="display: none;">Logout</button>
-        <p id="user-info"></p>
-        <div id="review-form" style="display: none;">
-            <h3>Leave a Review</h3>
-            <textarea id="comment" placeholder="Write your review..."></textarea>
-            <select id="rating">
-                <option value="5">5 - Excellent</option>
-                <option value="4">4 - Good</option>
-                <option value="3">3 - Average</option>
-                <option value="2">2 - Poor</option>
-                <option value="1">1 - Terrible</option>
-            </select>
-            <button id="submit-review-btn" class="btn-primary">Submit Review</button>
-        </div>
-        <div id="reviews-list"></div>
-        <div id="average-rating"></div>
-    </div>
-</body>
-</html>
+    document.getElementById("google-login-btn").addEventListener("click", async () => {
+        try {
+            await signInWithPopup(auth, provider);
+            window.location.href = "index.html"; // Redirect to home page
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+
+    document.getElementById("email-login-btn").addEventListener("click", async () => {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            window.location.href = "index.html"; // Redirect to home page
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+
+    document.getElementById("signup-btn").addEventListener("click", async () => {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+            window.location.href = "index.html"; // Redirect to home page
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+        await signOut(auth);
+        window.location.href = "index.html"; // Redirect to home page after logout
+    });
+</script>
+
+<style>
+    #profile-pic {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: none;
+    }
+</style>
+
+<img id="profile-pic" src="default-profile.png" alt="Profile" onclick="window.location.href='profile.html'">
+
