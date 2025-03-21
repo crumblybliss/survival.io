@@ -1,73 +1,120 @@
-<!-- Updated Base HTML Template (Apply to all pages) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website</title>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q...",
-            authDomain: "your-app.firebaseapp.com",
-            projectId: "your-app",
-            storageBucket: "your-app.appspot.com",
-            messagingSenderId: "1234567890",
-            appId: "1:1234567890:web:abcdef123456"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        const profilePic = document.getElementById("profile-pic");
-        const navMenu = document.getElementById("nav-menu");
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userRef);
-                if (!userSnap.exists()) {
-                    await setDoc(userRef, { cart: [] });
-                }
-                profilePic.src = user.photoURL || "default-profile.png";
-                profilePic.style.display = "block";
-                navMenu.style.display = "block";
-            } else {
-                profilePic.style.display = "none";
-                navMenu.style.display = "none";
-                window.location.href = "login.html";
-            }
-        });
-    </script>
+    <title>Paracord Bracelets</title>
     <style>
-        #profile-pic {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; text-align: center; }
+        .container { max-width: 900px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 10px; }
+        .product-box { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); text-align: center; }
+        .product-box img { width: 100%; max-width: 200px; border-radius: 5px; }
+        .profile-pic { position: absolute; top: 10px; left: 10px; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; }
+        .btn { padding: 10px; border: none; cursor: pointer; border-radius: 5px; }
+        .btn-add { background: #007BFF; color: white; margin-top: 10px; }
+        .cart-count { font-weight: bold; }
     </style>
 </head>
 <body>
-    <img id="profile-pic" src="default-profile.png" onclick="location.href='profile.html'" style="display:none;">
-    <nav id="nav-menu" style="display: none;">
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="products.html">Products</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="commitments.html">Commitments</a></li>
-        </ul>
-    </nav>
-    <div class="content">
-        <h1>Welcome to the website</h1>
+
+    <img id="profile-pic" class="profile-pic" src="default-profile.png" alt="Profile" onclick="goToProfile()">
+
+    <div class="container">
+        <h2>Our Paracord Bracelets</h2>
+        <div class="products-grid" id="product-list"></div>
+        <h3>Cart: <span id="cart-count" class="cart-count">0</span> items</h3>
     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        let userId = null;
+
+        // Paracord Bracelet Products
+        const products = [
+            { id: 1, name: "Black Tactical", price: 12, image: "paracord1.jpg" },
+            { id: 2, name: "Camo Military", price: 15, image: "paracord2.jpg" },
+            { id: 3, name: "Survival Multi-Tool", price: 20, image: "paracord3.jpg" },
+            { id: 4, name: "Red & Black", price: 10, image: "paracord4.jpg" },
+            { id: 5, name: "Blue Adventure", price: 14, image: "paracord5.jpg" },
+            { id: 6, name: "Emergency Whistle", price: 18, image: "paracord6.jpg" },
+            { id: 7, name: "Reflective Night", price: 16, image: "paracord7.jpg" },
+            { id: 8, name: "Minimalist Grey", price: 12, image: "paracord8.jpg" }
+        ];
+
+        // Load Products
+        const productList = document.getElementById("product-list");
+        products.forEach(product => {
+            const div = document.createElement("div");
+            div.className = "product-box";
+            div.innerHTML = `
+                <img src="${product.image}" alt="${product.name}">
+                <h4>${product.name}</h4>
+                <p>$${product.price}</p>
+                <button class="btn btn-add" onclick="addToCart(${product.id})">Add to Cart</button>
+            `;
+            productList.appendChild(div);
+        });
+
+        // Authentication Check
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userId = user.uid;
+                document.getElementById("profile-pic").src = user.photoURL || "default-profile.png";
+                loadCart();
+            } else {
+                window.location.href = "login.html"; // Redirect to login if not authenticated
+            }
+        });
+
+        // Load Cart from Firebase
+        function loadCart() {
+            get(child(ref(database), `carts/${userId}`)).then(snapshot => {
+                if (snapshot.exists()) {
+                    updateCartCount(snapshot.val().length);
+                }
+            });
+        }
+
+        // Add to Cart Function
+        function addToCart(productId) {
+            get(child(ref(database), `carts/${userId}`)).then(snapshot => {
+                let cart = snapshot.exists() ? snapshot.val() : [];
+                cart.push(productId);
+                set(ref(database, `carts/${userId}`), cart);
+                updateCartCount(cart.length);
+            });
+        }
+
+        // Update Cart Count
+        function updateCartCount(count) {
+            document.getElementById("cart-count").innerText = count;
+        }
+
+        // Go to Profile Page
+        function goToProfile() {
+            window.location.href = "profile.html";
+        }
+
+    </script>
+
 </body>
 </html>
-
