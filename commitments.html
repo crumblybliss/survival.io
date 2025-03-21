@@ -10,8 +10,9 @@
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-        // ✅ Initialize Firebase
+        // ✅ Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
             authDomain: "survival-f35e2.firebaseapp.com",
@@ -21,35 +22,87 @@
             appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-        // ✅ Submit a Review
+        // DOM Elements
+        const loginBtn = document.getElementById("login-btn");
+        const logoutBtn = document.getElementById("logout-btn");
+        const userInfo = document.getElementById("user-info");
+        const reviewFormContainer = document.getElementById("review-form-container");
+
+        // ✅ Handle User Login
+        loginBtn.addEventListener("click", async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                console.log("Logged in as:", user.displayName);
+            } catch (error) {
+                console.error("Login failed:", error);
+            }
+        });
+
+        // ✅ Handle Logout
+        logoutBtn.addEventListener("click", async () => {
+            try {
+                await signOut(auth);
+                console.log("User logged out.");
+            } catch (error) {
+                console.error("Logout failed:", error);
+            }
+        });
+
+        // ✅ Listen for Authentication Changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userInfo.innerHTML = `Logged in as: <strong>${user.displayName}</strong>`;
+                loginBtn.style.display = "none";
+                logoutBtn.style.display = "inline-block";
+                reviewFormContainer.style.display = "block";
+                document.getElementById("name").value = user.displayName; // Autofill name
+            } else {
+                userInfo.innerHTML = "";
+                loginBtn.style.display = "inline-block";
+                logoutBtn.style.display = "none";
+                reviewFormContainer.style.display = "none";
+            }
+        });
+
+        // ✅ Submit a Review (Only if Logged In)
         async function submitReview() {
-            const name = document.getElementById("name").value.trim();
+            const user = auth.currentUser;
+            if (!user) {
+                alert("You must be logged in to submit a review.");
+                return;
+            }
+
+            const name = user.displayName;
             const comment = document.getElementById("comment").value.trim();
             const rating = parseInt(document.getElementById("rating").value);
 
-            if (!name || !comment) {
-                alert("Please fill out all fields.");
+            if (!comment) {
+                alert("Please enter a comment.");
                 return;
             }
 
             try {
                 await addDoc(collection(db, "reviews"), {
                     name: name,
+                    email: user.email,
                     comment: comment,
                     rating: rating,
                     timestamp: serverTimestamp()
                 });
 
                 alert("Review submitted successfully!");
-                document.getElementById("name").value = "";
                 document.getElementById("comment").value = "";
-                loadReviews(); // Refresh reviews
+                loadReviews();
             } catch (error) {
                 console.error("Error submitting review:", error);
-                alert("Error submitting review. Check console.");
+                alert("Error submitting review.");
             }
         }
 
@@ -69,7 +122,7 @@
                     const reviewElement = document.createElement("div");
                     reviewElement.classList.add("review");
                     reviewElement.innerHTML = `
-                        <strong>${review.name}</strong> - <span class="stars">${"⭐".repeat(review.rating)}</span>
+                        <strong>${review.name}</strong> (${review.email}) - <span class="stars">${"⭐".repeat(review.rating)}</span>
                         <p>${review.comment}</p>
                     `;
                     reviewsList.appendChild(reviewElement);
@@ -77,7 +130,6 @@
                     count++;
                 });
 
-                // ✅ Calculate and display average rating
                 if (count > 0) {
                     const averageRating = (totalRating / count).toFixed(1);
                     averageRatingDiv.innerHTML = `<h3>Average Rating: ${averageRating} ⭐</h3>`;
@@ -91,9 +143,6 @@
 
         // ✅ Load reviews on page load
         window.onload = loadReviews;
-
-        // Expose functions to global scope
-        window.submitReview = submitReview;
     </script>
 
     <style>
@@ -102,6 +151,9 @@
             background-color: navy;
             color: white;
             text-align: center;
+        }
+        .auth-container {
+            margin: 20px auto;
         }
         .review-form, .reviews-container {
             background-color: white;
@@ -135,10 +187,17 @@
 
     <h1>Customer Reviews</h1>
 
-    <!-- Review Form -->
-    <div class="review-form">
+    <!-- Authentication Section -->
+    <div class="auth-container">
+        <button id="login-btn">Sign in with Google</button>
+        <button id="logout-btn" style="display: none;">Logout</button>
+        <p id="user-info"></p>
+    </div>
+
+    <!-- Review Form (Only shown if logged in) -->
+    <div id="review-form-container" class="review-form" style="display: none;">
         <h2>Leave a Review</h2>
-        <input type="text" id="name" placeholder="Your Name" required>
+        <input type="text" id="name" placeholder="Your Name" required disabled>
         <textarea id="comment" placeholder="Your Review" rows="4" required></textarea>
         <select id="rating">
             <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
