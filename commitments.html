@@ -7,9 +7,9 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Import Firebase modules
+        // ✅ Import Firebase Modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
         // ✅ Firebase Configuration
@@ -28,26 +28,44 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // DOM Elements
+        // ✅ DOM Elements
         const reviewForm = document.getElementById("review-form");
         const reviewsList = document.getElementById("reviews-list");
         const averageRatingDiv = document.getElementById("average-rating");
         const loginSection = document.getElementById("login-section");
         const logoutBtn = document.getElementById("logout-btn");
         const userInfo = document.getElementById("user-info");
+        const navMenu = document.getElementById("nav-menu"); // Navigation menu
 
-        // ✅ Handle Authentication
+        // ✅ Save Users in Firestore
+        async function saveUserToFirestore(user) {
+            if (!user) return;
+            const userRef = doc(db, "users", user.uid);
+            const docSnap = await getDoc(userRef);
+            if (!docSnap.exists()) {
+                await setDoc(userRef, {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || "Anonymous",
+                    createdAt: new Date(),
+                });
+            }
+        }
+
+        // ✅ Handle Authentication UI
         function updateUI(user) {
             if (user) {
                 userInfo.innerHTML = `Logged in as: <strong>${user.email}</strong>`;
                 loginSection.style.display = "none";
                 logoutBtn.style.display = "block";
                 reviewForm.style.display = "block";
+                navMenu.style.display = "block"; // Show navigation after login
             } else {
                 userInfo.innerHTML = "";
                 loginSection.style.display = "block";
                 logoutBtn.style.display = "none";
                 reviewForm.style.display = "none";
+                navMenu.style.display = "none"; // Hide navigation when logged out
             }
         }
 
@@ -59,7 +77,8 @@
         // ✅ Google Login
         document.getElementById("google-login-btn").addEventListener("click", async () => {
             try {
-                await signInWithPopup(auth, provider);
+                const result = await signInWithPopup(auth, provider);
+                await saveUserToFirestore(result.user);
             } catch (error) {
                 alert(error.message);
             }
@@ -70,7 +89,8 @@
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
             try {
-                await createUserWithEmailAndPassword(auth, email, password);
+                const result = await createUserWithEmailAndPassword(auth, email, password);
+                await saveUserToFirestore(result.user);
             } catch (error) {
                 alert(error.message);
             }
@@ -163,19 +183,21 @@
     <style>
         body { font-family: Arial, sans-serif; background-color: navy; color: white; text-align: center; }
         .container { max-width: 500px; margin: auto; background: white; color: black; padding: 20px; border-radius: 8px; }
-        input, textarea, select, button { width: 100%; padding: 10px; margin: 8px 0; }
-        button { background: #4CAF50; color: white; border: none; cursor: pointer; }
-        button:hover { background: #45a049; }
-        .review { border-bottom: 1px solid #ddd; padding: 10px; }
-        .stars { color: gold; }
+        .nav-menu { display: none; }
     </style>
 </head>
 <body>
 
-    <h1>Customer Reviews</h1>
+    <nav id="nav-menu" class="nav-menu">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="commitments.html">Commitments</a></li>
+        </ul>
+    </nav>
 
-    <!-- Authentication Section -->
-    <div id="login-section" class="container">
+    <div id="login-section">
         <button id="google-login-btn">Sign in with Google</button>
         <input type="email" id="email" placeholder="Email">
         <input type="password" id="password" placeholder="Password">
@@ -185,26 +207,6 @@
 
     <button id="logout-btn" style="display: none;">Logout</button>
     <p id="user-info"></p>
-
-    <!-- Review Form -->
-    <div id="review-form" class="container" style="display: none;">
-        <h2>Leave a Review</h2>
-        <textarea id="comment" placeholder="Your Review" rows="4"></textarea>
-        <select id="rating">
-            <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
-            <option value="4">⭐⭐⭐⭐ - Very Good</option>
-            <option value="3">⭐⭐⭐ - Good</option>
-            <option value="2">⭐⭐ - Fair</option>
-            <option value="1">⭐ - Poor</option>
-        </select>
-        <button id="submit-review-btn">Submit Review</button>
-    </div>
-
-    <div class="container">
-        <h2>Recent Reviews</h2>
-        <div id="average-rating"></div>
-        <div id="reviews-list"></div>
-    </div>
 
 </body>
 </html>
