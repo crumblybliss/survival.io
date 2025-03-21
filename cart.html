@@ -3,226 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Cart - Your Website</title>
+    <title>Your Cart - CrumblyBliss</title>
     <style>
-        /* General styles */
         body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #0a1d37; /* Dark Navy Blue */
-            color: #f1f1f1; /* Light text */
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background-color: #1c2b47; /* Darker navy */
-            color: white;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
-        }
-
-        .profile-link {
-            display: inline-block;
-        }
-
-        .profile-pic {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid #00bcd4; /* Aqua Blue Border */
-            box-shadow: 0 0 10px rgba(0, 188, 212, 0.6); /* Glowing Effect */
-            transition: all 0.3s ease-in-out;
-        }
-
-        .profile-pic:hover {
-            transform: scale(1.1);
-        }
-
-        .auth-status {
-            align-self: center;
-        }
-
-        nav {
-            background-color: #1c2b47; /* Darker navy */
-            padding: 10px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             text-align: center;
+            color: #333;
         }
 
-        nav a {
-            color: #f1f1f1;
-            margin: 0 15px;
-            text-decoration: none;
-            font-size: 18px;
-        }
-
-        nav a:hover {
-            color: #00bcd4; /* Aqua Blue hover effect */
-        }
-
-        .content {
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: #fff;
             padding: 20px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            color: #00bcd4; /* Aqua Blue */
-            text-align: center;
-        }
-
-        .cart-items {
-            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         .cart-item {
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            background-color: #1c2b47; /* Darker navy */
-            border: 1px solid #2c3e5f; /* Slightly lighter navy for border */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
         }
 
-        .cart-item h3 {
-            margin: 0;
-            font-size: 18px;
-            color: #f1f1f1;
-        }
-
-        .cart-item p {
-            margin: 5px 0;
-            color: #b0c4d3; /* Light gray for details */
-        }
-
-        #checkout-button {
-            margin-top: 20px;
-            padding: 12px;
-            background-color: #00bcd4; /* Aqua Blue */
+        .cart-item button {
+            background: #f44336;
             color: white;
             border: none;
+            padding: 5px 10px;
             border-radius: 5px;
             cursor: pointer;
+        }
+
+        .cart-item button:hover {
+            background: #d32f2f;
+        }
+
+        .total {
             font-size: 18px;
-            width: 100%;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.4);
+            font-weight: bold;
+            margin-top: 20px;
         }
 
-        #checkout-button:hover {
-            background-color: #0097a7; /* Slightly darker aqua blue */
-            box-shadow: 0 7px 20px rgba(0, 188, 212, 0.6);
+        /* Profile picture and nav menu styles */
+        .profile-pic {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid #00bcd4;
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.6);
         }
 
-        footer {
-            text-align: center;
+        .nav-menu {
             padding: 10px;
-            background-color: #1c2b47; /* Darker navy */
-            color: white;
-            margin-top: 40px;
-            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+            background: #00bcd4;
         }
 
-        /* Responsive Design */
-        @media screen and (max-width: 600px) {
-            .profile-pic {
-                width: 35px;
-                height: 35px;
-            }
+        .nav-menu ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
 
-            .content {
-                padding: 10px;
-            }
+        .nav-menu ul li {
+            margin: 0 15px;
+        }
 
-            #checkout-button {
-                font-size: 16px;
-            }
+        .nav-menu ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 12px 24px;
+            margin: 20px 0;
+            border: none;
+            cursor: pointer;
+            background: #00bcd4;
+            color: white;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #0097a7;
         }
     </style>
 </head>
 <body>
-    <header>
-        <a href="index.html" class="profile-link">
-            <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
-        </a>
-        <div class="auth-status" id="auth-status"></div>
-    </header>
 
-    <!-- Navigation Bar -->
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="shop.html">Shop</a>
-        <a href="cart.html">Cart</a>
-        <a href="checkout.html">Checkout</a>
+    <!-- Profile Picture -->
+    <img id="profile-pic" src="default-profile.png" alt="Profile Picture" class="profile-pic" onclick="window.location.href='profile.html'">
+
+    <!-- Navigation Menu -->
+    <nav class="nav-menu">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="commitments.html">Commitments</a></li>
+            <li><a href="cart.html">Cart 🛒</a></li>
+        </ul>
     </nav>
 
-    <div class="content">
+    <div class="container">
         <h1>Your Cart</h1>
-        <div class="cart-items" id="cart-items"></div>
-        <p id="total-price">Total: $0.00</p>
-        <div id="paypal-button-container"></div>
-        <p id="result-message"></p>
-
-        <!-- PayPal button script -->
-        <script src="https://www.paypal.com/sdk/js?client-id=Aa4LfD1dnj8w9ytQpxXQMmZqauIm7dQr0l6-JxOHJLqQpIXSvI6QRILuBv0MRrMVx7zI0C761uO_QPaS&currency=USD&components=buttons&enable-funding=venmo,paylater,card"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const cartItemsElement = document.getElementById('cart-items');
-                const totalPriceElement = document.getElementById('total-price');
-                const cart = getCartFromLocalStorage() || [];
-                
-                let totalPrice = 0;
-
-                if (cart.length === 0) {
-                    cartItemsElement.innerHTML = '<p>Your cart is empty!</p>';
-                } else {
-                    cart.forEach(item => {
-                        const itemDiv = document.createElement('div');
-                        itemDiv.classList.add('cart-item');
-                        itemDiv.innerHTML = `
-                            <h3>${item.name}</h3>
-                            <p>Size: ${item.selectedSize}</p>
-                            <p>Color: ${item.selectedColor}</p>
-                            <p>Price: $${item.price.toFixed(2)}</p>
-                        `;
-                        cartItemsElement.appendChild(itemDiv);
-                        totalPrice += item.price;
-                    });
-                }
-
-                totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
-
-                // PayPal Button
-                paypal.Buttons({
-                    createOrder: function(data, actions) {
-                        return actions.order.create({
-                            purchase_units: [{
-                                amount: {
-                                    value: totalPrice.toFixed(2)
-                                }
-                            }]
-                        });
-                    },
-                    onApprove: function(data, actions) {
-                        return actions.order.capture().then(function(details) {
-                            document.getElementById('result-message').textContent = 'Transaction completed by ' + details.payer.name.given_name;
-                            // Optionally clear cart after successful transaction
-                            localStorage.removeItem('cart');
-                        });
-                    }
-                }).render('#paypal-button-container');
-            });
-
-            // Helper function to get cart from localStorage
-            function getCartFromLocalStorage() {
-                return JSON.parse(localStorage.getItem('cart'));
-            }
-        </script>
+        <div id="cart-items">
+            <!-- Cart items will be populated here -->
+        </div>
+        <div id="cart-total" class="total">
+            Total: $0
+        </div>
+        <button onclick="checkout()">Proceed to Checkout</button>
     </div>
 
-    <footer>
-        <p>&copy; 2025 Your Website</p>
-    </footer>
+    <script>
+        // Example cart data stored in localStorage (in real app, cart data might come from a database)
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        // Function to render cart items
+        function renderCart() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartTotalContainer = document.getElementById('cart-total');
+            cartItemsContainer.innerHTML = '';  // Clear previous items
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                total += item.price;
+                const cartItemDiv = document.createElement('div');
+                cartItemDiv.classList.add('cart-item');
+                cartItemDiv.innerHTML = `
+                    <span>${item.name} - $${item.price.toFixed(2)}</span>
+                    <button onclick="removeItem(${index})">Remove</button>
+                `;
+                cartItemsContainer.appendChild(cartItemDiv);
+            });
+
+            cartTotalContainer.innerHTML = `Total: $${total.toFixed(2)}`;
+        }
+
+        // Function to remove item from cart
+        function removeItem(index) {
+            cart.splice(index, 1);  // Remove the item from the cart array
+            localStorage.setItem('cart', JSON.stringify(cart));  // Save updated cart to localStorage
+            renderCart();  // Re-render cart
+        }
+
+        // Function to handle checkout
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+            } else {
+                window.location.href = 'checkout.html';  // Redirect to checkout page
+            }
+        }
+
+        // Render the cart when the page loads
+        window.onload = renderCart;
+    </script>
+
 </body>
 </html>
