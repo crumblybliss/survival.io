@@ -3,256 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Survival Bracelets Store - Home</title>
+    <title>Customer Reviews</title>
 
-    <!-- PayPal Cart Script -->
-    <script src="https://www.paypalobjects.com/ncp/cart/cart.js" data-merchant-id="YZBS9R98C23HG"></script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+        // ✅ Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // DOM Elements
+        const reviewForm = document.getElementById("review-form");
+        const reviewsList = document.getElementById("reviews-list");
+        const averageRatingDiv = document.getElementById("average-rating");
+        const loginSection = document.getElementById("login-section");
+        const logoutBtn = document.getElementById("logout-btn");
+        const userInfo = document.getElementById("user-info");
+        const navMenu = document.getElementById("nav-menu"); // Navigation menu
+
+        // ✅ Handle Authentication
+        function updateUI(user) {
+            if (user) {
+                userInfo.innerHTML = `Logged in as: <strong>${user.email}</strong>`;
+                loginSection.style.display = "none";
+                logoutBtn.style.display = "block";
+                reviewForm.style.display = "block";
+                navMenu.style.display = "block"; // Show the navigation when logged in
+            } else {
+                userInfo.innerHTML = "";
+                loginSection.style.display = "block";
+                logoutBtn.style.display = "none";
+                reviewForm.style.display = "none";
+                navMenu.style.display = "none"; // Hide the navigation when logged out
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            updateUI(user);
+            loadReviews();
+        });
+
+        // ✅ Google Login
+        document.getElementById("google-login-btn").addEventListener("click", async () => {
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // ✅ Email Signup
+        document.getElementById("signup-btn").addEventListener("click", async () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // ✅ Email Login
+        document.getElementById("email-login-btn").addEventListener("click", async () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // ✅ Logout
+        logoutBtn.addEventListener("click", async () => {
+            await signOut(auth);
+        });
+
+        // ✅ Submit a Review
+        async function submitReview() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("You must be logged in to submit a review.");
+                return;
+            }
+
+            const comment = document.getElementById("comment").value.trim();
+            const rating = parseInt(document.getElementById("rating").value);
+
+            if (!comment) {
+                alert("Please enter a comment.");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "reviews"), {
+                    name: user.email,
+                    comment: comment,
+                    rating: rating,
+                    timestamp: serverTimestamp()
+                });
+
+                alert("Review submitted!");
+                document.getElementById("comment").value = "";
+                loadReviews();
+            } catch (error) {
+                alert("Error submitting review.");
+            }
+        }
+
+        document.getElementById("submit-review-btn").addEventListener("click", submitReview);
+
+        // ✅ Load Reviews
+        async function loadReviews() {
+            reviewsList.innerHTML = "";
+            let totalRating = 0, count = 0;
+
+            try {
+                const q = query(collection(db, "reviews"), orderBy("timestamp", "desc"));
+                const snapshot = await getDocs(q);
+
+                snapshot.forEach(doc => {
+                    const review = doc.data();
+                    const reviewElement = document.createElement("div");
+                    reviewElement.classList.add("review");
+                    reviewElement.innerHTML = `
+                        <strong>${review.name}</strong> - <span class="stars">${"⭐".repeat(review.rating)}</span>
+                        <p>${review.comment}</p>
+                    `;
+                    reviewsList.appendChild(reviewElement);
+                    totalRating += review.rating;
+                    count++;
+                });
+
+                if (count > 0) {
+                    const averageRating = (totalRating / count).toFixed(1);
+                    averageRatingDiv.innerHTML = `<h3>Average Rating: ${averageRating} ⭐</h3>`;
+                } else {
+                    averageRatingDiv.innerHTML = `<h3>No reviews yet.</h3>`;
+                }
+            } catch (error) {
+                console.error("Error loading reviews:", error);
+            }
+        }
+    </script>
 
     <style>
-        /* Global Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* General Styles */
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: navy;
-            color: white;
-            text-align: center;
-        }
-
-        /* Header */
-        header {
-            background-color: #003366;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-
-        header h1 {
-            font-size: 24px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-
-        nav ul {
-            list-style: none;
-            margin: 10px 0 0;
-            padding: 0;
-        }
-
-        nav ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-
-        nav ul li a:hover {
-            color: #4CAF50;
-        }
-
-        /* Hero Section */
-        .hero {
-            background: url('hero.jpg') no-repeat center center/cover;
-            padding: 80px 20px;
-            text-align: center;
-            color: white;
-        }
-
-        .hero h2 {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-
-        .hero p {
-            font-size: 16px;
-            max-width: 600px;
-            margin: auto;
-        }
-
-        .shop-button {
-            display: inline-block;
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            margin-top: 20px;
-            text-decoration: none;
-            font-size: 16px;
-            border-radius: 5px;
-            transition: 0.3s;
-        }
-
-        .shop-button:hover {
-            background-color: #45a049;
-        }
-
-        /* Featured Products */
-        .featured-products {
-            padding: 40px 20px;
-            max-width: 900px;
-            margin: auto;
-        }
-
-        .featured-products h2 {
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-
-        .products-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .product {
-            background-color: white;
-            padding: 12px;
-            border-radius: 10px;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-            transition: 0.3s;
-            text-align: center;
-        }
-
-        .product:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
-        }
-
-        .product img {
-            width: 100%;
-            height: 130px;
-            object-fit: cover;
-            border-radius: 6px;
-            transition: 0.3s;
-        }
-
-        .product img:hover {
-            opacity: 0.8;
-        }
-
-        .product a {
-            text-decoration: none;
-            color: navy;
-            font-weight: bold;
-        }
-
-        .product a:hover {
-            color: #4CAF50;
-        }
-
-        .price {
-            font-size: 13px;
-            font-weight: bold;
-            color: navy;
-        }
-
-        /* Footer */
-        footer {
-            background-color: #003366;
-            padding: 15px;
-            font-size: 12px;
-            margin-top: 20px;
-        }
-
-        footer a {
-            color: #4CAF50;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .donate-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 8px 15px;
-            font-size: 12px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .donate-button:hover {
-            background-color: #45a049;
-        }
+        body { font-family: Arial, sans-serif; background-color: navy; color: white; text-align: center; }
+        .container { max-width: 500px; margin: auto; background: white; color: black; padding: 20px; border-radius: 8px; }
+        input, textarea, select, button { width: 100%; padding: 10px; margin: 8px 0; }
+        button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background: #45a049; }
+        .review { border-bottom: 1px solid #ddd; padding: 10px; }
+        .stars { color: gold; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Survival Bracelets Store</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="products.html">Products</a></li>
-                <li><a href="about.html">About</a></li>
-                 <li><a href="commitments.html">Commitments</a></li>
-                <li><paypal-cart-button data-id="pp-view-cart"></paypal-cart-button></li>
-            </ul>
-        </nav>
-    </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <h2>Handmade Survival Bracelets</h2>
-        <p>Stylish, durable, and practical. Made with high-quality materials to suit all adventures.</p>
-        <a href="products.html" class="shop-button">Shop Now</a>
-    </section>
+    <h1>Customer Reviews</h1>
 
-    <!-- Featured Products -->
-    <section class="featured-products">
-        <h2>Featured Products</h2>
-        <div class="products-container">
-            <!-- Featured Product 1 -->
-            <div class="product">
-                <a href="products.html#survival-bracelet-2">
-                    <img src="3.jpg" alt="Survival Bracelet 2">
-                    <h3>Survival Bracelet 2</h3>
-                </a>
-                <p class="price">$15.00</p>
-                <paypal-add-to-cart-button data-id="AQJAZ5DJLULM6"></paypal-add-to-cart-button>
-            </div>
+    <!-- Navigation Menu (Hidden by Default) -->
+    <nav id="nav-menu" style="display: none;">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="commitments.html">Commitments</a></li>
+            <li><paypal-cart-button data-id="pp-view-cart"></paypal-cart-button></li>
+        </ul>
+    </nav>
 
-            <!-- Featured Product 2 -->
-            <div class="product">
-                <a href="products.html#braided-bracelet">
-                    <img src="6.jpg" alt="Braided Bracelet">
-                    <h3>Braided Bracelet</h3>
-                </a>
-                <p class="price">$20.00</p>
-                <paypal-add-to-cart-button data-id="TBGCSV22U2JYC"></paypal-add-to-cart-button>
-            </div>
-        </div>
-    </section>
+    <!-- Authentication Section -->
+    <div id="login-section" class="container">
+        <button id="google-login-btn">Sign in with Google</button>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button id="email-login-btn">Login</button>
+        <button id="signup-btn">Sign Up</button>
+    </div>
 
-    <footer>
-        <p>If you want different colors, email <a href="mailto:cheapbraclet@outlook.com">cheapbraclet@outlook.com</a></p>
-        <p>&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
+    <button id="logout-btn" style="display: none;">Logout</button>
+    <p id="user-info"></p>
 
-        <paypal-cart-button data-id="pp-view-cart"></paypal-cart-button>
-
-        <button class="donate-button" onclick="window.location.href='https://www.paypal.com/ncp/payment/C474MBZ4JC84S'">
-            Donate
-        </button>
-    </footer>
-
-    <!-- Initialize PayPal Buttons -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            if (typeof cartPaypal !== "undefined") {
-                cartPaypal.Cart({ id: "pp-view-cart" });
-            } else {
-                console.error("PayPal cart script not loaded.");
-            }
-        });
-    </script>
 </body>
 </html>
+
