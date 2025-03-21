@@ -11,32 +11,10 @@
 
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             background-color: navy;
             color: white;
             text-align: center;
-        }
-
-        header {
-            background-color: #003366;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-
-        nav ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        nav ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: white;
-            text-decoration: none;
         }
 
         .comments-container {
@@ -77,119 +55,111 @@
 </head>
 <body>
 
-<header>
     <h1>Comments</h1>
-    <nav>
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="products.html">Products</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><div id="paypal-cart-button"></div></li>
-        </ul>
-    </nav>
-</header>
 
-<!-- Comment Section -->
-<section class="comments-container">
-    <h2>Leave a Comment</h2>
-    <input type="text" id="name" placeholder="Your Name" required>
-    <textarea id="comment" placeholder="Write your comment here..." rows="4" required></textarea>
-    <select id="rating">
-        <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
-        <option value="4">⭐⭐⭐⭐ - Very Good</option>
-        <option value="3">⭐⭐⭐ - Good</option>
-        <option value="2">⭐⭐ - Fair</option>
-        <option value="1">⭐ - Poor</option>
-    </select>
-    <button onclick="submitComment()">Submit Comment</button>
+    <!-- Comment Section -->
+    <section class="comments-container">
+        <h2>Leave a Comment</h2>
+        <input type="text" id="name" placeholder="Your Name" required>
+        <textarea id="comment" placeholder="Write your comment here..." rows="4" required></textarea>
+        <select id="rating">
+            <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
+            <option value="4">⭐⭐⭐⭐ - Very Good</option>
+            <option value="3">⭐⭐⭐ - Good</option>
+            <option value="2">⭐⭐ - Fair</option>
+            <option value="1">⭐ - Poor</option>
+        </select>
+        <button id="submit-btn">Submit Comment</button>
 
-    <h2>Recent Comments</h2>
-    <div id="average-rating"></div>
-    <div id="comments-list"></div>
-</section>
+        <h2>Recent Comments</h2>
+        <div id="average-rating"></div>
+        <div id="comments-list"></div>
+    </section>
 
-<script>
-    // ✅ Initialize Firebase (Replace with your actual Firebase credentials)
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_AUTH_DOMAIN",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_STORAGE_BUCKET",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
-    };
+    <script>
+        // ✅ Initialize Firebase (Replace with YOUR actual Firebase credentials)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-    // ✅ Submit Comment
-    function submitComment() {
-        const name = document.getElementById("name").value.trim();
-        const comment = document.getElementById("comment").value.trim();
-        const rating = parseInt(document.getElementById("rating").value);
+        // ✅ Ensure Firebase is Ready Before Running Code
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("submit-btn").addEventListener("click", submitComment);
+            loadComments(); 
+        });
 
-        if (!name || !comment) {
-            alert("Please fill out all fields.");
-            return;
+        // ✅ Submit Comment Function
+        function submitComment() {
+            const name = document.getElementById("name").value.trim();
+            const comment = document.getElementById("comment").value.trim();
+            const rating = parseInt(document.getElementById("rating").value);
+
+            if (!name || !comment) {
+                alert("Please fill out all fields.");
+                return;
+            }
+
+            db.collection("comments").add({
+                name: name,
+                comment: comment,
+                rating: rating,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                alert("Comment submitted successfully!");
+                document.getElementById("name").value = "";
+                document.getElementById("comment").value = "";
+                loadComments(); // Refresh comments
+            })
+            .catch(error => {
+                console.error("Error submitting comment:", error);
+                alert("Error submitting comment. Check console.");
+            });
         }
 
-        db.collection("comments").add({
-            name: name,
-            comment: comment,
-            rating: rating,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        })
-        .then(() => {
-            alert("Comment submitted successfully!");
-            document.getElementById("name").value = "";
-            document.getElementById("comment").value = "";
-            loadComments(); // Refresh comments
-        })
-        .catch(error => {
-            console.error("Error submitting comment:", error);
-            alert("Error submitting comment. Check console.");
-        });
-    }
+        // ✅ Load Comments Function
+        function loadComments() {
+            const commentsList = document.getElementById("comments-list");
+            const averageRatingDiv = document.getElementById("average-rating");
+            commentsList.innerHTML = "";
+            let totalRating = 0, count = 0;
 
-    // ✅ Load Comments
-    function loadComments() {
-        const commentsList = document.getElementById("comments-list");
-        const averageRatingDiv = document.getElementById("average-rating");
-        commentsList.innerHTML = "";
-        let totalRating = 0, count = 0;
+            db.collection("comments").orderBy("timestamp", "desc").get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    const comment = doc.data();
+                    const commentElement = document.createElement("div");
+                    commentElement.classList.add("comment");
+                    commentElement.innerHTML = `
+                        <strong>${comment.name}</strong> - <span class="stars">${"⭐".repeat(comment.rating)}</span>
+                        <p>${comment.comment}</p>
+                    `;
+                    commentsList.appendChild(commentElement);
+                    totalRating += comment.rating;
+                    count++;
+                });
 
-        db.collection("comments").orderBy("timestamp", "desc").get()
-        .then(snapshot => {
-            snapshot.forEach(doc => {
-                const comment = doc.data();
-                const commentElement = document.createElement("div");
-                commentElement.classList.add("comment");
-                commentElement.innerHTML = `<strong>${comment.name}</strong> - <span class="stars">${"⭐".repeat(comment.rating)}</span>
-                                            <p>${comment.comment}</p>`;
-                commentsList.appendChild(commentElement);
-                totalRating += comment.rating;
-                count++;
+                // ✅ Calculate and display average rating
+                if (count > 0) {
+                    const averageRating = (totalRating / count).toFixed(1);
+                    averageRatingDiv.innerHTML = `<h3>Average Rating: ${averageRating} ⭐</h3>`;
+                } else {
+                    averageRatingDiv.innerHTML = `<h3>No comments yet.</h3>`;
+                }
+            })
+            .catch(error => {
+                console.error("Error loading comments:", error);
             });
-
-            if (count > 0) {
-                const averageRating = (totalRating / count).toFixed(1);
-                averageRatingDiv.innerHTML = `<h3>Average Rating: ${averageRating} ⭐</h3>`;
-            } else {
-                averageRatingDiv.innerHTML = `<h3>No comments yet.</h3>`;
-            }
-        })
-        .catch(error => {
-            console.error("Error loading comments:", error);
-        });
-    }
-
-    // ✅ Load comments on page load
-    window.onload = loadComments;
-</script>
-
-<footer>
-    <p>&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
-</footer>
+        }
+    </script>
 
 </body>
 </html>
