@@ -3,101 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Reviews & Comments</title>
+    <title>Survival Bracelets Store</title>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        async function submitComment() {
-            const user = auth.currentUser;
-            if (!user) {
-                alert("You must be logged in to comment.");
-                return;
-            }
-
-            const commentText = document.getElementById("comment-text").value.trim();
-            if (!commentText) {
-                alert("Please enter a comment.");
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "comments"), {
-                    name: user.email,
-                    comment: commentText,
-                    timestamp: serverTimestamp()
-                });
-                document.getElementById("comment-text").value = "";
-                loadComments();
-            } catch (error) {
-                console.error("Error submitting comment: ", error);
-            }
-        }
-
-        async function loadComments() {
-            const commentsList = document.getElementById("comments-list");
-            commentsList.innerHTML = "";
-
-            try {
-                const q = query(collection(db, "comments"), orderBy("timestamp", "desc"));
-                const snapshot = await getDocs(q);
-                snapshot.forEach(doc => {
-                    const comment = doc.data();
-                    const commentElement = document.createElement("div");
-                    commentElement.classList.add("comment");
-                    commentElement.innerHTML = `<strong>${comment.name}</strong>: <p>${comment.comment}</p>`;
-                    commentsList.appendChild(commentElement);
-                });
-            } catch (error) {
-                console.error("Error loading comments: ", error);
-            }
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            document.getElementById("comment-form").style.display = user ? "block" : "none";
-            loadComments();
-        });
-    </script>
+    <!-- PayPal Cart Script -->
+    <script src="https://www.paypalobjects.com/ncp/cart/cart.js" data-merchant-id="YZBS9R98C23HG"></script>
 
     <style>
-        body { font-family: Arial, sans-serif; background-color: navy; color: white; text-align: center; }
-        .container { max-width: 500px; margin: auto; background: white; color: black; padding: 20px; border-radius: 8px; }
-        .comment { border-bottom: 1px solid #ccc; padding: 10px; text-align: left; }
-        #comment-form { display: none; margin-top: 20px; }
-        textarea { width: 100%; padding: 10px; }
-        button { background: #4CAF50; color: white; padding: 10px; border: none; cursor: pointer; }
-        button:hover { background: #45a049; }
+        /* Global Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: navy;
+            color: white;
+            text-align: center;
+            padding-bottom: 50px;
+        }
+
+        /* Header */
+        header {
+            background-color: #003366;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        header h1 {
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 10px 0 0;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #4CAF50;
+        }
+
+        /* Product Grid */
+        .products-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .product {
+            background-color: white;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .product:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .product img {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .product h2 {
+            font-size: 14px;
+            color: navy;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        .price {
+            font-size: 13px;
+            font-weight: bold;
+            color: navy;
+        }
+
+        .paypal-button {
+            margin-top: 5px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #003366;
+            padding: 15px;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+
+        footer a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .donate-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            font-size: 12px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .donate-button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Customer Reviews & Comments</h1>
+        <h1>Survival Bracelets Store</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><paypal-cart-button data-id="pp-view-cart"></paypal-cart-button></li>
+            </ul>
+        </nav>
     </header>
 
-    <div class="container">
-        <h2>Comments</h2>
-        <div id="comments-list"></div>
+    <div class="products-container">
+        <!-- Product 1: Keychain -->
+        <div class="product">
+            <h2>Keychain</h2>
+            <img src="6.jpeg" alt="Keychain">
+            <p class="price">$5.00</p>
+            <div class="paypal-button">
+                <paypal-add-to-cart-button data-id="NGRF9T2H5BUQL"></paypal-add-to-cart-button>
+            </div>
+        </div>
 
-        <div id="comment-form">
-            <textarea id="comment-text" placeholder="Write your comment..."></textarea>
-            <button onclick="submitComment()">Submit</button>
+        <!-- Product 2: Bead Bracelet -->
+        <div class="product">
+            <h2>Bead Bracelet</h2>
+            <img src="7.jpg" alt="Bead Bracelet">
+            <p class="price">$15.00</p>
+            <div class="paypal-button">
+                <paypal-add-to-cart-button data-id="2JYUTZM5EWKMN"></paypal-add-to-cart-button>
+            </div>
+        </div>
+
+        <!-- Product 3: Survival Bracelet 2 -->
+        <div class="product">
+            <h2>Survival Bracelet 2</h2>
+            <img src="10.jpg" alt="Survival Bracelet 2">
+            <p class="price">$15.00</p>
+            <div class="paypal-button">
+                <paypal-add-to-cart-button data-id="AQJAZ5DJLULM6"></paypal-add-to-cart-button>
+            </div>
+        </div>
+
+        <!-- Product 4: Survival Bracelet 3 -->
+        <div class="product">
+            <h2>Survival Bracelet 3</h2>
+            <img src="20.jpg" alt="Survival Bracelet 3">
+            <p class="price">$15.00</p>
+            <div class="paypal-button">
+                <paypal-add-to-cart-button data-id="2GMD2YH57BJ4W"></paypal-add-to-cart-button>
+            </div>
+        </div>
+
+        <!-- Product 5: Survival Dog Collar -->
+        <div class="product">
+            <h2>Survival Dog Collar</h2>
+            <img src="pic1.jpg" alt="Survival Dog Collar">
+            <p class="price">$30.00</p>
+            <div class="paypal-button">
+                <paypal-add-to-cart-button data-id="UYT6RM32KL98Q"></paypal-add-to-cart-button>
+            </div>
+        </div>
+
+        <!-- Product 6: Braided Bracelet -->
+        <div class="product">
+            <h2>Braided Bracelet</h2>
+            <img src="braided.jpg" alt="Braided Bracelet">
+            <p class="price">$20.00</p>
+            <div class="paypal-button">
+                <paypal-add-to-cart-button data-id="BRAIDED12345"></paypal-add-to-cart-button>
+            </div>
         </div>
     </div>
+
+    <footer>
+        <p>If you want different colors, email <a href="mailto:cheapbraclet@outlook.com">cheapbraclet@outlook.com</a></p>
+        <p>&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
+        
+        <paypal-cart-button data-id="pp-view-cart"></paypal-cart-button>
+
+        <button class="donate-button" onclick="window.location.href='https://www.paypal.com/ncp/payment/C474MBZ4JC84S'">
+            Donate
+        </button>
+    </footer>
+
+    <!-- Initialize PayPal Buttons -->
+    <script>
+        cartPaypal.Cart({ id: "pp-view-cart" });
+        cartPaypal.AddToCart({ id: "NGRF9T2H5BUQL" });
+        cartPaypal.AddToCart({ id: "2JYUTZM5EWKMN" });
+        cartPaypal.AddToCart({ id: "AQJAZ5DJLULM6" });
+        cartPaypal.AddToCart({ id: "2GMD2YH57BJ4W" });
+        cartPaypal.AddToCart({ id: "UYT6RM32KL98Q" });
+        cartPaypal.AddToCart({ id: "BRAIDED12345" });
+    </script>
 </body>
 </html>
+
