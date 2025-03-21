@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; text-align: center; color: #333; }
+        .container { max-width: 400px; margin: 50px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        img { width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px; }
+        button { padding: 10px; margin-top: 10px; border: none; cursor: pointer; background: #dc3545; color: white; border-radius: 5px; }
+        button:hover { background: #c82333; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>User Profile</h2>
+        <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
+        <p id="user-email">Email: Loading...</p>
+        <button id="logout-btn">Logout</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Check authentication state
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById("profile-pic").src = user.photoURL || "default-profile.png";
+                document.getElementById("user-email").innerText = `Email: ${user.email}`;
+            } else {
+                window.location.href = "index.html"; // Redirect if not logged in
+            }
+        });
+
+        // Logout button functionality
+        document.getElementById("logout-btn").addEventListener("click", async () => {
+            await signOut(auth);
+            window.location.href = "index.html"; // Redirect after logout
+        });
+    </script>
+
+</body>
+</html>
