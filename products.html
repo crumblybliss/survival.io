@@ -12,8 +12,8 @@
             margin: 0;
             padding: 0;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            justify-content: center;
+            align-items: flex-start;
             height: 100vh;
             text-align: center;
         }
@@ -57,58 +57,67 @@
             color: #f1f1f1;
         }
 
-        /* Product Container */
+        /* Product Cards */
         .product-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 20px;
             padding: 20px;
-            width: 100%;
-            max-width: 1200px;
         }
 
         .product-card {
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
+            background-color: #1c2b47;
+            width: 250px;
             padding: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s ease;
             text-align: center;
-            color: #f1f1f1;
+        }
+
+        .product-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 188, 212, 0.5);
         }
 
         .product-card img {
             width: 100%;
+            height: auto;
             border-radius: 5px;
+            margin-bottom: 15px;
         }
 
         .product-card h3 {
-            margin-top: 10px;
-            font-size: 18px;
             color: #00bcd4;
+            font-size: 18px;
+            margin: 10px 0;
         }
 
         .product-card p {
+            color: #f1f1f1;
             font-size: 16px;
-            margin-top: 10px;
+        }
+
+        .product-card .price {
+            color: #00bcd4;
+            font-size: 20px;
+            margin: 10px 0;
         }
 
         .product-card button {
             background-color: #00bcd4;
+            color: #fff;
+            padding: 10px 20px;
             border: none;
-            color: white;
-            padding: 10px;
-            margin-top: 15px;
-            width: 100%;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-            box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4);
             transition: all 0.3s ease;
         }
 
         .product-card button:hover {
             background-color: #0097a7;
-            box-shadow: 0 6px 12px rgba(0, 188, 212, 0.6);
+            box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4);
         }
 
         /* Responsive Design */
@@ -118,13 +127,9 @@
                 height: 50px;
             }
 
-            .product-container {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .product-card button {
-                padding: 8px;
-                font-size: 14px;
+            .product-card {
+                width: 100%;
+                max-width: 300px;
             }
         }
     </style>
@@ -136,78 +141,85 @@
 
     <!-- Navigation Bar -->
     <div id="nav-menu">
+        <a href="index.html">Home</a> | 
+        <a href="cart.html">Cart</a> | 
         <a href="profile.html">Profile</a>
-        <a href="cart.html">Cart</a>
-        <a href="orders.html">Orders</a>
     </div>
 
-    <div class="product-container" id="product-list">
-        <!-- Product cards will be inserted here dynamically -->
+    <!-- Product Container -->
+    <div class="product-container">
+        <!-- Product 1 - Paracord Survival Bracelet -->
+        <div class="product-card">
+            <img src="paracord-bracelet.jpg" alt="Paracord Survival Bracelet">
+            <h3>Paracord Survival Bracelet</h3>
+            <p>Essential for outdoor adventures, this bracelet doubles as survival gear.</p>
+            <p class="price">$19.99</p>
+            <button>Add to Cart</button>
+        </div>
+
+        <!-- Product 2 - Gold Charm Bracelet -->
+        <div class="product-card">
+            <img src="gold-charm-bracelet.jpg" alt="Gold Charm Bracelet">
+            <h3>Gold Charm Bracelet</h3>
+            <p>Elegant charm bracelet with a luxurious gold finish.</p>
+            <p class="price">$29.99</p>
+            <button>Add to Cart</button>
+        </div>
+
+        <!-- Product 3 - Leather Wrap Bracelet -->
+        <div class="product-card">
+            <img src="leather-wrap-bracelet.jpg" alt="Leather Wrap Bracelet">
+            <h3>Leather Wrap Bracelet</h3>
+            <p>Stylish leather wrap bracelet, perfect for any casual outfit.</p>
+            <p class="price">$19.99</p>
+            <button>Add to Cart</button>
+        </div>
+
+        <!-- Product 4 - Beaded Bracelet -->
+        <div class="product-card">
+            <img src="beaded-bracelet.jpg" alt="Beaded Bracelet">
+            <h3>Beaded Bracelet</h3>
+            <p>Colorful and vibrant, this beaded bracelet is a fun accessory.</p>
+            <p class="price">$14.99</p>
+            <button>Add to Cart</button>
+        </div>
+
+        <!-- Product 5 - Diamond Bracelet -->
+        <div class="product-card">
+            <img src="diamond-bracelet.jpg" alt="Diamond Bracelet">
+            <h3>Diamond Bracelet</h3>
+            <p>A luxurious diamond-studded bracelet for those special occasions.</p>
+            <p class="price">$99.99</p>
+            <button>Add to Cart</button>
+        </div>
+
+        <!-- Product 6 - Rope Survival Bracelet -->
+        <div class="product-card">
+            <img src="rope-survival-bracelet.jpg" alt="Rope Survival Bracelet">
+            <h3>Rope Survival Bracelet</h3>
+            <p>This survival bracelet comes with a built-in rope for emergency use.</p>
+            <p class="price">$18.99</p>
+            <button>Add to Cart</button>
+        </div>
+
+        <!-- Product 7 - Silver Charm Bracelet -->
+        <div class="product-card">
+            <img src="silver-charm-bracelet.jpg" alt="Silver Charm Bracelet">
+            <h3>Silver Charm Bracelet</h3>
+            <p>A delicate silver bracelet with customizable charms.</p>
+            <p class="price">$25.99</p>
+            <button>Add to Cart</button>
+        </div>
+
+        <!-- Product 8 - Stainless Steel Bracelet -->
+        <div class="product-card">
+            <img src="stainless-steel-bracelet.jpg" alt="Stainless Steel Bracelet">
+            <h3>Stainless Steel Bracelet</h3>
+            <p>Durable and sleek, this stainless steel bracelet is perfect for everyday wear.</p>
+            <p class="price">$24.99</p>
+            <button>Add to Cart</button>
+        </div>
     </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Function to display product cards
-        async function loadProducts() {
-            const productRef = collection(db, "products"); // Assuming products are stored in a "products" collection
-            const productSnapshot = await getDocs(productRef);
-            const productList = document.getElementById("product-list");
-
-            productSnapshot.forEach(doc => {
-                const product = doc.data();
-                const productCard = document.createElement("div");
-                productCard.classList.add("product-card");
-
-                productCard.innerHTML = `
-                    <img src="${product.image}" alt="${product.name}">
-                    <h3>${product.name}</h3>
-                    <p>${product.description}</p>
-                    <p>Price: $${product.price}</p>
-                    <button onclick="addToCart('${doc.id}')">Add to Cart</button>
-                `;
-                productList.appendChild(productCard);
-            });
-        }
-
-        // Load products when page loads
-        loadProducts();
-
-        // Add product to cart (simple example)
-        function addToCart(productId) {
-            console.log(`Added product with ID: ${productId} to the cart`);
-            // Implement cart functionality here (e.g., storing in local storage or Firestore)
-        }
-
-        // Update profile picture and navigation menu based on authentication state
-        onAuthStateChanged(auth, (user) => {
-            const profilePic = document.getElementById("profile-pic");
-
-            if (user) {
-                profilePic.style.display = "block";
-                profilePic.src = user.photoURL || "default-profile.png";
-            } else {
-                profilePic.style.display = "none";
-            }
-        });
-    </script>
 
 </body>
 </html>
