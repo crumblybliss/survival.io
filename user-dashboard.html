@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile & Cart</title>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        // ✅ Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // DOM Elements
+        const cartList = document.getElementById("cart-list");
+        const totalAmountDiv = document.getElementById("total-amount");
+        const logoutBtn = document.getElementById("logout-btn");
+        const addItemBtn = document.getElementById("add-item-btn");
+
+        let currentUser = null;
+
+        // ✅ Check Authentication
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                loadCart(user);
+            } else {
+                window.location.href = "index.html"; // Redirect if not logged in
+            }
+        });
+
+        // ✅ Load Cart Items
+        async function loadCart(user) {
+            const cartRef = doc(db, "carts", user.uid);
+            const cartSnap = await getDoc(cartRef);
+            cartList.innerHTML = "";
+            let totalAmount = 0;
+
+            if (cartSnap.exists()) {
+                const cartData = cartSnap.data();
+                if (cartData.items && cartData.items.length > 0) {
+                    cartData.items.forEach(item => {
+                        const itemElement = document.createElement("div");
+                        itemElement.classList.add("cart-item");
+                        itemElement.innerHTML = `
+                            <span>${item.name} - $${item.price.toFixed(2)}</span>
+                            <button class="remove-item-btn" data-name="${item.name}" data-price="${item.price}">Remove</button>
+                        `;
+                        cartList.appendChild(itemElement);
+                        totalAmount += item.price;
+                    });
+
+                    document.querySelectorAll(".remove-item-btn").forEach(button => {
+                        button.addEventListener("click", (event) => {
+                            const name = event.target.getAttribute("data-name");
+                            const price = parseFloat(event.target.getAttribute("data-price"));
+                            removeFromCart(name, price);
+                        });
+                    });
+                }
+            }
+
+            totalAmountDiv.innerHTML = `<strong>Total: $${totalAmount.toFixed(2)}</strong>`;
+        }
+
+        // ✅ Add Item to Cart
+        addItemBtn.addEventListener("click", async () => {
+            if (!currentUser) return;
+
+            const itemName = prompt("Enter item name:");
+            const itemPrice = parseFloat(prompt("Enter item price:"));
+
+            if (!itemName || isNaN(itemPrice)) {
+                alert("Invalid item details.");
+                return;
+            }
+
+            const cartRef = doc(db, "carts", currentUser.uid);
+            await updateDoc(cartRef, { items: arrayUnion({ name: itemName, price: itemPrice }) }, { merge: true });
+
+            loadCart(currentUser);
+        });
+
+        // ✅ Remove Item from Cart
+        async function removeFromCart(name, price) {
+            if (!currentUser) return;
+
+            const cartRef = doc(db, "carts", currentUser.uid);
+            await updateDoc(cartRef, { items: arrayRemove({ name, price }) });
+
+            loadCart(currentUser);
+        }
+
+        // ✅ Logout
+        logoutBtn.addEventListener("click", async () => {
+            await signOut(auth);
+            window.location.href = "index.html";
+        });
+
+    </script>
+
+    <style>
+        body { font-family: Arial, sans-serif; background: navy; color: white; text-align: center; }
+        .container { background: white; color: black; padding: 20px; border-radius: 8px; max-width: 500px; margin: 20px auto; }
+        .cart-item { display: flex; justify-content: space-between; padding: 5px 0; }
+        button { background: #4CAF50; color: white; border: none; padding: 10px; cursor: pointer; width: 100%; margin-top: 10px; }
+        button:hover { background: #45a049; }
+    </style>
+</head>
+<body>
+
+    <h1>My Profile & Cart</h1>
+
+    <!-- Cart Section -->
+    <div class="container">
+        <h2>My Cart</h2>
+        <div id="cart-list"></div>
+        <div id="total-amount"></div>
+        <button id="add-item-btn">Add Item</button>
+    </div>
+
+    <button id="logout-btn">Logout</button>
+
+</body>
+</html>
