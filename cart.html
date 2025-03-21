@@ -150,7 +150,7 @@
             if (cart.length === 0) {
                 cartItemsElement.innerHTML = '<p>Your cart is empty!</p>';
             } else {
-                cart.forEach(item => {
+                cart.forEach((item, index) => {
                     const itemDiv = document.createElement('div');
                     itemDiv.classList.add('cart-item');
                     itemDiv.innerHTML = `
@@ -158,20 +158,67 @@
                         <p>Size: ${item.selectedSize}</p>
                         <p>Color: ${item.selectedColor}</p>
                         <p>Price: $${item.price.toFixed(2)}</p>
+                        <button class="remove-item" data-index="${index}">Remove</button>
                     `;
                     cartItemsElement.appendChild(itemDiv);
                 });
+
+                // Add event listener to remove buttons
+                document.querySelectorAll('.remove-item').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = this.dataset.index;
+                        removeItemFromCart(index);
+                    });
+                });
             }
 
-            // Checkout Button: Redirect to checkout page
+            // Checkout Button
             const checkoutButton = document.getElementById('checkout-button');
             checkoutButton.addEventListener('click', function() {
-                window.location.href = 'checkout.html'; // Redirect to checkout page
+                alert('Proceeding to checkout!');
+                // You can implement the checkout flow here
             });
 
-            // Helper function to get cart data from local storage
+            // Helper functions
             function getCartFromLocalStorage() {
                 return JSON.parse(localStorage.getItem('cart'));
+            }
+
+            function removeItemFromCart(index) {
+                let cart = getCartFromLocalStorage() || [];
+                cart.splice(index, 1); // Remove the item at the given index
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartUI(); // Update the cart display after removal
+            }
+
+            // Update cart display
+            function updateCartUI() {
+                const updatedCart = getCartFromLocalStorage() || [];
+                cartItemsElement.innerHTML = ''; // Clear current items
+                if (updatedCart.length === 0) {
+                    cartItemsElement.innerHTML = '<p>Your cart is empty!</p>';
+                } else {
+                    updatedCart.forEach((item, index) => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.classList.add('cart-item');
+                        itemDiv.innerHTML = `
+                            <h3>${item.name}</h3>
+                            <p>Size: ${item.selectedSize}</p>
+                            <p>Color: ${item.selectedColor}</p>
+                            <p>Price: $${item.price.toFixed(2)}</p>
+                            <button class="remove-item" data-index="${index}">Remove</button>
+                        `;
+                        cartItemsElement.appendChild(itemDiv);
+                    });
+
+                    // Add event listener to remove buttons
+                    document.querySelectorAll('.remove-item').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const index = this.dataset.index;
+                            removeItemFromCart(index);
+                        });
+                    });
+                }
             }
         });
     </script>
