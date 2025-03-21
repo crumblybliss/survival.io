@@ -1,93 +1,195 @@
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-        authDomain: "survival-f35e2.firebaseapp.com",
-        projectId: "survival-f35e2",
-        storageBucket: "survival-f35e2.appspot.com",
-        messagingSenderId: "704462603548",
-        appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-
-    function updateUI(user) {
-        if (user) {
-            userInfo.innerHTML = `Logged in as: <strong>${user.email}</strong>`;
-            loginSection.style.display = "none";
-            logoutBtn.style.display = "block";
-            reviewForm.style.display = "block";
-            navMenu.style.display = "block";
-            profilePic.style.display = "block";
-            profilePic.src = user.photoURL || "default-profile.png";
-        } else {
-            userInfo.innerHTML = "";
-            loginSection.style.display = "block";
-            logoutBtn.style.display = "none";
-            reviewForm.style.display = "none";
-            navMenu.style.display = "none";
-            profilePic.style.display = "none";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile and Authentication</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
-    }
 
-    onAuthStateChanged(auth, (user) => {
-        updateUI(user);
-    });
-
-    document.getElementById("google-login-btn").addEventListener("click", async () => {
-        try {
-            await signInWithPopup(auth, provider);
-            window.location.href = "index.html"; // Redirect to home page
-        } catch (error) {
-            alert(error.message);
+        #profile-pic {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            border: 3px solid #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
-    });
 
-    document.getElementById("email-login-btn").addEventListener("click", async () => {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            window.location.href = "index.html"; // Redirect to home page
-        } catch (error) {
-            alert(error.message);
+        .auth-container {
+            text-align: center;
+            padding: 20px;
         }
-    });
 
-    document.getElementById("signup-btn").addEventListener("click", async () => {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        try {
-            await createUserWithEmailAndPassword(auth, email, password);
-            window.location.href = "index.html"; // Redirect to home page
-        } catch (error) {
-            alert(error.message);
+        .auth-container button {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
-    });
 
-    logoutBtn.addEventListener("click", async () => {
-        await signOut(auth);
-        window.location.href = "index.html"; // Redirect to home page after logout
-    });
-</script>
+        .auth-container button:hover {
+            background-color: #45a049;
+        }
 
-<style>
-    #profile-pic {
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        cursor: pointer;
-        display: none;
-    }
-</style>
+        #user-info {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
 
-<img id="profile-pic" src="default-profile.png" alt="Profile" onclick="window.location.href='profile.html'">
+        #login-section {
+            display: block;
+        }
+
+        #logout-btn {
+            display: none;
+        }
+
+        #nav-menu {
+            display: none;
+            margin-top: 20px;
+        }
+
+        /* Mobile responsive */
+        @media screen and (max-width: 600px) {
+            #profile-pic {
+                top: 15px;
+                left: 15px;
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Profile Picture -->
+    <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
+
+    <div class="auth-container">
+        <!-- Authentication Info & Login Section -->
+        <div id="user-info"></div>
+
+        <div id="login-section">
+            <input type="email" id="email" placeholder="Email" required><br>
+            <input type="password" id="password" placeholder="Password" required><br>
+            <button id="google-login-btn">Login with Google</button>
+            <button id="email-login-btn">Login with Email</button>
+            <button id="signup-btn">Sign Up</button>
+        </div>
+
+        <!-- Logout Button -->
+        <button id="logout-btn">Logout</button>
+
+        <!-- Navigation Menu -->
+        <div id="nav-menu">
+            <a href="profile.html">Profile</a> | 
+            <a href="cart.html">Cart</a> |
+            <a href="orders.html">Orders</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Update UI based on authentication state
+        function updateUI(user) {
+            const userInfo = document.getElementById('user-info');
+            const loginSection = document.getElementById('login-section');
+            const logoutBtn = document.getElementById('logout-btn');
+            const profilePic = document.getElementById('profile-pic');
+            const navMenu = document.getElementById('nav-menu');
+
+            if (user) {
+                userInfo.innerHTML = `Logged in as: <strong>${user.email}</strong>`;
+                loginSection.style.display = "none";
+                logoutBtn.style.display = "block";
+                navMenu.style.display = "block";
+                profilePic.style.display = "block";
+                profilePic.src = user.photoURL || "default-profile.png";
+            } else {
+                userInfo.innerHTML = "";
+                loginSection.style.display = "block";
+                logoutBtn.style.display = "none";
+                navMenu.style.display = "none";
+                profilePic.style.display = "none";
+            }
+        }
+
+        // Monitor authentication state
+        onAuthStateChanged(auth, (user) => {
+            updateUI(user);
+        });
+
+        // Google Login
+        document.getElementById("google-login-btn").addEventListener("click", async () => {
+            try {
+                await signInWithPopup(auth, provider);
+                window.location.href = "index.html"; // Redirect to home page
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // Email Login
+        document.getElementById("email-login-btn").addEventListener("click", async () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                window.location.href = "index.html"; // Redirect to home page
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // Sign Up
+        document.getElementById("signup-btn").addEventListener("click", async () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                window.location.href = "index.html"; // Redirect to home page
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // Logout
+        document.getElementById("logout-btn").addEventListener("click", async () => {
+            await signOut(auth);
+            window.location.href = "index.html"; // Redirect to home page after logout
+        });
+    </script>
+
+</body>
+</html>
+
 
