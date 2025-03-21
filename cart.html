@@ -6,31 +6,65 @@
     <title>Your Cart - CrumblyBliss</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #0a1d37; /* Navy Blue Background */
-            color: #f1f1f1; /* Light text color */
-            margin: 0;
-            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             text-align: center;
+            color: #333;
         }
 
-        /* Profile picture */
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+
+        .cart-item button {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .cart-item button:hover {
+            background: #d32f2f;
+        }
+
+        .total {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        /* Profile picture and nav menu styles */
         .profile-pic {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: 10px;
+            left: 10px;
             width: 60px;
             height: 60px;
             border-radius: 50%;
             cursor: pointer;
-            border: 3px solid #fff;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+            border: 3px solid #00bcd4;
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.6);
         }
 
-        /* Navigation menu */
         .nav-menu {
             padding: 10px;
-            background: #001f3d; /* Darker Navy Blue */
+            background: #00bcd4;
         }
 
         .nav-menu ul {
@@ -50,74 +84,14 @@
             font-weight: bold;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 50px auto;
-            background: rgba(0, 0, 0, 0.7); /* Dark background for the container */
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            font-size: 32px;
-            color: #fff;
-        }
-
-        .cart-items {
-            margin-top: 20px;
-            padding: 20px;
-            background-color: #003c5a; /* Medium Navy Blue */
-            border-radius: 8px;
-        }
-
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #00bcd4;
-        }
-
-        .cart-item:last-child {
-            border-bottom: none;
-        }
-
-        .item-name {
-            color: #f1f1f1;
-        }
-
-        .item-price {
-            color: #00bcd4;
-        }
-
-        .remove-btn {
-            background: #ff4d4d;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .remove-btn:hover {
-            background: #e60000;
-        }
-
-        .total {
-            margin-top: 20px;
-            font-size: 24px;
-            color: #f1f1f1;
-        }
-
         button {
-            padding: 10px 20px;
+            padding: 12px 24px;
+            margin: 20px 0;
+            border: none;
+            cursor: pointer;
             background: #00bcd4;
             color: white;
-            border: none;
             border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
         }
 
         button:hover {
@@ -127,7 +101,7 @@
 </head>
 <body>
 
-    <!-- Profile Picture (Top Left) -->
+    <!-- Profile Picture -->
     <img id="profile-pic" src="default-profile.png" alt="Profile Picture" class="profile-pic" onclick="window.location.href='profile.html'">
 
     <!-- Navigation Menu -->
@@ -143,69 +117,58 @@
 
     <div class="container">
         <h1>Your Cart</h1>
-        <div class="cart-items" id="cart-items">
-            <!-- Cart items will be dynamically added here -->
+        <div id="cart-items">
+            <!-- Cart items will be populated here -->
         </div>
-        <div class="total" id="cart-total">Total: $0.00</div>
-        <button onclick="window.location.href='checkout.html'">Proceed to Checkout</button>
+        <div id="cart-total" class="total">
+            Total: $0
+        </div>
+        <button onclick="checkout()">Proceed to Checkout</button>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    <script>
+        // Example cart data stored in localStorage (in real app, cart data might come from a database)
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        // Example cart items array
-        const cart = [
-            { name: 'Cookie 1', price: 5.99 },
-            { name: 'Cookie 2', price: 6.99 },
-            { name: 'Cookie 3', price: 4.99 }
-        ];
-
-        // Function to update the cart display
-        function updateCart() {
-            const cartItemsContainer = document.getElementById("cart-items");
-            const cartTotal = document.getElementById("cart-total");
-            cartItemsContainer.innerHTML = ''; // Clear current cart items
-
+        // Function to render cart items
+        function renderCart() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartTotalContainer = document.getElementById('cart-total');
+            cartItemsContainer.innerHTML = '';  // Clear previous items
             let total = 0;
+
             cart.forEach((item, index) => {
-                const cartItem = document.createElement('div');
-                cartItem.classList.add('cart-item');
-
-                cartItem.innerHTML = `
-                    <span class="item-name">${item.name}</span>
-                    <span class="item-price">$${item.price.toFixed(2)}</span>
-                    <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
-                `;
-
-                cartItemsContainer.appendChild(cartItem);
                 total += item.price;
+                const cartItemDiv = document.createElement('div');
+                cartItemDiv.classList.add('cart-item');
+                cartItemDiv.innerHTML = `
+                    <span>${item.name} - $${item.price.toFixed(2)}</span>
+                    <button onclick="removeItem(${index})">Remove</button>
+                `;
+                cartItemsContainer.appendChild(cartItemDiv);
             });
 
-            cartTotal.innerText = `Total: $${total.toFixed(2)}`;
+            cartTotalContainer.innerHTML = `Total: $${total.toFixed(2)}`;
         }
 
         // Function to remove item from cart
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCart();
+        function removeItem(index) {
+            cart.splice(index, 1);  // Remove the item from the cart array
+            localStorage.setItem('cart', JSON.stringify(cart));  // Save updated cart to localStorage
+            renderCart();  // Re-render cart
         }
 
-        // Update the cart display on page load
-        window.onload = updateCart;
+        // Function to handle checkout
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+            } else {
+                window.location.href = 'checkout.html';  // Redirect to checkout page
+            }
+        }
+
+        // Render the cart when the page loads
+        window.onload = renderCart;
     </script>
 
 </body>
