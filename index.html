@@ -5,15 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - CrumblyBliss</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; text-align: center; color: #333; }
-        .container { max-width: 600px; margin: 50px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        .nav-menu { padding: 10px; background: #007BFF; }
-        .nav-menu ul { list-style: none; padding: 0; display: flex; justify-content: center; }
-        .nav-menu ul li { margin: 0 15px; }
-        .nav-menu ul li a { color: white; text-decoration: none; font-weight: bold; }
-        .profile-pic { position: absolute; top: 10px; left: 10px; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; border: 2px solid white; }
-        button { padding: 10px; margin: 10px; border: none; cursor: pointer; background: #007BFF; color: white; border-radius: 5px; }
-        button:hover { background: #0056b3; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0a1d37; /* Dark Navy Blue Background */
+            color: #f1f1f1; /* Light text color for contrast */
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #1c2b47;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-menu {
+            padding: 10px;
+            background: #00bcd4; /* Aqua Blue Background */
+        }
+
+        .nav-menu ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-menu ul li {
+            margin: 0 15px;
+        }
+
+        .nav-menu ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .profile-pic {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid #00bcd4; /* Aqua Blue Border */
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.6); /* Glowing effect */
+            transition: all 0.3s ease-in-out;
+        }
+
+        .profile-pic:hover {
+            transform: scale(1.1);
+        }
+
+        button {
+            padding: 12px 24px;
+            margin: 20px 0;
+            border: none;
+            cursor: pointer;
+            background: #00bcd4; /* Aqua Blue */
+            color: white;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #0097a7;
+            box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4);
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 600px) {
+            .profile-pic {
+                width: 50px;
+                height: 50px;
+            }
+
+            .container {
+                width: 90%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -32,6 +108,7 @@
         </ul>
     </nav>
 
+    <!-- Home Page Content -->
     <div class="container">
         <h1>Welcome to CrumblyBliss!</h1>
         <p>Delicious cookies made with love. Browse our selection and place your order today!</p>
@@ -68,4 +145,3 @@
 
 </body>
 </html>
-
