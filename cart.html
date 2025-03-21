@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart - Your Website</title>
+    <style>
+        /* General styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+        }
+
+        .profile-link {
+            display: inline-block;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .auth-status {
+            align-self: center;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .cart-items {
+            margin-top: 20px;
+        }
+
+        .cart-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+        }
+
+        #checkout-button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="profile-link">
+            <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
+        </a>
+        <div class="auth-status" id="auth-status"></div>
+    </header>
+
+    <div class="content">
+        <h1>Your Cart</h1>
+        <div class="cart-items" id="cart-items"></div>
+        <button id="checkout-button">Checkout</button>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Your Website</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cartItemsElement = document.getElementById('cart-items');
+            const cart = getCartFromLocalStorage() || [];
+
+            if (cart.length === 0) {
+                cartItemsElement.innerHTML = '<p>Your cart is empty!</p>';
+            } else {
+                cart.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.classList.add('cart-item');
+                    itemDiv.innerHTML = `
+                        <h3>${item.name}</h3>
+                        <p>Size: ${item.selectedSize}</p>
+                        <p>Color: ${item.selectedColor}</p>
+                        <p>Price: $${item.price.toFixed(2)}</p>
+                    `;
+                    cartItemsElement.appendChild(itemDiv);
+                });
+            }
+
+            // Checkout Button
+            const checkoutButton = document.getElementById('checkout-button');
+            checkoutButton.addEventListener('click', function() {
+                alert('Proceeding to checkout!');
+                // You can implement the checkout flow here
+            });
+
+            // Helper functions
+            function getCartFromLocalStorage() {
+                return JSON.parse(localStorage.getItem('cart'));
+            }
+        });
+    </script>
+</body>
+</html>
