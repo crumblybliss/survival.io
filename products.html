@@ -23,6 +23,26 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
         }
 
+        /* Navigation Bar */
+        nav {
+            display: flex;
+            justify-content: space-around;
+            background-color: #333;
+            padding: 10px 0;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 18px;
+        }
+
+        nav a:hover {
+            background-color: #00bcd4;
+            border-radius: 5px;
+        }
+
         .profile-link {
             display: inline-block;
         }
@@ -128,6 +148,15 @@
         </a>
         <div class="auth-status" id="auth-status"></div>
     </header>
+
+    <!-- Navigation Bar -->
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="cart.html">Cart</a>
+        <a href="checkout.html">Checkout</a>
+        <a href="login.html">Login</a>
+    </nav>
 
     <div class="content">
         <h1>Our Products</h1>
