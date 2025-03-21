@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CrumblyBliss</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; text-align: center; color: #333; }
+        .container { max-width: 400px; margin: 50px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        input { padding: 10px; width: 90%; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px; width: 100%; border: none; cursor: pointer; background: #007BFF; color: white; border-radius: 5px; }
+        button:hover { background: #0056b3; }
+        .btn-google { background: #db4437; }
+        .btn-google:hover { background: #b9362e; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Login to CrumblyBliss</h2>
+        <button id="google-login-btn" class="btn-google">Sign in with Google</button>
+
+        <hr>
+
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button id="email-login-btn">Login</button>
+        <button id="signup-btn">Sign Up</button>
+        <p id="error-message" style="color: red;"></p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Redirect logged-in users to home page
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = "index.html";
+            }
+        });
+
+        // Google Login
+        document.getElementById("google-login-btn").addEventListener("click", async () => {
+            try {
+                await signInWithPopup(auth, provider);
+                window.location.href = "index.html";
+            } catch (error) {
+                document.getElementById("error-message").innerText = error.message;
+            }
+        });
+
+        // Email Signup
+        document.getElementById("signup-btn").addEventListener("click", async () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                window.location.href = "index.html";
+            } catch (error) {
+                document.getElementById("error-message").innerText = error.message;
+            }
+        });
+
+        // Email Login
+        document.getElementById("email-login-btn").addEventListener("click", async () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                window.location.href = "index.html";
+            } catch (error) {
+                document.getElementById("error-message").innerText = error.message;
+            }
+        });
+
+    </script>
+
+</body>
+</html>
