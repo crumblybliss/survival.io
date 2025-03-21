@@ -7,17 +7,20 @@
     <style>
         /* General styles */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #0a1d37; /* Dark Navy Blue */
+            color: #f1f1f1; /* Light text */
         }
 
         header {
             display: flex;
             justify-content: space-between;
             padding: 10px;
-            background-color: #333;
+            background-color: #1c2b47; /* Darker navy */
             color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
         }
 
         .profile-link {
@@ -28,6 +31,13 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
+            border: 2px solid #00bcd4; /* Aqua Blue Border */
+            box-shadow: 0 0 10px rgba(0, 188, 212, 0.6); /* Glowing Effect */
+            transition: all 0.3s ease-in-out;
+        }
+
+        .profile-pic:hover {
+            transform: scale(1.1);
         }
 
         .auth-status {
@@ -36,6 +46,13 @@
 
         .content {
             padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #00bcd4; /* Aqua Blue */
+            text-align: center;
         }
 
         .cart-items {
@@ -43,25 +60,67 @@
         }
 
         .cart-item {
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            background-color: #1c2b47; /* Darker navy */
+            border: 1px solid #2c3e5f; /* Slightly lighter navy for border */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .cart-item h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #f1f1f1;
+        }
+
+        .cart-item p {
+            margin: 5px 0;
+            color: #b0c4d3; /* Light gray for details */
         }
 
         #checkout-button {
             margin-top: 20px;
-            padding: 10px;
-            background-color: #5cb85c;
+            padding: 12px;
+            background-color: #00bcd4; /* Aqua Blue */
             color: white;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.4);
+        }
+
+        #checkout-button:hover {
+            background-color: #0097a7; /* Slightly darker aqua blue */
+            box-shadow: 0 7px 20px rgba(0, 188, 212, 0.6);
         }
 
         footer {
             text-align: center;
             padding: 10px;
-            background-color: #333;
+            background-color: #1c2b47; /* Darker navy */
             color: white;
+            margin-top: 40px;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 600px) {
+            .profile-pic {
+                width: 35px;
+                height: 35px;
+            }
+
+            .content {
+                padding: 10px;
+            }
+
+            #checkout-button {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
