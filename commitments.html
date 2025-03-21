@@ -3,193 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile and Authentication</title>
+    <title>Leave a Comment</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        #profile-pic {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: none;
-            border: 3px solid #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-
-        .auth-container {
+            background-color: #f4f4f4;
             text-align: center;
-            padding: 20px;
-        }
-
-        .auth-container button {
-            padding: 10px 20px;
-            margin: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .auth-container button:hover {
-            background-color: #45a049;
-        }
-
-        #user-info {
-            margin-top: 20px;
-            font-size: 18px;
             color: #333;
         }
-
-        #login-section {
-            display: block;
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-
-        #logout-btn {
+        .stars input {
             display: none;
         }
-
-        #nav-menu {
-            display: none;
-            margin-top: 20px;
+        .stars label {
+            font-size: 30px;
+            color: #ddd;
+            cursor: pointer;
         }
-
-        /* Mobile responsive */
-        @media screen and (max-width: 600px) {
-            #profile-pic {
-                top: 15px;
-                left: 15px;
-                width: 50px;
-                height: 50px;
-            }
+        .stars input:checked ~ label,
+        .stars label:hover,
+        .stars label:hover ~ label {
+            color: gold;
+        }
+        button {
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            cursor: pointer;
+            background: #007BFF;
+            color: white;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #0056b3;
         }
     </style>
 </head>
 <body>
-
-    <!-- Profile Picture -->
-    <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
-
-    <div class="auth-container">
-        <!-- Authentication Info & Login Section -->
-        <div id="user-info"></div>
-
-        <div id="login-section">
-            <input type="email" id="email" placeholder="Email" required><br>
-            <input type="password" id="password" placeholder="Password" required><br>
-            <button id="google-login-btn">Login with Google</button>
-            <button id="email-login-btn">Login with Email</button>
-            <button id="signup-btn">Sign Up</button>
+    <div class="container">
+        <h2>Leave a Comment</h2>
+        <div class="stars">
+            <input type="radio" name="rating" id="star5" value="5"><label for="star5">★</label>
+            <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
+            <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
+            <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
+            <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
         </div>
-
-        <!-- Logout Button -->
-        <button id="logout-btn">Logout</button>
-
-        <!-- Navigation Menu -->
-        <div id="nav-menu">
-            <a href="profile.html">Profile</a> | 
-            <a href="cart.html">Cart</a> |
-            <a href="orders.html">Orders</a>
-        </div>
+        <textarea id="comment" rows="4" placeholder="Write your comment..."></textarea><br>
+        <button onclick="submitComment()">Submit</button>
+        <h3>Comments</h3>
+        <div id="comments-section"></div>
     </div>
-
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
+        const db = getFirestore(app);
 
-        // Update UI based on authentication state
-        function updateUI(user) {
-            const userInfo = document.getElementById('user-info');
-            const loginSection = document.getElementById('login-section');
-            const logoutBtn = document.getElementById('logout-btn');
-            const profilePic = document.getElementById('profile-pic');
-            const navMenu = document.getElementById('nav-menu');
-
-            if (user) {
-                userInfo.innerHTML = `Logged in as: <strong>${user.email}</strong>`;
-                loginSection.style.display = "none";
-                logoutBtn.style.display = "block";
-                navMenu.style.display = "block";
-                profilePic.style.display = "block";
-                profilePic.src = user.photoURL || "default-profile.png";
-            } else {
-                userInfo.innerHTML = "";
-                loginSection.style.display = "block";
-                logoutBtn.style.display = "none";
-                navMenu.style.display = "none";
-                profilePic.style.display = "none";
+        async function submitComment() {
+            const commentText = document.getElementById("comment").value;
+            const rating = document.querySelector('input[name="rating"]:checked')?.value || "0";
+            if (!commentText.trim()) {
+                alert("Please enter a comment.");
+                return;
             }
+            
+            await addDoc(collection(db, "comments"), {
+                text: commentText,
+                rating: rating,
+                timestamp: new Date()
+            });
+            document.getElementById("comment").value = "";
+            loadComments();
         }
 
-        // Monitor authentication state
-        onAuthStateChanged(auth, (user) => {
-            updateUI(user);
-        });
+        async function loadComments() {
+            const commentsSection = document.getElementById("comments-section");
+            commentsSection.innerHTML = "";
+            const querySnapshot = await getDocs(collection(db, "comments"));
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                commentsSection.innerHTML += `<p><strong>${'★'.repeat(data.rating)}</strong> ${data.text}</p>`;
+            });
+        }
 
-        // Google Login
-        document.getElementById("google-login-btn").addEventListener("click", async () => {
-            try {
-                await signInWithPopup(auth, provider);
-                window.location.href = "index.html"; // Redirect to home page
-            } catch (error) {
-                alert(error.message);
-            }
-        });
-
-        // Email Login
-        document.getElementById("email-login-btn").addEventListener("click", async () => {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                window.location.href = "index.html"; // Redirect to home page
-            } catch (error) {
-                alert(error.message);
-            }
-        });
-
-        // Sign Up
-        document.getElementById("signup-btn").addEventListener("click", async () => {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                window.location.href = "index.html"; // Redirect to home page
-            } catch (error) {
-                alert(error.message);
-            }
-        });
-
-        // Logout
-        document.getElementById("logout-btn").addEventListener("click", async () => {
-            await signOut(auth);
-            window.location.href = "index.html"; // Redirect to home page after logout
-        });
+        loadComments();
     </script>
-
 </body>
 </html>
-
-
