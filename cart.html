@@ -163,14 +163,13 @@
                 });
             }
 
-            // Checkout Button
+            // Checkout Button: Redirect to checkout page
             const checkoutButton = document.getElementById('checkout-button');
             checkoutButton.addEventListener('click', function() {
-                alert('Proceeding to checkout!');
-                // You can implement the checkout flow here
+                window.location.href = 'checkout.html'; // Redirect to checkout page
             });
 
-            // Helper functions
+            // Helper function to get cart data from local storage
             function getCartFromLocalStorage() {
                 return JSON.parse(localStorage.getItem('cart'));
             }
