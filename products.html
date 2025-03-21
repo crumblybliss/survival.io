@@ -3,248 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products - Your Website</title>
+    <title>Products</title>
     <style>
-        /* General styles */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            background-color: #0a1d37; /* Dark Navy Blue Background */
+            color: #f1f1f1; /* Light text color for contrast */
             margin: 0;
             padding: 0;
-            background-color: #0a1d37; /* Dark Navy Blue */
-            color: #f1f1f1; /* Light text */
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background-color: #1c2b47; /* Darker navy */
-            color: white;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
-        }
-
-        /* Navigation Bar */
-        nav {
-            display: flex;
-            justify-content: space-around;
-            background-color: #333;
-            padding: 10px 0;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            font-size: 18px;
-        }
-
-        nav a:hover {
-            background-color: #00bcd4;
-            border-radius: 5px;
-        }
-
-        .profile-link {
-            display: inline-block;
-        }
-
-        .profile-pic {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid #00bcd4; /* Aqua Blue Border */
-            box-shadow: 0 0 10px rgba(0, 188, 212, 0.6); /* Glowing Effect */
-            transition: all 0.3s ease-in-out;
-        }
-
-        .profile-pic:hover {
-            transform: scale(1.1);
-        }
-
-        .auth-status {
-            align-self: center;
-        }
-
-        .content {
-            padding: 20px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            color: #00bcd4; /* Aqua Blue */
-            text-align: center;
-        }
-
-        .product-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .product {
-            border: 1px solid #ccc;
-            padding: 20px;
-            width: 250px;
-            text-align: center;
-            background-color: #1c2b47; /* Darker navy */
-            border-radius: 8px;
-        }
-
-        .product-box {
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-
-        .picker {
-            margin-bottom: 10px;
-            padding: 10px;
-            width: 100%;
-            font-size: 16px;
-        }
-
-        .color-picker {
-            margin-bottom: 10px;
-            padding: 10px;
-            width: 100%;
-            font-size: 16px;
-            background-color: #333;
-            color: #fff;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .color-picker option {
-            background-color: #333;
-            color: #fff;
-        }
-
-        button {
-            padding: 10px;
-            background-color: #5cb85c;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        button:hover {
-            background-color: #4cae4c;
-        }
-
-        footer {
+            height: 100vh;
             text-align: center;
-            padding: 10px;
-            background-color: #1c2b47; /* Darker navy */
+        }
+
+        /* Profile Picture */
+        #profile-pic {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            border: 3px solid #00bcd4; /* Aqua blue border for futuristic look */
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.6); /* Glowing effect */
+            transition: all 0.3s ease-in-out;
+        }
+
+        #profile-pic:hover {
+            transform: scale(1.1);
+        }
+
+        /* Navigation Bar */
+        #nav-menu {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            width: 100%;
+        }
+
+        #nav-menu a {
+            color: #00bcd4;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            transition: 0.3s ease;
+        }
+
+        #nav-menu a:hover {
+            color: #f1f1f1;
+        }
+
+        /* Product Container */
+        .product-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .product-card {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            color: #f1f1f1;
+        }
+
+        .product-card img {
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        .product-card h3 {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #00bcd4;
+        }
+
+        .product-card p {
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .product-card button {
+            background-color: #00bcd4;
+            border: none;
             color: white;
+            padding: 10px;
+            margin-top: 15px;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .product-card button:hover {
+            background-color: #0097a7;
+            box-shadow: 0 6px 12px rgba(0, 188, 212, 0.6);
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 600px) {
+            #profile-pic {
+                width: 50px;
+                height: 50px;
+            }
+
+            .product-container {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .product-card button {
+                padding: 8px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <a href="index.html" class="profile-link">
-            <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
-        </a>
-        <div class="auth-status" id="auth-status"></div>
-    </header>
+
+    <!-- Profile Picture -->
+    <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
 
     <!-- Navigation Bar -->
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="products.html">Products</a>
+    <div id="nav-menu">
+        <a href="profile.html">Profile</a>
         <a href="cart.html">Cart</a>
-        <a href="checkout.html">Checkout</a>
-        <a href="login.html">Login</a>
-    </nav>
-
-    <div class="content">
-        <h1>Our Products</h1>
-
-        <div class="product-list" id="product-list"></div>
+        <a href="orders.html">Orders</a>
     </div>
 
-    <footer>
-        <p>&copy; 2025 Your Website</p>
-    </footer>
+    <div class="product-container" id="product-list">
+        <!-- Product cards will be inserted here dynamically -->
+    </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const productListElement = document.getElementById('product-list');
-            const products = [
-                { id: 1, name: 'Gold Charm Bracelet', price: 29.99, sizes: ['S', 'M', 'L'], colors: ['Gold', 'Rose Gold', 'Silver'] },
-                { id: 2, name: 'Leather Wrap Bracelet', price: 19.99, sizes: ['M', 'L'], colors: ['Black', 'Brown'] },
-                { id: 3, name: 'Beaded Bracelet', price: 14.99, sizes: ['S', 'M'], colors: ['Blue', 'Green', 'Red'] },
-                { id: 4, name: 'Diamond Bracelet', price: 99.99, sizes: ['S', 'M'], colors: ['Gold', 'Platinum'] },
-            ];
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-            // Sort colors alphabetically
-            products.forEach(product => {
-                product.colors.sort();
-            });
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
 
-            // Render product list dynamically
-            products.forEach(product => {
-                const productDiv = document.createElement('div');
-                productDiv.classList.add('product');
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-                const sizeOptions = product.sizes.map(size => `<option value="${size}">${size}</option>`).join('');
-                const colorOptions = product.colors.map(color => `<option value="${color}">${color}</option>`).join('');
+        // Function to display product cards
+        async function loadProducts() {
+            const productRef = collection(db, "products"); // Assuming products are stored in a "products" collection
+            const productSnapshot = await getDocs(productRef);
+            const productList = document.getElementById("product-list");
 
-                productDiv.innerHTML = `
-                    <div class="product-box">
-                        <h3>${product.name}</h3>
-                        <p>Price: $${product.price.toFixed(2)}</p>
+            productSnapshot.forEach(doc => {
+                const product = doc.data();
+                const productCard = document.createElement("div");
+                productCard.classList.add("product-card");
 
-                        <label for="size-${product.id}">Size:</label>
-                        <select id="size-${product.id}" class="picker">
-                            ${sizeOptions}
-                        </select>
-
-                        <label for="color-${product.id}">Color:</label>
-                        <select id="color-${product.id}" class="color-picker">
-                            ${colorOptions}
-                        </select>
-
-                        <button class="add-to-cart" data-id="${product.id}">Add to Cart</button>
-                    </div>
+                productCard.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}">
+                    <h3>${product.name}</h3>
+                    <p>${product.description}</p>
+                    <p>Price: $${product.price}</p>
+                    <button onclick="addToCart('${doc.id}')">Add to Cart</button>
                 `;
-
-                productListElement.appendChild(productDiv);
+                productList.appendChild(productCard);
             });
+        }
 
-            // Add event listener to all "Add to Cart" buttons
-            document.querySelectorAll('.add-to-cart').forEach(button => {
-                button.addEventListener('click', function() {
-                    const productId = this.dataset.id;
-                    const product = products.find(p => p.id === parseInt(productId));
+        // Load products when page loads
+        loadProducts();
 
-                    const size = document.getElementById(`size-${productId}`).value;
-                    const color = document.getElementById(`color-${productId}`).value;
+        // Add product to cart (simple example)
+        function addToCart(productId) {
+            console.log(`Added product with ID: ${productId} to the cart`);
+            // Implement cart functionality here (e.g., storing in local storage or Firestore)
+        }
 
-                    const cartProduct = {
-                        ...product,
-                        selectedSize: size,
-                        selectedColor: color,
-                    };
+        // Update profile picture and navigation menu based on authentication state
+        onAuthStateChanged(auth, (user) => {
+            const profilePic = document.getElementById("profile-pic");
 
-                    addToCart(cartProduct);
-                });
-            });
-
-            // Function to add selected product to cart in localStorage
-            function addToCart(product) {
-                let cart = getCartFromLocalStorage() || [];
-                cart.push(product);
-                localStorage.setItem('cart', JSON.stringify(cart));
-                alert(`${product.name} has been added to your cart!`);
-            }
-
-            // Helper functions
-            function getCartFromLocalStorage() {
-                return JSON.parse(localStorage.getItem('cart'));
+            if (user) {
+                profilePic.style.display = "block";
+                profilePic.src = user.photoURL || "default-profile.png";
+            } else {
+                profilePic.style.display = "none";
             }
         });
     </script>
+
 </body>
 </html>
