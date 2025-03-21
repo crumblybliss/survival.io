@@ -3,159 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Cart - Checkout</title>
+    <title>Checkout - Your Website</title>
     <style>
-        /* General styles */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background-color: #333;
-            color: white;
-        }
-
-        .profile-link {
-            display: inline-block;
-        }
-
-        .profile-pic {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
-
-        .auth-status {
-            align-self: center;
-        }
-
-        .content {
-            padding: 20px;
-        }
-
-        .cart-items {
-            margin-top: 20px;
-        }
-
-        .cart-item {
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-        }
-
-        .cart-total {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        footer {
-            text-align: center;
-            padding: 10px;
-            background-color: #333;
-            color: white;
-        }
+        /* Add your CSS here */
     </style>
 </head>
 <body>
+    <header>
+        <a href="index.html" class="profile-link">
+            <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
+        </a>
+    </header>
 
-<header>
-    <a href="index.html" class="profile-link">
-        <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
-    </a>
-    <div class="auth-status" id="auth-status"></div>
-</header>
+    <div class="content">
+        <h1>Checkout</h1>
+        <div id="checkout-items"></div>
+        <p id="total-price">Total: $0.00</p>
+        <button id="paypal-button">Proceed with PayPal</button>
+    </div>
 
-<div class="content">
-    <h1>Checkout</h1>
-    <div class="cart-items" id="cart-items"></div>
-    <div class="cart-total" id="cart-total"></div>
-    
-    <!-- PayPal button container -->
-    <div id="paypal-button-container"></div>
+    <footer>
+        <p>&copy; 2025 Your Website</p>
+    </footer>
 
-</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkoutItemsElement = document.getElementById('checkout-items');
+            const totalPriceElement = document.getElementById('total-price');
+            const cart = getCartFromLocalStorage() || [];
+            let totalPrice = 0;
 
-<footer>
-    <p>&copy; 2025 Your Website</p>
-</footer>
+            if (cart.length === 0) {
+                checkoutItemsElement.innerHTML = '<p>Your cart is empty!</p>';
+            } else {
+                cart.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.classList.add('checkout-item');
+                    itemDiv.innerHTML = `
+                        <h3>${item.name}</h3>
+                        <p>Size: ${item.selectedSize}</p>
+                        <p>Color: ${item.selectedColor}</p>
+                        <p>Price: $${item.price.toFixed(2)}</p>
+                    `;
+                    checkoutItemsElement.appendChild(itemDiv);
+                    totalPrice += item.price;
+                });
+                totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
+            }
 
-<!-- Initialize the JS-SDK -->
-<script
-    src="https://www.paypal.com/sdk/js?client-id=Aa4LfD1dnj8w9ytQpxXQMmZqauIm7dQr0l6-JxOHJLqQpIXSvI6QRILuBv0MRrMVx7zI0C761uO_QPaS&buyer-country=US&currency=USD&components=buttons&enable-funding=venmo,paylater,card"
-    data-sdk-integration-source="developer-studio"
-></script>
+            // PayPal Button Integration
+            const paypalButton = document.getElementById('paypal-button');
+            paypalButton.addEventListener('click', function() {
+                alert('Proceeding with PayPal!');
+                // You can integrate PayPal here by following the PayPal SDK instructions
+            });
 
-<script>
-// Get cart data from local storage
-document.addEventListener('DOMContentLoaded', function() {
-    const cartItemsElement = document.getElementById('cart-items');
-    const cartTotalElement = document.getElementById('cart-total');
-    const cart = getCartFromLocalStorage() || [];
-
-    if (cart.length === 0) {
-        cartItemsElement.innerHTML = '<p>Your cart is empty!</p>';
-    } else {
-        let totalAmount = 0;
-        cart.forEach(item => {
-            const itemDiv = document.createElement('div');
-            itemDiv.classList.add('cart-item');
-            itemDiv.innerHTML = `
-                <h3>${item.name}</h3>
-                <p>Size: ${item.selectedSize}</p>
-                <p>Color: ${item.selectedColor}</p>
-                <p>Price: $${item.price.toFixed(2)}</p>
-            `;
-            cartItemsElement.appendChild(itemDiv);
-            totalAmount += item.price;
+            // Helper function to get cart from localStorage
+            function getCartFromLocalStorage() {
+                return JSON.parse(localStorage.getItem('cart'));
+            }
         });
-
-        cartTotalElement.innerHTML = `Total: $${totalAmount.toFixed(2)}`;
-    }
-
-    // PayPal button creation
-    paypal.Buttons({
-        // Set up the payment request when the button is clicked
-        createOrder: function(data, actions) {
-            const totalAmount = cart.reduce((acc, item) => acc + item.price, 0).toFixed(2); // Calculate total amount dynamically
-            return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                        value: totalAmount, // Set the total amount to be paid
-                        currency_code: 'USD'
-                    },
-                    description: 'Your Cart Purchase'
-                }]
-            });
-        },
-
-        // Handle payment approval and completion
-        onApprove: function(data, actions) {
-            return actions.order.capture().then(function(details) {
-                alert('Transaction completed by ' + details.payer.name.given_name);
-                // Redirect to a success page after payment completion
-                window.location.href = 'success.html'; // Redirect to a success page
-            });
-        },
-
-        // Handle errors
-        onError: function(err) {
-            console.error("PayPal Checkout Error: ", err);
-            alert('An error occurred during the PayPal transaction. Please try again.');
-        }
-    }).render('#paypal-button-container'); // Render PayPal button inside the container
-});
-
-// Helper function to get cart data from local storage
-function getCartFromLocalStorage() {
-    return JSON.parse(localStorage.getItem('cart'));
-}
-</script>
-
+    </script>
 </body>
 </html>
