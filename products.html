@@ -3,21 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bracelets - Your Website</title>
+    <title>Products - Your Website</title>
     <style>
         /* General styles */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #0a1d37; /* Dark Navy Blue */
+            color: #f1f1f1; /* Light text */
         }
 
         header {
             display: flex;
             justify-content: space-between;
             padding: 10px;
-            background-color: #333;
+            background-color: #1c2b47; /* Darker navy */
             color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
         }
 
         .profile-link {
@@ -28,6 +31,13 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
+            border: 2px solid #00bcd4; /* Aqua Blue Border */
+            box-shadow: 0 0 10px rgba(0, 188, 212, 0.6); /* Glowing Effect */
+            transition: all 0.3s ease-in-out;
+        }
+
+        .profile-pic:hover {
+            transform: scale(1.1);
         }
 
         .auth-status {
@@ -36,19 +46,29 @@
 
         .content {
             padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #00bcd4; /* Aqua Blue */
+            text-align: center;
         }
 
         .product-list {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
+            justify-content: center;
         }
 
         .product {
             border: 1px solid #ccc;
-            padding: 15px;
-            width: 200px;
+            padding: 20px;
+            width: 250px;
             text-align: center;
+            background-color: #1c2b47; /* Darker navy */
+            border-radius: 8px;
         }
 
         .product-box {
@@ -59,8 +79,25 @@
 
         .picker {
             margin-bottom: 10px;
-            padding: 5px;
+            padding: 10px;
             width: 100%;
+            font-size: 16px;
+        }
+
+        .color-picker {
+            margin-bottom: 10px;
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+            background-color: #333;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .color-picker option {
+            background-color: #333;
+            color: #fff;
         }
 
         button {
@@ -69,6 +106,7 @@
             color: white;
             border: none;
             cursor: pointer;
+            border-radius: 5px;
         }
 
         button:hover {
@@ -78,21 +116,21 @@
         footer {
             text-align: center;
             padding: 10px;
-            background-color: #333;
+            background-color: #1c2b47; /* Darker navy */
             color: white;
         }
     </style>
 </head>
 <body>
     <header>
-        <a href="profile.html" class="profile-link"> <!-- Updated link to profile page -->
+        <a href="index.html" class="profile-link">
             <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
         </a>
         <div class="auth-status" id="auth-status"></div>
     </header>
 
     <div class="content">
-        <h1>Our Bracelets</h1>
+        <h1>Our Products</h1>
 
         <div class="product-list" id="product-list"></div>
     </div>
@@ -103,47 +141,43 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const authStatusElement = document.getElementById('auth-status');
-            const user = getUserFromLocalStorage();
-
-            if (user) {
-                authStatusElement.textContent = `Welcome, ${user.name}`;
-            } else {
-                authStatusElement.innerHTML = '<a href="login.html">Login</a>';
-            }
-
             const productListElement = document.getElementById('product-list');
-            const bracelets = [
-                { id: 1, name: 'Gold Charm Bracelet', price: 29.99, sizes: ['S', 'M', 'L'], colors: ['Gold', 'Silver', 'Rose Gold'] },
+            const products = [
+                { id: 1, name: 'Gold Charm Bracelet', price: 29.99, sizes: ['S', 'M', 'L'], colors: ['Gold', 'Rose Gold', 'Silver'] },
                 { id: 2, name: 'Leather Wrap Bracelet', price: 19.99, sizes: ['M', 'L'], colors: ['Black', 'Brown'] },
-                { id: 3, name: 'Beaded Bracelet', price: 14.99, sizes: ['S', 'M'], colors: ['Blue', 'Red', 'Green'] },
+                { id: 3, name: 'Beaded Bracelet', price: 14.99, sizes: ['S', 'M'], colors: ['Blue', 'Green', 'Red'] },
                 { id: 4, name: 'Diamond Bracelet', price: 99.99, sizes: ['S', 'M'], colors: ['Gold', 'Platinum'] },
             ];
 
-            // Render bracelet products dynamically
-            bracelets.forEach(bracelet => {
+            // Sort colors alphabetically
+            products.forEach(product => {
+                product.colors.sort();
+            });
+
+            // Render product list dynamically
+            products.forEach(product => {
                 const productDiv = document.createElement('div');
                 productDiv.classList.add('product');
 
-                const sizeOptions = bracelet.sizes.map(size => `<option value="${size}">${size}</option>`).join('');
-                const colorOptions = bracelet.colors.map(color => `<option value="${color}">${color}</option>`).join('');
+                const sizeOptions = product.sizes.map(size => `<option value="${size}">${size}</option>`).join('');
+                const colorOptions = product.colors.map(color => `<option value="${color}">${color}</option>`).join('');
 
                 productDiv.innerHTML = `
                     <div class="product-box">
-                        <h3>${bracelet.name}</h3>
-                        <p>Price: $${bracelet.price.toFixed(2)}</p>
+                        <h3>${product.name}</h3>
+                        <p>Price: $${product.price.toFixed(2)}</p>
 
-                        <label for="size-${bracelet.id}">Size:</label>
-                        <select id="size-${bracelet.id}" class="picker">
+                        <label for="size-${product.id}">Size:</label>
+                        <select id="size-${product.id}" class="picker">
                             ${sizeOptions}
                         </select>
 
-                        <label for="color-${bracelet.id}">Color:</label>
-                        <select id="color-${bracelet.id}" class="picker">
+                        <label for="color-${product.id}">Color:</label>
+                        <select id="color-${product.id}" class="color-picker">
                             ${colorOptions}
                         </select>
 
-                        <button class="add-to-cart" data-id="${bracelet.id}">Add to Cart</button>
+                        <button class="add-to-cart" data-id="${product.id}">Add to Cart</button>
                     </div>
                 `;
 
@@ -152,11 +186,9 @@
 
             // Add event listener to all "Add to Cart" buttons
             document.querySelectorAll('.add-to-cart').forEach(button => {
-                button.addEventListener('click', function(event) {
-                    event.preventDefault();  // Prevent any potential redirection
-
+                button.addEventListener('click', function() {
                     const productId = this.dataset.id;
-                    const product = bracelets.find(b => b.id === parseInt(productId));
+                    const product = products.find(p => p.id === parseInt(productId));
 
                     const size = document.getElementById(`size-${productId}`).value;
                     const color = document.getElementById(`color-${productId}`).value;
@@ -180,10 +212,6 @@
             }
 
             // Helper functions
-            function getUserFromLocalStorage() {
-                return JSON.parse(localStorage.getItem('user'));
-            }
-
             function getCartFromLocalStorage() {
                 return JSON.parse(localStorage.getItem('cart'));
             }
