@@ -3,9 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - Your Website</title>
+    <title>Your Cart - Your Website</title>
     <style>
-        /* Add your CSS here */
+        /* General styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #0a1d37; /* Dark Navy Blue */
+            color: #f1f1f1; /* Light text */
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #1c2b47; /* Darker navy */
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+        }
+
+        .profile-link {
+            display: inline-block;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #00bcd4; /* Aqua Blue Border */
+            box-shadow: 0 0 10px rgba(0, 188, 212, 0.6); /* Glowing Effect */
+            transition: all 0.3s ease-in-out;
+        }
+
+        .profile-pic:hover {
+            transform: scale(1.1);
+        }
+
+        .auth-status {
+            align-self: center;
+        }
+
+        nav {
+            background-color: #1c2b47; /* Darker navy */
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav a {
+            color: #f1f1f1;
+            margin: 0 15px;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        nav a:hover {
+            color: #00bcd4; /* Aqua Blue hover effect */
+        }
+
+        .content {
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #00bcd4; /* Aqua Blue */
+            text-align: center;
+        }
+
+        .cart-items {
+            margin-top: 20px;
+        }
+
+        .cart-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            background-color: #1c2b47; /* Darker navy */
+            border: 1px solid #2c3e5f; /* Slightly lighter navy for border */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .cart-item h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #f1f1f1;
+        }
+
+        .cart-item p {
+            margin: 5px 0;
+            color: #b0c4d3; /* Light gray for details */
+        }
+
+        #checkout-button {
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #00bcd4; /* Aqua Blue */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.4);
+        }
+
+        #checkout-button:hover {
+            background-color: #0097a7; /* Slightly darker aqua blue */
+            box-shadow: 0 7px 20px rgba(0, 188, 212, 0.6);
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #1c2b47; /* Darker navy */
+            color: white;
+            margin-top: 40px;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 600px) {
+            .profile-pic {
+                width: 35px;
+                height: 35px;
+            }
+
+            .content {
+                padding: 10px;
+            }
+
+            #checkout-button {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -13,75 +146,83 @@
         <a href="index.html" class="profile-link">
             <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
         </a>
+        <div class="auth-status" id="auth-status"></div>
     </header>
 
+    <!-- Navigation Bar -->
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="cart.html">Cart</a>
+        <a href="checkout.html">Checkout</a>
+    </nav>
+
     <div class="content">
-        <h1>Checkout</h1>
-        <div id="checkout-items"></div>
+        <h1>Your Cart</h1>
+        <div class="cart-items" id="cart-items"></div>
         <p id="total-price">Total: $0.00</p>
-        <div id="paypal-button-container"></div> <!-- PayPal Button will be rendered here -->
-    </div>
+        <div id="paypal-button-container"></div>
+        <p id="result-message"></p>
 
-    <footer>
-        <p>&copy; 2025 Your Website</p>
-    </footer>
+        <!-- PayPal button script -->
+        <script src="https://www.paypal.com/sdk/js?client-id=Aa4LfD1dnj8w9ytQpxXQMmZqauIm7dQr0l6-JxOHJLqQpIXSvI6QRILuBv0MRrMVx7zI0C761uO_QPaS&currency=USD&components=buttons&enable-funding=venmo,paylater,card"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const cartItemsElement = document.getElementById('cart-items');
+                const totalPriceElement = document.getElementById('total-price');
+                const cart = getCartFromLocalStorage() || [];
+                
+                let totalPrice = 0;
 
-    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=USD&components=buttons"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkoutItemsElement = document.getElementById('checkout-items');
-            const totalPriceElement = document.getElementById('total-price');
-            const cart = getCartFromLocalStorage() || [];
-            let totalPrice = 0;
-
-            if (cart.length === 0) {
-                checkoutItemsElement.innerHTML = '<p>Your cart is empty!</p>';
-            } else {
-                cart.forEach(item => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.classList.add('checkout-item');
-                    itemDiv.innerHTML = `
-                        <h3>${item.name}</h3>
-                        <p>Size: ${item.selectedSize}</p>
-                        <p>Color: ${item.selectedColor}</p>
-                        <p>Price: $${item.price.toFixed(2)}</p>
-                    `;
-                    checkoutItemsElement.appendChild(itemDiv);
-                    totalPrice += item.price;
-                });
-                totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
-            }
-
-            // PayPal Button Integration
-            paypal.Buttons({
-                createOrder: function(data, actions) {
-                    return actions.order.create({
-                        purchase_units: [{
-                            amount: {
-                                value: totalPrice.toFixed(2)
-                            }
-                        }]
+                if (cart.length === 0) {
+                    cartItemsElement.innerHTML = '<p>Your cart is empty!</p>';
+                } else {
+                    cart.forEach(item => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.classList.add('cart-item');
+                        itemDiv.innerHTML = `
+                            <h3>${item.name}</h3>
+                            <p>Size: ${item.selectedSize}</p>
+                            <p>Color: ${item.selectedColor}</p>
+                            <p>Price: $${item.price.toFixed(2)}</p>
+                        `;
+                        cartItemsElement.appendChild(itemDiv);
+                        totalPrice += item.price;
                     });
-                },
-                onApprove: function(data, actions) {
-                    return actions.order.capture().then(function(details) {
-                        alert('Transaction completed by ' + details.payer.name.given_name);
-                        localStorage.removeItem('cart'); // Clear the cart after successful payment
-                        window.location.href = 'thank-you.html'; // Redirect to thank-you page
-                    });
-                },
-                onError: function(err) {
-                    console.error('Error during payment:', err);
-                    alert('An error occurred during the payment. Please try again.');
                 }
-            }).render('#paypal-button-container'); // Render the PayPal button inside the container
+
+                totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
+
+                // PayPal Button
+                paypal.Buttons({
+                    createOrder: function(data, actions) {
+                        return actions.order.create({
+                            purchase_units: [{
+                                amount: {
+                                    value: totalPrice.toFixed(2)
+                                }
+                            }]
+                        });
+                    },
+                    onApprove: function(data, actions) {
+                        return actions.order.capture().then(function(details) {
+                            document.getElementById('result-message').textContent = 'Transaction completed by ' + details.payer.name.given_name;
+                            // Optionally clear cart after successful transaction
+                            localStorage.removeItem('cart');
+                        });
+                    }
+                }).render('#paypal-button-container');
+            });
 
             // Helper function to get cart from localStorage
             function getCartFromLocalStorage() {
                 return JSON.parse(localStorage.getItem('cart'));
             }
-        });
-    </script>
+        </script>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Your Website</p>
+    </footer>
 </body>
 </html>
