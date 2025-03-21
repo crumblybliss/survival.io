@@ -7,18 +7,18 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #0a1d37; /* Navy Blue */
             text-align: center;
-            color: #333;
+            color: #f1f1f1;
         }
 
         .container {
             max-width: 800px;
             margin: 50px auto;
-            background: #fff;
+            background: rgba(0, 0, 0, 0.7);
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
         }
 
         .cart-item {
@@ -28,6 +28,8 @@
             padding: 10px;
             border-bottom: 1px solid #ddd;
             margin-bottom: 10px;
+            background: #003c5a;
+            border-radius: 5px;
         }
 
         .cart-item button {
@@ -64,7 +66,7 @@
 
         .nav-menu {
             padding: 10px;
-            background: #00bcd4;
+            background: #001f3d; /* Dark Navy */
         }
 
         .nav-menu ul {
@@ -127,14 +129,12 @@
     </div>
 
     <script>
-        // Example cart data stored in localStorage (in real app, cart data might come from a database)
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-        // Function to render cart items
         function renderCart() {
             const cartItemsContainer = document.getElementById('cart-items');
             const cartTotalContainer = document.getElementById('cart-total');
-            cartItemsContainer.innerHTML = '';  // Clear previous items
+            cartItemsContainer.innerHTML = ''; 
             let total = 0;
 
             cart.forEach((item, index) => {
@@ -151,23 +151,20 @@
             cartTotalContainer.innerHTML = `Total: $${total.toFixed(2)}`;
         }
 
-        // Function to remove item from cart
         function removeItem(index) {
-            cart.splice(index, 1);  // Remove the item from the cart array
-            localStorage.setItem('cart', JSON.stringify(cart));  // Save updated cart to localStorage
-            renderCart();  // Re-render cart
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
         }
 
-        // Function to handle checkout
         function checkout() {
             if (cart.length === 0) {
                 alert('Your cart is empty!');
             } else {
-                window.location.href = 'checkout.html';  // Redirect to checkout page
+                window.location.href = 'checkout.html';
             }
         }
 
-        // Render the cart when the page loads
         window.onload = renderCart;
     </script>
 
