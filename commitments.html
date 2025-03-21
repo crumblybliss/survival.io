@@ -10,7 +10,7 @@
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
         // ✅ Firebase Configuration
         const firebaseConfig = {
@@ -31,41 +31,76 @@
         // DOM Elements
         const loginBtn = document.getElementById("login-btn");
         const logoutBtn = document.getElementById("logout-btn");
+        const googleLoginBtn = document.getElementById("google-login-btn");
+        const emailLoginBtn = document.getElementById("email-login-btn");
+        const emailSignupBtn = document.getElementById("email-signup-btn");
         const userInfo = document.getElementById("user-info");
         const reviewFormContainer = document.getElementById("review-form-container");
 
-        // ✅ Handle User Login
-        loginBtn.addEventListener("click", async () => {
+        // ✅ Google Login
+        googleLoginBtn.addEventListener("click", async () => {
             try {
                 const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-                console.log("Logged in as:", user.displayName);
+                console.log("Logged in as:", result.user.displayName);
             } catch (error) {
-                console.error("Login failed:", error);
+                console.error("Google login failed:", error);
             }
         });
 
-        // ✅ Handle Logout
-        logoutBtn.addEventListener("click", async () => {
-            try {
-                await signOut(auth);
-                console.log("User logged out.");
-            } catch (error) {
-                console.error("Logout failed:", error);
+        // ✅ Email/Password Signup
+        emailSignupBtn.addEventListener("click", async () => {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            if (!email || !password) {
+                alert("Please enter email and password.");
+                return;
             }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                console.log("Signed up:", userCredential.user);
+            } catch (error) {
+                console.error("Signup failed:", error);
+                alert(error.message);
+            }
+        });
+
+        // ✅ Email/Password Login
+        emailLoginBtn.addEventListener("click", async () => {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            if (!email || !password) {
+                alert("Please enter email and password.");
+                return;
+            }
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log("Logged in:", userCredential.user);
+            } catch (error) {
+                console.error("Login failed:", error);
+                alert(error.message);
+            }
+        });
+
+        // ✅ Logout
+        logoutBtn.addEventListener("click", async () => {
+            await signOut(auth);
+            console.log("User logged out.");
         });
 
         // ✅ Listen for Authentication Changes
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                userInfo.innerHTML = `Logged in as: <strong>${user.displayName}</strong>`;
+                userInfo.innerHTML = `Logged in as: <strong>${user.email}</strong>`;
                 loginBtn.style.display = "none";
                 logoutBtn.style.display = "inline-block";
                 reviewFormContainer.style.display = "block";
-                document.getElementById("name").value = user.displayName; // Autofill name
             } else {
                 userInfo.innerHTML = "";
-                loginBtn.style.display = "inline-block";
+                loginBtn.style.display = "block";
                 logoutBtn.style.display = "none";
                 reviewFormContainer.style.display = "none";
             }
@@ -79,7 +114,7 @@
                 return;
             }
 
-            const name = user.displayName;
+            const name = user.email;
             const comment = document.getElementById("comment").value.trim();
             const rating = parseInt(document.getElementById("rating").value);
 
@@ -105,44 +140,6 @@
                 alert("Error submitting review.");
             }
         }
-
-        // ✅ Load Reviews
-        async function loadReviews() {
-            const reviewsList = document.getElementById("reviews-list");
-            const averageRatingDiv = document.getElementById("average-rating");
-            reviewsList.innerHTML = "";
-            let totalRating = 0, count = 0;
-
-            try {
-                const q = query(collection(db, "reviews"), orderBy("timestamp", "desc"));
-                const snapshot = await getDocs(q);
-
-                snapshot.forEach(doc => {
-                    const review = doc.data();
-                    const reviewElement = document.createElement("div");
-                    reviewElement.classList.add("review");
-                    reviewElement.innerHTML = `
-                        <strong>${review.name}</strong> (${review.email}) - <span class="stars">${"⭐".repeat(review.rating)}</span>
-                        <p>${review.comment}</p>
-                    `;
-                    reviewsList.appendChild(reviewElement);
-                    totalRating += review.rating;
-                    count++;
-                });
-
-                if (count > 0) {
-                    const averageRating = (totalRating / count).toFixed(1);
-                    averageRatingDiv.innerHTML = `<h3>Average Rating: ${averageRating} ⭐</h3>`;
-                } else {
-                    averageRatingDiv.innerHTML = `<h3>No reviews yet.</h3>`;
-                }
-            } catch (error) {
-                console.error("Error loading reviews:", error);
-            }
-        }
-
-        // ✅ Load reviews on page load
-        window.onload = loadReviews;
     </script>
 
     <style>
@@ -162,7 +159,6 @@
             border-radius: 8px;
             max-width: 500px;
             margin: 20px auto;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             text-align: left;
         }
         input, textarea, select, button {
@@ -179,8 +175,6 @@
             cursor: pointer;
         }
         button:hover { background-color: #45a049; }
-        .review { border-bottom: 1px solid #ddd; padding: 10px; }
-        .stars { color: gold; }
     </style>
 </head>
 <body>
@@ -189,7 +183,11 @@
 
     <!-- Authentication Section -->
     <div class="auth-container">
-        <button id="login-btn">Sign in with Google</button>
+        <button id="google-login-btn">Sign in with Google</button>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button id="email-login-btn">Login</button>
+        <button id="email-signup-btn">Sign Up</button>
         <button id="logout-btn" style="display: none;">Logout</button>
         <p id="user-info"></p>
     </div>
@@ -197,7 +195,6 @@
     <!-- Review Form (Only shown if logged in) -->
     <div id="review-form-container" class="review-form" style="display: none;">
         <h2>Leave a Review</h2>
-        <input type="text" id="name" placeholder="Your Name" required disabled>
         <textarea id="comment" placeholder="Your Review" rows="4" required></textarea>
         <select id="rating">
             <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
@@ -207,13 +204,6 @@
             <option value="1">⭐ - Poor</option>
         </select>
         <button onclick="submitReview()">Submit Review</button>
-    </div>
-
-    <!-- Reviews Display -->
-    <div class="reviews-container">
-        <h2>Recent Reviews</h2>
-        <div id="average-rating"></div>
-        <div id="reviews-list"></div>
     </div>
 
 </body>
