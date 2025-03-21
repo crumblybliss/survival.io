@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Commitments - Survival Bracelets Store</title>
+    <title>Comments - Survival Bracelets Store</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
     <style>
         /* Global Reset */
@@ -63,23 +67,60 @@
             margin-top: -5px;
         }
 
-        /* Commitments Section */
-        .commitments-container {
+        /* Comment Section */
+        .comments-container {
             max-width: 800px;
             margin: auto;
             padding: 30px 20px;
+            background-color: white;
+            color: black;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            text-align: left;
         }
 
-        .commitments-container h2 {
+        .comments-container h2 {
             font-size: 26px;
             margin-bottom: 15px;
             color: #4CAF50;
         }
 
-        .commitments-container p {
+        .comment-box {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
             font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 15px;
+        }
+
+        .comment-list {
+            margin-top: 20px;
+        }
+
+        .comment {
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .comment strong {
+            color: navy;
+        }
+
+        .comment-form button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .comment-form button:hover {
+            background-color: #45a049;
         }
 
         /* Footer */
@@ -99,7 +140,7 @@
 </head>
 <body>
     <header>
-        <h1>Our Commitments</h1>
+        <h1>Comments</h1>
         <nav>
             <ul>
                 <li><a href="index.html">Home</a></li>
@@ -110,20 +151,82 @@
         </nav>
     </header>
 
-    <!-- Commitments Section -->
-    <section class="commitments-container">
-        <h2>Our Commitments</h2>
-        <p>At <strong>Survival Bracelets Store</strong>, we are committed to providing high-quality, handcrafted survival gear that blends functionality with style. 
-           Our products are made with durable materials to ensure they last through any adventure.</p>
+    <!-- Comment Section -->
+    <section class="comments-container">
+        <h2>Leave a Comment</h2>
+        <form class="comment-form">
+            <input type="text" id="name" class="comment-box" placeholder="Your Name" required>
+            <textarea id="comment" class="comment-box" placeholder="Write your comment here..." rows="4" required></textarea>
+            <button type="button" onclick="submitComment()">Submit Comment</button>
+        </form>
 
-        <p>We stand by our mission to promote preparedness and self-reliance while also offering fashionable accessories that fit any lifestyle.</p>
-
-        <h2>Quality Assurance</h2>
-        <p>We take pride in our craftsmanship. Every bracelet is carefully inspected to meet our high standards.</p>
-
-        <h2>Customer Satisfaction</h2>
-        <p>Your satisfaction is our priority. If you're not happy with your purchase, reach out, and we'll make it right.</p>
+        <h2>Recent Comments</h2>
+        <div id="comments-list" class="comment-list"></div>
     </section>
+
+    <!-- Firebase Configuration -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Submit a Comment
+        function submitComment() {
+            const name = document.getElementById("name").value.trim();
+            const comment = document.getElementById("comment").value.trim();
+
+            if (!name || !comment) {
+                alert("Please fill out all fields.");
+                return;
+            }
+
+            db.collection("comments").add({
+                name: name,
+                comment: comment,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                alert("Comment submitted successfully!");
+                document.getElementById("name").value = "";
+                document.getElementById("comment").value = "";
+                loadComments(); // Refresh comments
+            })
+            .catch(error => {
+                console.error("Error submitting comment:", error);
+                alert("Error submitting comment. Check console.");
+            });
+        }
+
+        // Load Comments
+        function loadComments() {
+            const commentsList = document.getElementById("comments-list");
+            commentsList.innerHTML = "";
+
+            db.collection("comments").orderBy("timestamp", "desc").get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    const comment = doc.data();
+                    const commentElement = document.createElement("div");
+                    commentElement.classList.add("comment");
+                    commentElement.innerHTML = `<strong>${comment.name}</strong><p>${comment.comment}</p>`;
+                    commentsList.appendChild(commentElement);
+                });
+            })
+            .catch(error => {
+                console.error("Error loading comments:", error);
+            });
+        }
+
+        window.onload = loadComments;
+    </script>
 
     <!-- PayPal SDK -->
     <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&components=buttons"></script>
@@ -135,27 +238,12 @@
                 color: 'gold',
                 shape: 'rect',
                 label: 'checkout'
-            },
-            createOrder: function(data, actions) {
-                return actions.order.create({
-                    purchase_units: [{
-                        amount: {
-                            value: '20.00' // Example amount, update dynamically
-                        }
-                    }]
-                });
-            },
-            onApprove: function(data, actions) {
-                return actions.order.capture().then(function(details) {
-                    alert('Transaction completed by ' + details.payer.name.given_name);
-                });
             }
         }).render('#paypal-cart-button');
     </script>
 
     <footer>
         <p>&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
-        <p>If you have any questions, feel free to reach out!</p>
     </footer>
 </body>
 </html>
