@@ -3,101 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
+    <title>Your Profile - Your Website</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; text-align: center; }
-        .container { max-width: 500px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        .profile-pic { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin: 10px; }
-        .btn { padding: 10px; border: none; cursor: pointer; border-radius: 5px; margin: 5px; }
-        .btn-primary { background: #007BFF; color: white; }
-        .btn-danger { background: #dc3545; color: white; }
-        .nav-links a { display: block; margin: 5px 0; text-decoration: none; color: #007BFF; font-weight: bold; }
+        /* General styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+        }
+
+        .profile-link {
+            display: inline-block;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .auth-status {
+            align-self: center;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+        }
     </style>
 </head>
 <body>
+    <header>
+        <a href="index.html" class="profile-link">
+            <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
+        </a>
+        <div class="auth-status" id="auth-status"></div>
+    </header>
 
-    <div class="container">
-        <h2>User Profile</h2>
-        <img id="profile-pic" class="profile-pic" src="default-profile.png" alt="Profile Picture">
-        <br>
-        <input type="file" id="profile-upload" accept="image/*">
-        <button class="btn btn-primary" onclick="uploadProfilePic()">Upload New Picture</button>
-        <h3 id="user-name">Loading...</h3>
-
-        <div class="nav-links">
-            <a href="index.html">🏠 Home</a>
-            <a href="products.html">🛒 Products</a>
-            <a href="reviews.html">⭐ Reviews</a>
-        </div>
-
-        <button class="btn btn-danger" onclick="logout()">Logout</button>
+    <div class="content">
+        <h1>Your Profile</h1>
+        <p id="user-info"></p>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+    <footer>
+        <p>&copy; 2025 Your Website</p>
+    </footer>
 
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userInfoElement = document.getElementById('user-info');
+            const user = getUserFromLocalStorage();
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const storage = getStorage(app);
-
-        // Profile Elements
-        const profilePic = document.getElementById("profile-pic");
-        const profileUpload = document.getElementById("profile-upload");
-        const userName = document.getElementById("user-name");
-
-        // Check if User is Logged In
-        onAuthStateChanged(auth, (user) => {
             if (user) {
-                userName.textContent = user.displayName || "User";
-                profilePic.src = user.photoURL || "default-profile.png";
+                userInfoElement.innerHTML = `
+                    <p>Name: ${user.name}</p>
+                    <p>Email: ${user.email}</p>
+                    <p>Username: ${user.username}</p>
+                `;
             } else {
-                window.location.href = "login.html"; // Redirect if not logged in
+                userInfoElement.innerHTML = '<p>You are not logged in.</p>';
+            }
+
+            // Helper function to get user data
+            function getUserFromLocalStorage() {
+                return JSON.parse(localStorage.getItem('user'));
             }
         });
-
-        // Upload Profile Picture
-        function uploadProfilePic() {
-            const file = profileUpload.files[0];
-            if (!file) return alert("Please select an image to upload.");
-
-            const fileRef = storageRef(storage, `profile_pictures/${auth.currentUser.uid}.jpg`);
-            
-            uploadBytes(fileRef, file).then(() => {
-                return getDownloadURL(fileRef);
-            }).then((url) => {
-                updateProfile(auth.currentUser, { photoURL: url }).then(() => {
-                    profilePic.src = url; // Update Picture Instantly
-                    alert("Profile picture updated!");
-                });
-            }).catch((error) => {
-                console.error("Error uploading image:", error);
-                alert("Upload failed.");
-            });
-        }
-
-        // Logout Function
-        function logout() {
-            signOut(auth).then(() => {
-                window.location.href = "login.html";
-            }).catch((error) => {
-                console.error("Logout failed:", error);
-            });
-        }
     </script>
-
 </body>
 </html>
 
