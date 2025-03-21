@@ -1,243 +1,73 @@
+<!-- Updated Base HTML Template (Apply to all pages) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Survival Bracelets Store</title>
+    <title>Website</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q...",
+            authDomain: "your-app.firebaseapp.com",
+            projectId: "your-app",
+            storageBucket: "your-app.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    <!-- PayPal Cart Script -->
-    <script src="https://www.paypalobjects.com/ncp/cart/cart.js" data-merchant-id="YZBS9R98C23HG"></script>
+        const profilePic = document.getElementById("profile-pic");
+        const navMenu = document.getElementById("nav-menu");
 
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                if (!userSnap.exists()) {
+                    await setDoc(userRef, { cart: [] });
+                }
+                profilePic.src = user.photoURL || "default-profile.png";
+                profilePic.style.display = "block";
+                navMenu.style.display = "block";
+            } else {
+                profilePic.style.display = "none";
+                navMenu.style.display = "none";
+                window.location.href = "login.html";
+            }
+        });
+    </script>
     <style>
-        /* Global Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* General Styles */
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #001f3d;
-            color: white;
-            text-align: center;
-            padding-bottom: 50px;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        /* Header */
-        header {
-            background-color: #003366;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        header h1 {
-            font-size: 28px;
-            letter-spacing: 2px;
-        }
-
-        nav ul {
-            list-style: none;
-            margin: 15px 0 0;
-            padding: 0;
-            text-align: center;
-        }
-
-        nav ul li {
-            display: inline;
-            margin: 0 20px;
-        }
-
-        nav ul li a {
-            font-size: 16px;
-            color: white;
-            transition: 0.3s;
-        }
-
-        nav ul li a:hover {
-            color: #4CAF50;
-        }
-
-        /* Product Grid */
-        .products-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            justify-content: center;
-            padding: 40px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .product {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            overflow: hidden;
-        }
-
-        .product:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
-        }
-
-        .product img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .product h2 {
-            font-size: 18px;
-            color: #003366;
-            margin-bottom: 10px;
-        }
-
-        .product p {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        .paypal-button {
-            margin-top: 10px;
-        }
-
-        /* Footer */
-        footer {
-            background-color: #003366;
-            padding: 20px;
-            font-size: 14px;
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        footer a {
-            color: #4CAF50;
-            font-weight: bold;
-        }
-
-        .donate-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            font-size: 14px;
-            border-radius: 5px;
-            border: none;
+        #profile-pic {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-
-        .donate-button:hover {
-            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Survival Bracelets Store</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="products.html">Products</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><paypal-cart-button data-id="pp-view-cart"></paypal-cart-button></li>
-            </ul>
-        </nav>
-    </header>
-
-    <div class="products-container">
-        <!-- Product 1: Keychain -->
-        <div class="product">
-            <h2>Keychain</h2>
-            <img src="6.jpeg" alt="Keychain">
-            <p>$5.00</p>
-            <div class="paypal-button">
-                <paypal-add-to-cart-button data-id="NGRF9T2H5BUQL"></paypal-add-to-cart-button>
-            </div>
-        </div>
-
-        <!-- Product 2: Bead Bracelet -->
-        <div class="product">
-            <h2>Bead Bracelet</h2>
-            <img src="7.jpg" alt="Bead Bracelet">
-            <p>$15.00</p>
-            <div class="paypal-button">
-                <paypal-add-to-cart-button data-id="2JYUTZM5EWKMN"></paypal-add-to-cart-button>
-            </div>
-        </div>
-
-        <!-- Product 3: Survival Bracelet 2 -->
-        <div class="product">
-            <h2>Survival Bracelet 2</h2>
-            <img src="10.jpg" alt="Survival Bracelet 2">
-            <p>$15.00</p>
-            <div class="paypal-button">
-                <paypal-add-to-cart-button data-id="AQJAZ5DJLULM6"></paypal-add-to-cart-button>
-            </div>
-        </div>
-
-        <!-- Product 4: Survival Bracelet 3 -->
-        <div class="product">
-            <h2>Survival Bracelet 3</h2>
-            <img src="20.jpg" alt="Survival Bracelet 3">
-            <p>$15.00</p>
-            <div class="paypal-button">
-                <paypal-add-to-cart-button data-id="2GMD2YH57BJ4W"></paypal-add-to-cart-button>
-            </div>
-        </div>
-
-        <!-- Product 5: Survival Dog Collar -->
-        <div class="product">
-            <h2>Survival Dog Collar</h2>
-            <img src="pic1.jpg" alt="Survival Dog Collar">
-            <p>$30.00</p>
-            <div class="paypal-button">
-                <paypal-add-to-cart-button data-id="UYT6RM32KL98Q"></paypal-add-to-cart-button>
-            </div>
-        </div>
-
-        <!-- Product 6: Braided Bracelet -->
-        <div class="product">
-            <h2>Braided Bracelet</h2>
-            <img src="braided.jpg" alt="Braided Bracelet">
-            <p>$20.00</p>
-            <div class="paypal-button">
-                <paypal-add-to-cart-button data-id="BRAIDED12345"></paypal-add-to-cart-button>
-            </div>
-        </div>
+    <img id="profile-pic" src="default-profile.png" onclick="location.href='profile.html'" style="display:none;">
+    <nav id="nav-menu" style="display: none;">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="commitments.html">Commitments</a></li>
+        </ul>
+    </nav>
+    <div class="content">
+        <h1>Welcome to the website</h1>
     </div>
-
-    <footer>
-        <p>If you want different colors, email <a href="mailto:cheapbraclet@outlook.com">cheapbraclet@outlook.com</a></p>
-        <p>&copy; 2024 Survival Bracelets Store. All rights reserved.</p>
-        <paypal-cart-button data-id="pp-view-cart"></paypal-cart-button>
-        <button class="donate-button" onclick="window.location.href='https://www.paypal.com/ncp/payment/C474MBZ4JC84S'">Donate</button>
-    </footer>
-
-    <!-- Initialize PayPal Buttons -->
-    <script>
-        cartPaypal.Cart({ id: "pp-view-cart" });
-        cartPaypal.AddToCart({ id: "NGRF9T2H5BUQL" });
-        cartPaypal.AddToCart({ id: "2JYUTZM5EWKMN" });
-        cartPaypal.AddToCart({ id: "AQJAZ5DJLULM6" });
-        cartPaypal.AddToCart({ id: "2GMD2YH57BJ4W" });
-        cartPaypal.AddToCart({ id: "UYT6RM32KL98Q" });
-        cartPaypal.AddToCart({ id: "BRAIDED12345" });
-    </script>
 </body>
 </html>
+
