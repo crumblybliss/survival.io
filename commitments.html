@@ -4,50 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Reviews</title>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        
+        // Firebase Configuration
+        const firebaseConfig = { /* Your Firebase Config */ };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        // Elements
+        const profilePic = document.getElementById("profile-pic");
+        const logoutBtn = document.getElementById("logout-btn");
+        const reviewForm = document.getElementById("review-form");
+        
+        // Authentication & Profile
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                profilePic.src = user.photoURL || "default-avatar.png";
+                profilePic.style.display = "block";
+                reviewForm.style.display = "block";
+            } else {
+                window.location.href = "login.html"; // Redirect to login
+            }
+        });
+        
+        logoutBtn.addEventListener("click", async () => {
+            await signOut(auth);
+            window.location.href = "login.html";
+        });
+        
+        // Load Reviews
+        async function loadReviews() {
+            const reviewsList = document.getElementById("reviews-list");
+            reviewsList.innerHTML = "";
+            const q = query(collection(db, "reviews"), orderBy("timestamp", "desc"));
+            const snapshot = await getDocs(q);
+            snapshot.forEach(doc => {
+                const review = doc.data();
+                const reviewElement = document.createElement("div");
+                reviewElement.innerHTML = `<strong>${review.name}</strong> - ⭐${review.rating}<p>${review.comment}</p>`;
+                reviewsList.appendChild(reviewElement);
+            });
+        }
+        loadReviews();
+    </script>
+    
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; text-align: center; }
-        .container { max-width: 500px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        .nav-menu { padding: 10px; background: #007BFF; }
-        .nav-menu ul { list-style: none; padding: 0; }
-        .nav-menu ul li { display: inline; margin: 0 10px; }
-        .nav-menu ul li a { color: white; text-decoration: none; font-weight: bold; }
-        button { padding: 10px; margin: 10px; border: none; cursor: pointer; }
-        .btn-primary { background: #007BFF; color: white; border-radius: 5px; }
-        .btn-danger { background: #dc3545; color: white; border-radius: 5px; }
-        .review { border-bottom: 1px solid #ddd; padding: 10px; text-align: left; }
-        .stars { color: gold; }
-        input, select { padding: 8px; margin: 5px; width: 90%; border: 1px solid #ddd; border-radius: 5px; }
-        #profile-pic { position: absolute; top: 10px; left: 10px; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; }
+        body { font-family: Arial, sans-serif; background: #f4f4f4; text-align: center; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 8px; }
+        .profile-pic { width: 50px; height: 50px; border-radius: 50%; position: absolute; top: 10px; left: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
-
-    <!-- Profile Picture (Takes User to Profile Page) -->
-    <img id="profile-pic" src="default-profile.png" alt="Profile" onclick="goToProfile()">
-
-    <nav id="nav-menu" class="nav-menu">
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="products.html">Products</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="commitments.html">Commitments</a></li>
-        </ul>
-    </nav>
-
+    <img id="profile-pic" class="profile-pic" src="default-avatar.png" alt="Profile" onclick="window.location.href='profile.html'">
+    
     <div class="container">
-        <div id="login-section">
-            <button id="google-login-btn" class="btn-primary">Sign in with Google</button>
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="password" placeholder="Password">
-            <button id="email-login-btn" class="btn-primary">Login</button>
-            <button id="signup-btn" class="btn-primary">Sign Up</button>
-        </div>
-        
-        <button id="logout-btn" class="btn-danger" style="display: none;">Logout</button>
-        <p id="user-info"></p>
-        
+        <h1>Customer Reviews</h1>
         <div id="review-form" style="display: none;">
-            <h3>Leave a Review</h3>
             <textarea id="comment" placeholder="Write your review..."></textarea>
             <select id="rating">
                 <option value="5">5 - Excellent</option>
@@ -56,67 +74,11 @@
                 <option value="2">2 - Poor</option>
                 <option value="1">1 - Terrible</option>
             </select>
-            <button id="submit-review-btn" class="btn-primary">Submit Review</button>
+            <button id="submit-review-btn">Submit Review</button>
         </div>
-        
+        <button id="logout-btn">Logout</button>
         <div id="reviews-list"></div>
-        <div id="average-rating"></div>
     </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
-        function updateUI(user) {
-            if (user) {
-                document.getElementById("user-info").textContent = `Logged in as: ${user.email}`;
-                document.getElementById("login-section").style.display = "none";
-                document.getElementById("logout-btn").style.display = "block";
-                document.getElementById("review-form").style.display = "block";
-                document.getElementById("profile-pic").src = user.photoURL || "default-profile.png";
-            } else {
-                document.getElementById("user-info").textContent = "";
-                document.getElementById("login-section").style.display = "block";
-                document.getElementById("logout-btn").style.display = "none";
-                document.getElementById("review-form").style.display = "none";
-                document.getElementById("profile-pic").src = "default-profile.png";
-            }
-        }
-
-        document.getElementById("google-login-btn").addEventListener("click", async () => {
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                alert(error.message);
-            }
-        });
-
-        document.getElementById("logout-btn").addEventListener("click", async () => {
-            await signOut(auth);
-        });
-
-        onAuthStateChanged(auth, (user) => {
-            updateUI(user);
-        });
-
-        function goToProfile() {
-            window.location.href = "profile.html";
-        }
-    </script>
-
 </body>
 </html>
 
