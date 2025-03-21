@@ -3,27 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile</title>
+    <title>Profile</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; text-align: center; color: #333; }
-        .container { max-width: 400px; margin: 50px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        img { width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px; }
-        button { padding: 10px; margin-top: 10px; border: none; cursor: pointer; background: #dc3545; color: white; border-radius: 5px; }
-        button:hover { background: #c82333; }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; text-align: center; }
+        .container { max-width: 500px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        .profile-pic { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin: 10px; }
+        .btn { padding: 10px; border: none; cursor: pointer; border-radius: 5px; margin: 5px; }
+        .btn-primary { background: #007BFF; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .nav-links a { display: block; margin: 5px 0; text-decoration: none; color: #007BFF; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h2>User Profile</h2>
-        <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
-        <p id="user-email">Email: Loading...</p>
-        <button id="logout-btn">Logout</button>
+        <img id="profile-pic" class="profile-pic" src="default-profile.png" alt="Profile Picture">
+        <br>
+        <input type="file" id="profile-upload" accept="image/*">
+        <button class="btn btn-primary" onclick="uploadProfilePic()">Upload New Picture</button>
+        <h3 id="user-name">Loading...</h3>
+
+        <div class="nav-links">
+            <a href="index.html">🏠 Home</a>
+            <a href="products.html">🛒 Products</a>
+            <a href="reviews.html">⭐ Reviews</a>
+        </div>
+
+        <button class="btn btn-danger" onclick="logout()">Logout</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -38,23 +51,53 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const storage = getStorage(app);
 
-        // Check authentication state
+        // Profile Elements
+        const profilePic = document.getElementById("profile-pic");
+        const profileUpload = document.getElementById("profile-upload");
+        const userName = document.getElementById("user-name");
+
+        // Check if User is Logged In
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                document.getElementById("profile-pic").src = user.photoURL || "default-profile.png";
-                document.getElementById("user-email").innerText = `Email: ${user.email}`;
+                userName.textContent = user.displayName || "User";
+                profilePic.src = user.photoURL || "default-profile.png";
             } else {
-                window.location.href = "index.html"; // Redirect if not logged in
+                window.location.href = "login.html"; // Redirect if not logged in
             }
         });
 
-        // Logout button functionality
-        document.getElementById("logout-btn").addEventListener("click", async () => {
-            await signOut(auth);
-            window.location.href = "index.html"; // Redirect after logout
-        });
+        // Upload Profile Picture
+        function uploadProfilePic() {
+            const file = profileUpload.files[0];
+            if (!file) return alert("Please select an image to upload.");
+
+            const fileRef = storageRef(storage, `profile_pictures/${auth.currentUser.uid}.jpg`);
+            
+            uploadBytes(fileRef, file).then(() => {
+                return getDownloadURL(fileRef);
+            }).then((url) => {
+                updateProfile(auth.currentUser, { photoURL: url }).then(() => {
+                    profilePic.src = url; // Update Picture Instantly
+                    alert("Profile picture updated!");
+                });
+            }).catch((error) => {
+                console.error("Error uploading image:", error);
+                alert("Upload failed.");
+            });
+        }
+
+        // Logout Function
+        function logout() {
+            signOut(auth).then(() => {
+                window.location.href = "login.html";
+            }).catch((error) => {
+                console.error("Logout failed:", error);
+            });
+        }
     </script>
 
 </body>
 </html>
+
