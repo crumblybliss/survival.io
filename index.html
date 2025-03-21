@@ -3,16 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Reviews</title>
+    <title>Home - CrumblyBliss</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; text-align: center; color: #333; }
+        .container { max-width: 600px; margin: 50px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        .nav-menu { padding: 10px; background: #007BFF; }
+        .nav-menu ul { list-style: none; padding: 0; display: flex; justify-content: center; }
+        .nav-menu ul li { margin: 0 15px; }
+        .nav-menu ul li a { color: white; text-decoration: none; font-weight: bold; }
+        .profile-pic { position: absolute; top: 10px; left: 10px; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; border: 2px solid white; }
+        button { padding: 10px; margin: 10px; border: none; cursor: pointer; background: #007BFF; color: white; border-radius: 5px; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
 
-    <!-- Firebase SDK -->
+    <!-- Profile Picture (Top Left) -->
+    <img id="profile-pic" src="default-profile.png" alt="Profile Picture" class="profile-pic" onclick="window.location.href='profile.html'">
+
+    <!-- Navigation Menu -->
+    <nav class="nav-menu">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="commitments.html">Commitments</a></li>
+            <li><a href="cart.html">Cart 🛒</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Welcome to CrumblyBliss!</h1>
+        <p>Delicious cookies made with love. Browse our selection and place your order today!</p>
+        <button onclick="window.location.href='products.html'">Shop Now</button>
+    </div>
+
     <script type="module">
-        // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-        // ✅ Firebase Configuration
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
             authDomain: "survival-f35e2.firebaseapp.com",
@@ -24,181 +54,17 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
         const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
 
-        // DOM Elements
-        const reviewForm = document.getElementById("review-form");
-        const reviewsList = document.getElementById("reviews-list");
-        const averageRatingDiv = document.getElementById("average-rating");
-        const loginSection = document.getElementById("login-section");
-        const logoutBtn = document.getElementById("logout-btn");
-        const userInfo = document.getElementById("user-info");
-        const navMenu = document.getElementById("nav-menu"); // Navigation menu
-
-        // ✅ Handle Authentication
-        function updateUI(user) {
-            if (user) {
-                userInfo.innerHTML = `Logged in as: <strong>${user.email}</strong>`;
-                loginSection.style.display = "none";
-                logoutBtn.style.display = "block";
-                reviewForm.style.display = "block";
-                navMenu.style.display = "block"; // Show the navigation when logged in
-            } else {
-                userInfo.innerHTML = "";
-                loginSection.style.display = "block";
-                logoutBtn.style.display = "none";
-                reviewForm.style.display = "none";
-                navMenu.style.display = "none"; // Hide the navigation when logged out
-            }
-        }
-
+        // Update Profile Picture on Page Load
         onAuthStateChanged(auth, (user) => {
-            updateUI(user);
-            loadReviews();
-        });
-
-        // ✅ Google Login
-        document.getElementById("google-login-btn").addEventListener("click", async () => {
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                alert(error.message);
+            if (user) {
+                document.getElementById("profile-pic").src = user.photoURL || "default-profile.png";
+            } else {
+                window.location.href = "login.html"; // Redirect if not logged in
             }
         });
-
-        // ✅ Email Signup
-        document.getElementById("signup-btn").addEventListener("click", async () => {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                alert(error.message);
-            }
-        });
-
-        // ✅ Email Login
-        document.getElementById("email-login-btn").addEventListener("click", async () => {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                alert(error.message);
-            }
-        });
-
-        // ✅ Logout
-        logoutBtn.addEventListener("click", async () => {
-            await signOut(auth);
-        });
-
-        // ✅ Submit a Review
-        async function submitReview() {
-            const user = auth.currentUser;
-            if (!user) {
-                alert("You must be logged in to submit a review.");
-                return;
-            }
-
-            const comment = document.getElementById("comment").value.trim();
-            const rating = parseInt(document.getElementById("rating").value);
-
-            if (!comment) {
-                alert("Please enter a comment.");
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "reviews"), {
-                    name: user.email,
-                    comment: comment,
-                    rating: rating,
-                    timestamp: serverTimestamp()
-                });
-
-                alert("Review submitted!");
-                document.getElementById("comment").value = "";
-                loadReviews();
-            } catch (error) {
-                alert("Error submitting review.");
-            }
-        }
-
-        document.getElementById("submit-review-btn").addEventListener("click", submitReview);
-
-        // ✅ Load Reviews
-        async function loadReviews() {
-            reviewsList.innerHTML = "";
-            let totalRating = 0, count = 0;
-
-            try {
-                const q = query(collection(db, "reviews"), orderBy("timestamp", "desc"));
-                const snapshot = await getDocs(q);
-
-                snapshot.forEach(doc => {
-                    const review = doc.data();
-                    const reviewElement = document.createElement("div");
-                    reviewElement.classList.add("review");
-                    reviewElement.innerHTML = `
-                        <strong>${review.name}</strong> - <span class="stars">${"⭐".repeat(review.rating)}</span>
-                        <p>${review.comment}</p>
-                    `;
-                    reviewsList.appendChild(reviewElement);
-                    totalRating += review.rating;
-                    count++;
-                });
-
-                if (count > 0) {
-                    const averageRating = (totalRating / count).toFixed(1);
-                    averageRatingDiv.innerHTML = `<h3>Average Rating: ${averageRating} ⭐</h3>`;
-                } else {
-                    averageRatingDiv.innerHTML = `<h3>No reviews yet.</h3>`;
-                }
-            } catch (error) {
-                console.error("Error loading reviews:", error);
-            }
-        }
     </script>
-
-    <style>
-        body { font-family: Arial, sans-serif; background-color: navy; color: white; text-align: center; }
-        .container { max-width: 500px; margin: auto; background: white; color: black; padding: 20px; border-radius: 8px; }
-        input, textarea, select, button { width: 100%; padding: 10px; margin: 8px 0; }
-        button { background: #4CAF50; color: white; border: none; cursor: pointer; }
-        button:hover { background: #45a049; }
-        .review { border-bottom: 1px solid #ddd; padding: 10px; }
-        .stars { color: gold; }
-    </style>
-</head>
-<body>
-
-    <h1>Customer Reviews</h1>
-
-    <!-- Navigation Menu (Hidden by Default) -->
-    <nav id="nav-menu" style="display: none;">
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="products.html">Products</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="commitments.html">Commitments</a></li>
-            <li><paypal-cart-button data-id="pp-view-cart"></paypal-cart-button></li>
-        </ul>
-    </nav>
-
-    <!-- Authentication Section -->
-    <div id="login-section" class="container">
-        <button id="google-login-btn">Sign in with Google</button>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        <button id="email-login-btn">Login</button>
-        <button id="signup-btn">Sign Up</button>
-    </div>
-
-    <button id="logout-btn" style="display: none;">Logout</button>
-    <p id="user-info"></p>
 
 </body>
 </html>
