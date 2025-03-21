@@ -3,87 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Profile - Your Website</title>
+    <title>Profile and Authentication</title>
     <style>
-        /* General styles */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            background-color: #0a1d37; /* Dark Navy Blue Background */
+            color: #f1f1f1; /* Light text color for contrast */
             margin: 0;
             padding: 0;
-        }
-
-        header {
             display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background-color: #333;
-            color: white;
-        }
-
-        .profile-link {
-            display: inline-block;
-        }
-
-        .profile-pic {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
-
-        .auth-status {
-            align-self: center;
-        }
-
-        .content {
-            padding: 20px;
-        }
-
-        footer {
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             text-align: center;
+        }
+
+        /* Profile picture */
+        #profile-pic {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            border: 3px solid #00bcd4; /* Aqua blue border for futuristic look */
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.6); /* Glowing effect */
+            transition: all 0.3s ease-in-out;
+        }
+
+        #profile-pic:hover {
+            transform: scale(1.1);
+        }
+
+        .auth-container {
+            background: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-container h2 {
+            color: #00bcd4; /* Light Aqua Blue */
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .auth-container input {
+            width: 100%;
             padding: 10px;
-            background-color: #333;
-            color: white;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #00bcd4;
+            background-color: #1c2b47; /* Darker Navy Blue */
+            color: #f1f1f1;
+            font-size: 16px;
+            transition: 0.3s ease;
+        }
+
+        .auth-container input:focus {
+            border-color: #00bcd4;
+            background-color: #2c3e5f; /* Lighter navy blue */
+            outline: none;
+        }
+
+        .auth-container button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            background-color: #00bcd4; /* Aqua Blue */
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .auth-container button:hover {
+            background-color: #0097a7; /* Slightly darker aqua blue */
+            box-shadow: 0 6px 12px rgba(0, 188, 212, 0.6);
+        }
+
+        #user-info {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #f1f1f1;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #login-section {
+            display: block;
+        }
+
+        #logout-btn {
+            display: none;
+        }
+
+        #nav-menu {
+            display: none;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        #nav-menu a {
+            color: #00bcd4;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: bold;
+            transition: 0.3s ease;
+        }
+
+        #nav-menu a:hover {
+            color: #f1f1f1;
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 600px) {
+            #profile-pic {
+                width: 50px;
+                height: 50px;
+            }
+
+            .auth-container {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <a href="index.html" class="profile-link">
-            <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
-        </a>
-        <div class="auth-status" id="auth-status"></div>
-    </header>
 
-    <div class="content">
-        <h1>Your Profile</h1>
-        <p id="user-info"></p>
+    <!-- Profile Picture -->
+    <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
+
+    <div class="auth-container">
+        <!-- Authentication Info & Login Section -->
+        <h2>Welcome to Your Futuristic Profile</h2>
+        <div id="user-info"></div>
+
+        <div id="login-section">
+            <input type="email" id="email" placeholder="Email" required><br>
+            <input type="password" id="password" placeholder="Password" required><br>
+            <button id="google-login-btn">Login with Google</button>
+            <button id="email-login-btn">Login with Email</button>
+            <button id="signup-btn">Sign Up</button>
+        </div>
+
+        <!-- Logout Button -->
+        <button id="logout-btn">Logout</button>
+
+        <!-- Navigation Menu -->
+        <div id="nav-menu">
+            <a href="profile.html">Profile</a> | 
+            <a href="cart.html">Cart</a> |
+            <a href="orders.html">Orders</a>
+        </div>
     </div>
 
-    <footer>
-        <p>&copy; 2025 Your Website</p>
-    </footer>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const userInfoElement = document.getElementById('user-info');
-            const user = getUserFromLocalStorage();
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Update UI based on authentication state
+        function updateUI(user) {
+            const userInfo = document.getElementById('user-info');
+            const loginSection = document.getElementById('login-section');
+            const logoutBtn = document.getElementById('logout-btn');
+            const profilePic = document.getElementById('profile-pic');
+            const navMenu = document.getElementById('nav-menu');
 
             if (user) {
-                userInfoElement.innerHTML = `
-                    <p>Name: ${user.name}</p>
-                    <p>Email: ${user.email}</p>
-                    <p>Username: ${user.username}</p>
-                `;
+                userInfo.innerHTML = `Logged in as: <strong>${user.email}</strong>`;
+                loginSection.style.display = "none";
+                logoutBtn.style.display = "block";
+                navMenu.style.display = "block";
+                profilePic.style.display = "block";
+                profilePic.src = user.photoURL || "default-profile.png";
             } else {
-                userInfoElement.innerHTML = '<p>You are not logged in.</p>';
+                userInfo.innerHTML = "";
+                loginSection.style.display = "block";
+                logoutBtn.style.display = "none";
+                navMenu.style.display = "none";
+                profilePic.style.display = "none";
             }
+        }
 
-            // Helper function to get user data
-            function getUserFromLocalStorage() {
-                return JSON.parse(localStorage.getItem('user'));
+        // Monitor authentication state
+        onAuthStateChanged(auth, (user) => {
+            updateUI(user);
+        });
+
+        // Google Login
+        document.getElementById("google-login-btn").addEventListener("click", async () => {
+            try {
+                await signInWithPopup(auth, provider);
+                window.location.href = "index.html"; // Redirect to home page
+            } catch (error) {
+                alert(error.message);
             }
         });
+
+        // Email Login
+        document.getElementById("email-login-btn").addEventListener("click", async () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                window.location.href = "index.html"; // Redirect to home page
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // Sign Up
+        document.getElementById("signup-btn").addEventListener("click", async () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                window.location.href = "index.html"; // Redirect to home page
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // Logout
+        document.getElementById("logout-btn").addEventListener("click", async () => {
+            await signOut(auth);
+            window.location.href = "index.html"; // Redirect to home page after logout
+        });
     </script>
+
 </body>
 </html>
 
