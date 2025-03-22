@@ -1,117 +1,92 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <li><a href="index.html">Home</a></li>
-        <li><a href="products.html">Products</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="commitments.html">Commitments</a></li>
-        <li><a href="cart.html">Cart 🛒</a></li>
-        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px; }
-        h1 { text-align: center; color: #333; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; }
-        .product-list { margin-top: 20px; }
-        .product-item { padding: 15px; margin-bottom: 10px; background: #f9f9f9; display: flex; align-items: center; }
-        img { width: 50px; height: 50px; margin-right: 10px; }
-        button { background: #ff4c4c; color: white; border: none; padding: 8px; cursor: pointer; }
-        input, label { display: block; margin: 5px 0; }
-    </style>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+import React, { useEffect, useState } from "react";
+import { db } from "../firebase";
+import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../firebase";
+import { useRouter } from "next/router";
+import { Button, Card, CardContent, Input, Table, TableBody, TableCell, TableHead, TableRow } from "@/components/ui";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
+const AdminPage = () => {
+    const [products, setProducts] = useState([]);
+    const [newProduct, setNewProduct] = useState({ name: "", price: "" });
+    const [user, loading] = useAuthState(auth);
+    const router = useRouter();
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
-
-        const authorizedUsers = ["cheapbraclets@outlook.com"];
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user && authorizedUsers.includes(user.email)) {
-                loadProducts();
-            } else {
-                document.body.innerHTML = "<h2>Access Denied</h2>";
+    useEffect(() => {
+        if (!loading) {
+            if (!user || user.email !== "cheapbraclets@outlook.com") {
+                router.push("/");
             }
-        });
-
-        async function loadProducts() {
-            const productsRef = collection(db, "products");
-            const productList = document.getElementById("product-list");
-            productList.innerHTML = "";
-            
-            const querySnapshot = await getDocs(productsRef);
-            querySnapshot.forEach((docSnap) => {
-                const product = docSnap.data();
-                const productDiv = document.createElement("div");
-                productDiv.classList.add("product-item");
-                productDiv.innerHTML = `
-                    <img src="${product.imageURL}" alt="Product Image">
-                    <div>
-                        <h3>${product.name}</h3>
-                        <p>Price: $${product.price}</p>
-                        <button onclick="deleteProduct('${docSnap.id}', '${product.imagePath}')">Delete</button>
-                    </div>
-                `;
-                productList.appendChild(productDiv);
-            });
         }
+    }, [user, loading, router]);
 
-        window.addProduct = async () => {
-            const name = document.getElementById("new-name").value;
-            const price = parseFloat(document.getElementById("new-price").value);
-            const fileInput = document.getElementById("new-image");
-            
-            if (!name || isNaN(price) || !fileInput.files.length) {
-                alert("Please provide all fields including an image.");
-                return;
-            }
-            
-            const file = fileInput.files[0];
-            const storageRef = ref(storage, `products/${file.name}`);
-            await uploadBytes(storageRef, file);
-            const imageURL = await getDownloadURL(storageRef);
-
-            await addDoc(collection(db, "products"), { name, price, imageURL, imagePath: storageRef.fullPath });
-            alert("Product added successfully!");
-            loadProducts();
+    useEffect(() => {
+        const fetchProducts = async () => {
+            const querySnapshot = await getDocs(collection(db, "products"));
+            const productList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setProducts(productList);
         };
+        fetchProducts();
+    }, []);
 
-        window.deleteProduct = async (id, imagePath) => {
-            await deleteDoc(doc(db, "products", id));
-            await deleteObject(ref(storage, imagePath));
-            alert("Product deleted successfully!");
-            loadProducts();
-        };
-    </script>
-</head>
-<body>
-    <div class="container">
-        <h1>Admin Dashboard</h1>
-        <h2>Manage Products</h2>
-        <div class="add-product">
-            <input type="text" id="new-name" placeholder="Product Name" />
-            <input type="number" id="new-price" placeholder="Price" />
-            <input type="file" id="new-image" accept="image/*" />
-            <button onclick="addProduct()">Add Product</button>
+    const addProduct = async () => {
+        if (!newProduct.name || !newProduct.price) return;
+        const docRef = await addDoc(collection(db, "products"), newProduct);
+        setProducts([...products, { id: docRef.id, ...newProduct }]);
+        setNewProduct({ name: "", price: "" });
+    };
+
+    const deleteProduct = async (id) => {
+        await deleteDoc(doc(db, "products", id));
+        setProducts(products.filter(product => product.id !== id));
+    };
+
+    return (
+        <div className="max-w-4xl mx-auto p-6 bg-gray-100 min-h-screen">
+            <h1 className="text-3xl font-bold text-center mb-6">Admin Panel</h1>
+            
+            <Card>
+                <CardContent className="p-4">
+                    <div className="flex gap-4">
+                        <Input 
+                            type="text" 
+                            placeholder="Product Name" 
+                            value={newProduct.name} 
+                            onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} 
+                        />
+                        <Input 
+                            type="number" 
+                            placeholder="Price" 
+                            value={newProduct.price} 
+                            onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} 
+                        />
+                        <Button onClick={addProduct} className="bg-blue-500 text-white px-4 py-2 rounded">Add</Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Table className="mt-6 bg-white shadow rounded-lg">
+                <TableHead>
+                    <TableRow>
+                        <TableCell className="font-bold">Product Name</TableCell>
+                        <TableCell className="font-bold">Price</TableCell>
+                        <TableCell className="font-bold">Actions</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {products.map(product => (
+                        <TableRow key={product.id}>
+                            <TableCell>{product.name}</TableCell>
+                            <TableCell>${product.price}</TableCell>
+                            <TableCell>
+                                <Button onClick={() => deleteProduct(product.id)} className="bg-red-500 text-white px-3 py-1 rounded">Delete</Button>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
         </div>
-        <h3>Product List</h3>
-        <div id="product-list" class="product-list"></div>
-    </div>
-</body>
-</html>
+    );
+};
+
+export default AdminPage;
