@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - CrumblyBliss</title>
-    
-    <link rel="manifest" href="manifest.json" />
-
+    <title>Home - Survival Store</title>
+    <link rel="manifest" href="manifest.json">
     <style>
         * {
             margin: 0;
@@ -14,110 +12,138 @@
             box-sizing: border-box;
             font-family: 'Arial', sans-serif;
         }
-
         body {
             background-color: #0a1d37;
             color: #f1f1f1;
             text-align: center;
-            padding: 20px;
         }
-
-        /* Navigation Bar */
         .nav-bar {
             background: #001f3d;
-            padding: 15px;
+            padding: 10px;
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            left: 0;
-            z-index: 1000;
+            justify-content: space-between;
+            align-items: center;
         }
-
-        .nav-bar a {
+        .nav-bar ul {
+            list-style: none;
+            display: flex;
+        }
+        .nav-bar ul li {
+            margin: 0 15px;
+        }
+        .nav-bar ul li a {
             color: white;
             text-decoration: none;
             font-weight: bold;
-            padding: 10px 15px;
-            transition: 0.3s;
         }
-
-        .nav-bar a:hover {
-            background: #00bcd4;
-            border-radius: 5px;
-        }
-
         .container {
-            max-width: 600px;
-            margin: 100px auto 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 20px;
-            border-radius: 10px;
+            margin-top: 50px;
         }
-
-        /* Install App Button */
-        .install-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
+        button {
+            padding: 10px;
             background: #00bcd4;
             color: white;
             border: none;
-            padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-            display: none;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #0097a7;
         }
     </style>
 </head>
 <body>
 
     <!-- Navigation Bar -->
-    <div class="nav-bar">
-        <a href="index.html">Home</a>
-        <a href="products.html">Products</a>
-        <a href="about.html">About</a>
-        <a href="cart.html">Cart 🛒</a>
-        <a href="profile.html">Profile</a>
-    </div>
+    <nav class="nav-bar">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="cart.html">Cart 🛒</a></li>
+        </ul>
+        <button id="login-btn">Login with Google</button>
+        <button id="logout-btn" style="display: none;">Logout</button>
+    </nav>
 
-    <!-- Main Content -->
     <div class="container">
-        <h1>Welcome to CrumblyBliss</h1>
-        <p>Delicious treats and survival gear!</p>
+        <h1>Welcome to Survival Store</h1>
+        <p>Your best source for survival gear and handmade products.</p>
     </div>
 
-    <!-- Install App Button -->
-    <button id="install-button" class="install-button">Install App</button>
+    <script type="module">
+        // Firebase Config
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
-    <script>
-        let deferredPrompt;
-        window.addEventListener("beforeinstallprompt", (event) => {
-            event.preventDefault();
-            deferredPrompt = event;
-            document.getElementById("install-button").style.display = "block";
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const provider = new GoogleAuthProvider();
+
+        const authorizedEmails = ["carr.isaiah@lposd.org", "nelson.jacob@lposd.org"];
+
+        document.getElementById("login-btn").addEventListener("click", () => {
+            signInWithPopup(auth, provider).then((result) => {
+                const user = result.user;
+                if (authorizedEmails.includes(user.email)) {
+                    window.location.href = "admin.html"; // Redirect to admin page
+                } else {
+                    window.location.href = "index.html"; // Redirect customers to home
+                }
+            }).catch((error) => {
+                console.error("Login failed:", error);
+            });
         });
 
-        document.getElementById("install-button").addEventListener("click", () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === "accepted") {
-                        console.log("User accepted the install prompt");
-                    }
-                    deferredPrompt = null;
-                });
+        document.getElementById("logout-btn").addEventListener("click", () => {
+            signOut(auth).then(() => {
+                alert("Logged out successfully!");
+                window.location.href = "index.html";
+            });
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById("login-btn").style.display = "none";
+                document.getElementById("logout-btn").style.display = "block";
+            } else {
+                document.getElementById("login-btn").style.display = "block";
+                document.getElementById("logout-btn").style.display = "none";
             }
         });
 
-        window.addEventListener("appinstalled", () => {
-            document.getElementById("install-button").style.display = "none";
+        // PWA Install
+        let deferredPrompt;
+        window.addEventListener("beforeinstallprompt", (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.createElement("button");
+            installBtn.textContent = "Install App";
+            installBtn.style.position = "fixed";
+            installBtn.style.bottom = "20px";
+            installBtn.style.right = "20px";
+            installBtn.onclick = () => {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choice) => {
+                    if (choice.outcome === "accepted") {
+                        console.log("User installed the app");
+                    }
+                    deferredPrompt = null;
+                });
+            };
+            document.body.appendChild(installBtn);
         });
     </script>
 
 </body>
 </html>
-
