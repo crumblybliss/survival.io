@@ -34,10 +34,16 @@
       const name = document.getElementById("productName").value;
       const price = document.getElementById("productPrice").value;
       if (!name || !price) return;
-      const docRef = await db.collection("products").add({ name, price });
-      fetchProducts(); // Refresh products after adding a new one
+      
+      // Adding the new product to Firestore
+      await db.collection("products").add({ name, price });
+
+      // Clear the input fields
       document.getElementById("productName").value = "";
       document.getElementById("productPrice").value = "";
+
+      // Fetch and display the updated list of products
+      fetchProducts();
     }
 
     // Function to delete a product from Firestore
