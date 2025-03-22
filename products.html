@@ -87,6 +87,11 @@
     <iframe src="https://calendar.google.com/calendar/embed?src=your-calendar-id&ctz=America%2FNew_York" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
 
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Page Loaded - Running loadProducts");
+            loadProducts();
+        });
+
         // Array of products to display
         const products = [
             { name: "Paracord Survival Bracelet", price: 12.99 },
@@ -98,13 +103,15 @@
         // Function to load and display products
         function loadProducts() {
             const productList = document.getElementById("products-list");
-            productList.innerHTML = "";
+            if (!productList) {
+                console.error("Product list container not found!");
+                return;
+            }
 
-            console.log("Loading products..."); // Debugging log
+            productList.innerHTML = ""; // Clear the list
 
-            // Loop through products array and create HTML elements
             products.forEach((product, index) => {
-                console.log("Adding product:", product); // Debugging log
+                console.log("Adding product:", product);
                 const productDiv = document.createElement("div");
                 productDiv.classList.add("product");
                 productDiv.innerHTML = `
@@ -114,12 +121,19 @@
                 `;
                 productList.appendChild(productDiv);
             });
+
+            console.log("Products loaded successfully.");
         }
 
         // Function to add products to the cart (with promo code and color)
         function addToCart(index) {
             const promoCode = document.getElementById("promo-code").value.trim();
             const product = products[index];
+            if (!product) {
+                console.error("Product not found for index:", index);
+                return;
+            }
+
             const finalPrice = (promoCode === "TESTFREE") ? 0 : product.price;
             const colorInput = document.getElementById(`color-${index}`).value || "No color specified";
 
@@ -135,12 +149,6 @@
         function applyPromo() {
             alert("Promo code applied! If valid, all items will be free.");
         }
-
-        // Load products when the page loads
-        window.onload = () => {
-            console.log("Page Loaded");
-            loadProducts();
-        };
     </script>
 </body>
 </html>
