@@ -4,32 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - CrumblyBliss</title>
-    <link rel="manifest" href="data:application/json,{%22name%22:%22CrumblyBliss%22,%22short_name%22:%22CrumblyBliss%22,%22start_url%22:%22index.html%22,%22display%22:%22standalone%22,%22background_color%22:%22#0a1d37%22,%22theme_color%22:%22#00bcd4%22,%22icons%22:[{%22src%22:%22icon-192.png%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22},{%22src%22:%22icon-512.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}" />
-    <script>
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("sw.js")
-                .then(() => console.log("Service Worker Registered"))
-                .catch((error) => console.log("Service Worker Registration Failed:", error));
-        }
-    </script>
+    
+    <link rel="manifest" href="manifest.json" />
+
     <style>
-        body {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: 'Arial', sans-serif;
+        }
+
+        body {
             background-color: #0a1d37;
             color: #f1f1f1;
             text-align: center;
-            margin: 0;
             padding: 20px;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            background: #001f3d;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .nav-bar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 15px;
+            transition: 0.3s;
+        }
+
+        .nav-bar a:hover {
+            background: #00bcd4;
+            border-radius: 5px;
         }
 
         .container {
             max-width: 600px;
-            margin: auto;
+            margin: 100px auto 20px;
             background: rgba(0, 0, 0, 0.7);
             padding: 20px;
             border-radius: 10px;
         }
 
+        /* Install App Button */
         .install-button {
             position: fixed;
             bottom: 20px;
@@ -47,6 +75,16 @@
 </head>
 <body>
 
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="about.html">About</a>
+        <a href="cart.html">Cart 🛒</a>
+        <a href="profile.html">Profile</a>
+    </div>
+
+    <!-- Main Content -->
     <div class="container">
         <h1>Welcome to CrumblyBliss</h1>
         <p>Delicious treats and survival gear!</p>
@@ -80,39 +118,6 @@
         });
     </script>
 
-    <!-- Inline Service Worker -->
-    <script id="sw">
-        const CACHE_NAME = "CrumblyBliss-v1";
-        const ASSETS_TO_CACHE = [
-            "index.html"
-        ];
-
-        self.addEventListener("install", (event) => {
-            event.waitUntil(
-                caches.open(CACHE_NAME).then((cache) => {
-                    return cache.addAll(ASSETS_TO_CACHE);
-                })
-            );
-        });
-
-        self.addEventListener("activate", (event) => {
-            event.waitUntil(
-                caches.keys().then((keys) => {
-                    return Promise.all(
-                        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-                    );
-                })
-            );
-        });
-
-        self.addEventListener("fetch", (event) => {
-            event.respondWith(
-                caches.match(event.request).then((response) => {
-                    return response || fetch(event.request);
-                }).catch(() => caches.match("index.html"))
-            );
-        });
-    </script>
-
 </body>
 </html>
+
