@@ -4,11 +4,61 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
-  <!-- Firebase Scripts -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#0A192F] text-white">
+
+  <div class="min-h-screen p-8">
+    <h1 class="text-3xl font-bold text-center mb-6">Admin Dashboard</h1>
+
+    <!-- Add Product Form -->
+    <div class="max-w-lg mx-auto bg-[#112240] p-6 rounded-lg shadow-lg">
+      <h2 class="text-xl mb-4">Add Product</h2>
+      <input type="text" id="productName" placeholder="Product Name" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
+      <input type="number" id="productPrice" placeholder="Price" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
+      <label class="text-white">Available</label>
+      <input type="checkbox" id="productAvailable" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
+      <input type="text" id="productTags" placeholder="Tags (comma separated)" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
+      <input type="text" id="productCategory" placeholder="Category" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
+      <button id="addProductBtn" class="w-full p-2 bg-blue-500 hover:bg-blue-600 rounded text-white font-bold">Add Product</button>
+    </div>
+
+    <!-- Edit Product Form -->
+    <div class="max-w-lg mx-auto bg-[#112240] p-6 rounded-lg shadow-lg mt-6" id="editProductForm" style="display: none;">
+      <h2 class="text-xl mb-4">Edit Product</h2>
+      <input type="text" id="editProductName" placeholder="Product Name" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
+      <input type="number" id="editProductPrice" placeholder="Price" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
+      <label class="text-white">Available</label>
+      <input type="checkbox" id="editProductAvailable" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
+      <input type="text" id="editProductTags" placeholder="Tags (comma separated)" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
+      <input type="text" id="editProductCategory" placeholder="Category" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
+      <button id="updateProductBtn" class="w-full p-2 bg-blue-500 hover:bg-blue-600 rounded text-white font-bold">Update Product</button>
+    </div>
+
+    <!-- Product List Table -->
+    <div class="max-w-2xl mx-auto mt-6">
+      <h2 class="text-xl mb-4">Products</h2>
+      <table class="w-full border-collapse border border-gray-700">
+        <thead>
+          <tr class="bg-[#112240]">
+            <th class="p-2 border border-gray-700">Name</th>
+            <th class="p-2 border border-gray-700">Price</th>
+            <th class="p-2 border border-gray-700">Available</th>
+            <th class="p-2 border border-gray-700">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="productList">
+          <!-- Product rows will be added here dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
   <script>
-    // Firebase setup with provided credentials
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
       authDomain: "survival-f35e2.firebaseapp.com",
@@ -18,131 +68,100 @@
       appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
     };
 
-    // Initialize Firebase and Firestore
+    // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Function to fetch products from Firestore
-    async function fetchProducts() {
-      const productsSnapshot = await db.collection("products").get();
-      const products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      renderProducts(products);
-    }
+    const productListElement = document.getElementById("productList");
 
-    // Function to add a product to Firestore
-    async function addProduct() {
-      const name = document.getElementById("productName").value;
-      const price = document.getElementById("productPrice").value;
-      if (!name || !price) return;
-      
-      // Adding the new product to Firestore
-      await db.collection("products").add({ name, price });
+    // Function to get and display products
+    const fetchProducts = async () => {
+      const querySnapshot = await db.collection("products").get();
+      productListElement.innerHTML = "";  // Clear the list before displaying new data
 
-      // Clear the input fields
-      document.getElementById("productName").value = "";
-      document.getElementById("productPrice").value = "";
+      querySnapshot.forEach((doc) => {
+        const product = doc.data();
+        const tr = document.createElement("tr");
 
-      // Fetch and display the updated list of products
-      fetchProducts();
-    }
-
-    // Function to delete a product from Firestore
-    async function deleteProduct(id) {
-      await db.collection("products").doc(id).delete();
-      fetchProducts(); // Refresh products after deletion
-    }
-
-    // Function to render the products in the table
-    function renderProducts(products) {
-      const tableBody = document.getElementById("productsTableBody");
-      tableBody.innerHTML = ''; // Clear the current list
-      products.forEach(product => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
+        tr.innerHTML = `
           <td class="p-2 border border-gray-700">${product.name}</td>
           <td class="p-2 border border-gray-700">$${product.price}</td>
+          <td class="p-2 border border-gray-700">${product.available ? 'Yes' : 'No'}</td>
           <td class="p-2 border border-gray-700">
-            <button onclick="deleteProduct('${product.id}')" class="px-2 py-1 bg-red-500 hover:bg-red-600 rounded text-white">Delete</button>
+            <button class="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 rounded text-white" onclick="editProduct('${doc.id}')">Edit</button>
+            <button class="px-2 py-1 bg-red-500 hover:bg-red-600 rounded text-white" onclick="deleteProduct('${doc.id}')">Delete</button>
           </td>
         `;
-        tableBody.appendChild(row);
+
+        productListElement.appendChild(tr);
       });
-    }
-
-    // Initial fetch of products when the page loads
-    window.onload = function () {
-      fetchProducts();
     };
-  </script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #0A192F;
-      color: white;
-      padding: 20px;
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background-color: #112240;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    input, button {
-      padding: 10px;
-      margin: 10px 0;
-      width: 100%;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      background-color: #0A192F;
-      color: white;
-    }
-    button {
-      background-color: #007BFF;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    table {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: left;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1 class="text-3xl font-bold text-center mb-6">Admin Dashboard</h1>
-    
-    <div class="add-product">
-      <h2>Add Product</h2>
-      <input type="text" id="productName" placeholder="Product Name">
-      <input type="text" id="productPrice" placeholder="Price">
-      <button onclick="addProduct()">Add Product</button>
-    </div>
 
-    <div class="products">
-      <h2>Products</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="productsTableBody">
-          <!-- Products will be listed here -->
-        </tbody>
-      </table>
-    </div>
-  </div>
+    // Add new product
+    document.getElementById("addProductBtn").addEventListener("click", async () => {
+      const name = document.getElementById("productName").value;
+      const price = parseFloat(document.getElementById("productPrice").value);
+      const available = document.getElementById("productAvailable").checked;
+      const tags = document.getElementById("productTags").value.split(",");
+      const category = document.getElementById("productCategory").value;
+      const createdAt = new Date().toISOString();
+
+      await db.collection("products").add({
+        name,
+        price,
+        available,
+        tags,
+        createdAt,
+        category
+      });
+
+      fetchProducts();  // Refresh product list
+    });
+
+    // Edit product form
+    let editingProductId = null;
+    const editProduct = async (productId) => {
+      editingProductId = productId;
+      const productDoc = await db.collection("products").doc(productId).get();
+      const product = productDoc.data();
+
+      document.getElementById("editProductName").value = product.name;
+      document.getElementById("editProductPrice").value = product.price;
+      document.getElementById("editProductAvailable").checked = product.available;
+      document.getElementById("editProductTags").value = product.tags.join(",");
+      document.getElementById("editProductCategory").value = product.category;
+
+      document.getElementById("editProductForm").style.display = "block";
+    };
+
+    // Update product
+    document.getElementById("updateProductBtn").addEventListener("click", async () => {
+      const name = document.getElementById("editProductName").value;
+      const price = parseFloat(document.getElementById("editProductPrice").value);
+      const available = document.getElementById("editProductAvailable").checked;
+      const tags = document.getElementById("editProductTags").value.split(",");
+      const category = document.getElementById("editProductCategory").value;
+
+      await db.collection("products").doc(editingProductId).update({
+        name,
+        price,
+        available,
+        tags,
+        category
+      });
+
+      fetchProducts();  // Refresh product list
+      document.getElementById("editProductForm").style.display = "none";
+    });
+
+    // Delete product
+    const deleteProduct = async (productId) => {
+      await db.collection("products").doc(productId).delete();
+      fetchProducts();  // Refresh product list
+    };
+
+    // Initialize product list
+    fetchProducts();
+  </script>
 </body>
 </html>
