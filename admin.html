@@ -1,87 +1,142 @@
-import { useState, useEffect } from "react";
-import { db } from "../firebase";
-import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
-
-export default function AdminPage() {
-  const [products, setProducts] = useState([]);
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      const querySnapshot = await getDocs(collection(db, "products"));
-      setProducts(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script>
+    // Firebase setup with provided credentials
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
     };
-    fetchProducts();
-  }, []);
 
-  const addProduct = async () => {
-    if (!name || !price) return;
-    const docRef = await addDoc(collection(db, "products"), { name, price });
-    setProducts([...products, { id: docRef.id, name, price }]);
-    setName("");
-    setPrice("");
-  };
+    // Initialize Firebase and Firestore
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-  const deleteProduct = async (id) => {
-    await deleteDoc(doc(db, "products", id));
-    setProducts(products.filter(product => product.id !== id));
-  };
+    // Function to fetch products from Firestore
+    async function fetchProducts() {
+      const productsSnapshot = await db.collection("products").get();
+      const products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderProducts(products);
+    }
 
-  return (
-    <div className="min-h-screen bg-[#0A192F] text-white p-8">
-      <h1 className="text-3xl font-bold text-center mb-6">Admin Dashboard</h1>
-      <div className="max-w-lg mx-auto bg-[#112240] p-6 rounded-lg shadow-lg">
-        <h2 className="text-xl mb-4">Add Product</h2>
-        <input 
-          type="text" 
-          placeholder="Product Name" 
-          value={name} 
-          onChange={(e) => setName(e.target.value)} 
-          className="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded"
-        />
-        <input 
-          type="text" 
-          placeholder="Price" 
-          value={price} 
-          onChange={(e) => setPrice(e.target.value)} 
-          className="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded"
-        />
-        <button 
-          onClick={addProduct} 
-          className="w-full p-2 bg-blue-500 hover:bg-blue-600 rounded text-white font-bold"
-        >
-          Add Product
-        </button>
-      </div>
-      <div className="max-w-2xl mx-auto mt-6">
-        <h2 className="text-xl mb-4">Products</h2>
-        <table className="w-full border-collapse border border-gray-700">
-          <thead>
-            <tr className="bg-[#112240]">
-              <th className="p-2 border border-gray-700">Name</th>
-              <th className="p-2 border border-gray-700">Price</th>
-              <th className="p-2 border border-gray-700">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map(product => (
-              <tr key={product.id} className="bg-[#0A192F]">
-                <td className="p-2 border border-gray-700">{product.name}</td>
-                <td className="p-2 border border-gray-700">${product.price}</td>
-                <td className="p-2 border border-gray-700">
-                  <button 
-                    onClick={() => deleteProduct(product.id)} 
-                    className="px-2 py-1 bg-red-500 hover:bg-red-600 rounded text-white"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    // Function to add a product to Firestore
+    async function addProduct() {
+      const name = document.getElementById("productName").value;
+      const price = document.getElementById("productPrice").value;
+      if (!name || !price) return;
+      const docRef = await db.collection("products").add({ name, price });
+      fetchProducts(); // Refresh products after adding a new one
+      document.getElementById("productName").value = "";
+      document.getElementById("productPrice").value = "";
+    }
+
+    // Function to delete a product from Firestore
+    async function deleteProduct(id) {
+      await db.collection("products").doc(id).delete();
+      fetchProducts(); // Refresh products after deletion
+    }
+
+    // Function to render the products in the table
+    function renderProducts(products) {
+      const tableBody = document.getElementById("productsTableBody");
+      tableBody.innerHTML = ''; // Clear the current list
+      products.forEach(product => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="p-2 border border-gray-700">${product.name}</td>
+          <td class="p-2 border border-gray-700">$${product.price}</td>
+          <td class="p-2 border border-gray-700">
+            <button onclick="deleteProduct('${product.id}')" class="px-2 py-1 bg-red-500 hover:bg-red-600 rounded text-white">Delete</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Initial fetch of products when the page loads
+    window.onload = function () {
+      fetchProducts();
+    };
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0A192F;
+      color: white;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: #112240;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      background-color: #0A192F;
+      color: white;
+    }
+    button {
+      background-color: #007BFF;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-3xl font-bold text-center mb-6">Admin Dashboard</h1>
+    
+    <div class="add-product">
+      <h2>Add Product</h2>
+      <input type="text" id="productName" placeholder="Product Name">
+      <input type="text" id="productPrice" placeholder="Price">
+      <button onclick="addProduct()">Add Product</button>
     </div>
-  );
-}
+
+    <div class="products">
+      <h2>Products</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="productsTableBody">
+          <!-- Products will be listed here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
