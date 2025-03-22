@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -38,18 +37,12 @@
         button:hover {
             background: #0097a7;
         }
-        img {
-            width: 100px; /* Adjust the size as needed */
-            height: auto;
-            margin-right: 10px;
-        }
     </style>
 
     <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-        import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -62,7 +55,6 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         async function loadProducts() {
             const productList = document.getElementById("products-list");
@@ -77,17 +69,12 @@
                     return;
                 }
 
-                querySnapshot.forEach(async (doc) => {
+                querySnapshot.forEach((doc) => {
                     const product = doc.data();
                     const productDiv = document.createElement("div");
                     productDiv.classList.add("product");
 
-                    // Get the image URL from Firebase Storage
-                    const imageRef = ref(storage, product.imagePath); // imagePath is stored in Firestore
-                    const imageUrl = await getDownloadURL(imageRef);
-
                     productDiv.innerHTML = `
-                        <img src="${imageUrl}" alt="${product.name}">
                         <span>${product.name} - $${product.price.toFixed(2)}</span>
                         <button onclick="addToCart('${doc.id}', '${product.name}', ${product.price})">Add to Cart</button>
                     `;
