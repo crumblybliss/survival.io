@@ -9,10 +9,11 @@
     <script type="module">
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getAuth, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
-        // ✅ Firebase Configuration
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
             authDomain: "survival-f35e2.firebaseapp.com",
@@ -26,116 +27,96 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
-        // DOM Elements
-        const cartList = document.getElementById("cart-list");
-        const totalAmountDiv = document.getElementById("total-amount");
-        const logoutBtn = document.getElementById("logout-btn");
-        const addItemBtn = document.getElementById("add-item-btn");
+        const storage = getStorage(app);
 
         let currentUser = null;
 
-        // ✅ Check Authentication
+        // DOM Elements
+        const profilePic = document.getElementById("profile-pic");
+        const nameInput = document.getElementById("name");
+        const emailInput = document.getElementById("email");
+        const updateProfileBtn = document.getElementById("update-profile-btn");
+        const logoutBtn = document.getElementById("logout-btn");
+        const fileInput = document.getElementById("file-input");
+
+        // Check Authentication
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                loadCart(user);
+                loadProfile(user);
             } else {
-                window.location.href = "index.html"; // Redirect if not logged in
+                window.location.href = "index.html";
             }
         });
 
-        // ✅ Load Cart Items
-        async function loadCart(user) {
-            const cartRef = doc(db, "carts", user.uid);
-            const cartSnap = await getDoc(cartRef);
-            cartList.innerHTML = "";
-            let totalAmount = 0;
-
-            if (cartSnap.exists()) {
-                const cartData = cartSnap.data();
-                if (cartData.items && cartData.items.length > 0) {
-                    cartData.items.forEach(item => {
-                        const itemElement = document.createElement("div");
-                        itemElement.classList.add("cart-item");
-                        itemElement.innerHTML = `
-                            <span>${item.name} - $${item.price.toFixed(2)}</span>
-                            <button class="remove-item-btn" data-name="${item.name}" data-price="${item.price}">Remove</button>
-                        `;
-                        cartList.appendChild(itemElement);
-                        totalAmount += item.price;
-                    });
-
-                    document.querySelectorAll(".remove-item-btn").forEach(button => {
-                        button.addEventListener("click", (event) => {
-                            const name = event.target.getAttribute("data-name");
-                            const price = parseFloat(event.target.getAttribute("data-price"));
-                            removeFromCart(name, price);
-                        });
-                    });
-                }
+        // Load User Profile
+        async function loadProfile(user) {
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+            
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                nameInput.value = userData.name || "";
+                emailInput.value = userData.email || user.email;
+                profilePic.src = userData.profilePic || "default-profile.png";
             }
-
-            totalAmountDiv.innerHTML = `<strong>Total: $${totalAmount.toFixed(2)}</strong>`;
         }
 
-        // ✅ Add Item to Cart
-        addItemBtn.addEventListener("click", async () => {
+        // Update Profile
+        updateProfileBtn.addEventListener("click", async () => {
             if (!currentUser) return;
-
-            const itemName = prompt("Enter item name:");
-            const itemPrice = parseFloat(prompt("Enter item price:"));
-
-            if (!itemName || isNaN(itemPrice)) {
-                alert("Invalid item details.");
-                return;
-            }
-
-            const cartRef = doc(db, "carts", currentUser.uid);
-            await updateDoc(cartRef, { items: arrayUnion({ name: itemName, price: itemPrice }) }, { merge: true });
-
-            loadCart(currentUser);
+            
+            const userRef = doc(db, "users", currentUser.uid);
+            await updateDoc(userRef, {
+                name: nameInput.value,
+                email: emailInput.value
+            });
+            
+            alert("Profile updated successfully!");
         });
 
-        // ✅ Remove Item from Cart
-        async function removeFromCart(name, price) {
+        // Upload Profile Picture
+        fileInput.addEventListener("change", async (event) => {
             if (!currentUser) return;
+            
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const storageRef = ref(storage, `profile_pics/${currentUser.uid}`);
+            await uploadBytes(storageRef, file);
+            const downloadURL = await getDownloadURL(storageRef);
+            
+            await updateDoc(doc(db, "users", currentUser.uid), { profilePic: downloadURL });
+            profilePic.src = downloadURL;
+        });
 
-            const cartRef = doc(db, "carts", currentUser.uid);
-            await updateDoc(cartRef, { items: arrayRemove({ name, price }) });
-
-            loadCart(currentUser);
-        }
-
-        // ✅ Logout
+        // Logout
         logoutBtn.addEventListener("click", async () => {
             await signOut(auth);
             window.location.href = "index.html";
         });
-
     </script>
 
     <style>
         body { font-family: Arial, sans-serif; background: navy; color: white; text-align: center; }
         .container { background: white; color: black; padding: 20px; border-radius: 8px; max-width: 500px; margin: 20px auto; }
-        .cart-item { display: flex; justify-content: space-between; padding: 5px 0; }
+        .profile-pic { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; }
         button { background: #4CAF50; color: white; border: none; padding: 10px; cursor: pointer; width: 100%; margin-top: 10px; }
         button:hover { background: #45a049; }
     </style>
 </head>
 <body>
-
-    <h1>My Profile & Cart</h1>
-
-    <!-- Cart Section -->
+    <h1>My Profile</h1>
+    
     <div class="container">
-        <h2>My Cart</h2>
-        <div id="cart-list"></div>
-        <div id="total-amount"></div>
-        <button id="add-item-btn">Add Item</button>
+        <img id="profile-pic" class="profile-pic" src="default-profile.png" alt="Profile Picture">
+        <input type="file" id="file-input" accept="image/*">
+        
+        <input type="text" id="name" placeholder="Enter your name">
+        <input type="email" id="email" placeholder="Enter your email">
+        <button id="update-profile-btn">Update Profile</button>
     </div>
-
+    
     <button id="logout-btn">Logout</button>
-
 </body>
 </html>
