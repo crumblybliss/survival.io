@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products - CrumblyBliss</title>
+    <title>Products</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -26,13 +26,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        .product input {
-            padding: 5px;
-            margin-right: 10px;
-            border-radius: 5px;
-            border: none;
-            width: 120px;
         }
         button {
             padding: 10px;
@@ -64,6 +57,63 @@
             text-decoration: underline;
         }
     </style>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadProducts() {
+            const productList = document.getElementById("products-list");
+            productList.innerHTML = "<p>Loading products...</p>";
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "products"));
+                productList.innerHTML = "";
+
+                if (querySnapshot.empty) {
+                    productList.innerHTML = "<p>No products available.</p>";
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const product = doc.data();
+                    const productDiv = document.createElement("div");
+                    productDiv.classList.add("product");
+                    productDiv.innerHTML = `
+                        <span>${product.name} - $${product.price.toFixed(2)}</span>
+                        <button onclick="addToCart('${doc.id}', '${product.name}', ${product.price})">Add to Cart</button>
+                    `;
+                    productList.appendChild(productDiv);
+                });
+
+            } catch (error) {
+                productList.innerHTML = "<p>Error loading products.</p>";
+                console.error("Error fetching products:", error);
+            }
+        }
+
+        window.addToCart = (id, name, price) => {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.push({ id, name, price });
+            localStorage.setItem("cart", JSON.stringify(cart));
+            alert(`${name} added to cart!`);
+        };
+
+        window.onload = loadProducts;
+    </script>
 </head>
 <body>
     <ul>
@@ -79,76 +129,6 @@
     <div class="container">
         <h2>Available Products</h2>
         <div id="products-list"></div>
-        <input type="text" id="promo-code" placeholder="Enter Promo Code">
-        <button onclick="applyPromo()">Apply Promo Code</button>
     </div>
-    
-    <!-- Google Calendar Embed -->
-    <iframe src="https://calendar.google.com/calendar/embed?src=your-calendar-id&ctz=America%2FNew_York" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            console.log("Page Loaded - Running loadProducts");
-            loadProducts();
-        });
-
-        // Array of products to display
-        const products = [
-            { name: "Paracord Survival Bracelet", price: 12.99 },
-            { name: "Chocolate Chip Cookies", price: 5.99 },
-            { name: "Oatmeal Raisin Cookies", price: 6.49 },
-            { name: "Peanut Butter Cookies", price: 5.49 }
-        ];
-
-        // Function to load and display products
-        function loadProducts() {
-            const productList = document.getElementById("products-list");
-            if (!productList) {
-                console.error("Product list container not found!");
-                return;
-            }
-
-            productList.innerHTML = ""; // Clear the list
-
-            products.forEach((product, index) => {
-                console.log("Adding product:", product);
-                const productDiv = document.createElement("div");
-                productDiv.classList.add("product");
-                productDiv.innerHTML = `
-                    <span>${product.name} - $${product.price.toFixed(2)}</span>
-                    <input type="text" id="color-${index}" placeholder="Enter color">
-                    <button onclick="addToCart(${index})">Add to Cart</button>
-                `;
-                productList.appendChild(productDiv);
-            });
-
-            console.log("Products loaded successfully.");
-        }
-
-        // Function to add products to the cart (with promo code and color)
-        function addToCart(index) {
-            const promoCode = document.getElementById("promo-code").value.trim();
-            const product = products[index];
-            if (!product) {
-                console.error("Product not found for index:", index);
-                return;
-            }
-
-            const finalPrice = (promoCode === "TESTFREE") ? 0 : product.price;
-            const colorInput = document.getElementById(`color-${index}`).value || "No color specified";
-
-            // Get cart from localStorage or initialize as empty
-            let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            cart.push({ name: product.name, price: finalPrice, color: colorInput });
-            localStorage.setItem("cart", JSON.stringify(cart));
-
-            alert(`${product.name} added to cart with color: ${colorInput} for $${finalPrice.toFixed(2)}`);
-        }
-
-        // Function to apply promo code
-        function applyPromo() {
-            alert("Promo code applied! If valid, all items will be free.");
-        }
-    </script>
 </body>
 </html>
