@@ -45,17 +45,36 @@
         button:hover {
             background: #0097a7;
         }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            background-color: #003c5a;
+        }
+        ul li {
+            display: inline;
+            margin: 10px;
+        }
+        ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        ul li a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-     <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="products.html">Products</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="commitments.html">Commitments</a></li>
-            <li><a href="cart.html">Cart<🛒</a></li>
-             <li><a href="admin.html"> Admin Dashboard <🛒</a></li>
-        </ul>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="commitments.html">Commitments</a></li>
+        <li><a href="cart.html">Cart 🛒</a></li>
+        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
+    </ul>
+
     <h1>Our Products</h1>
     <div class="container">
         <h2>Available Products</h2>
@@ -68,6 +87,7 @@
     <iframe src="https://calendar.google.com/calendar/embed?src=your-calendar-id&ctz=America%2FNew_York" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
 
     <script>
+        // Array of products to display
         const products = [
             { name: "Paracord Survival Bracelet", price: 12.99 },
             { name: "Chocolate Chip Cookies", price: 5.99 },
@@ -75,10 +95,12 @@
             { name: "Peanut Butter Cookies", price: 5.49 }
         ];
 
+        // Function to load and display products
         function loadProducts() {
             const productList = document.getElementById("products-list");
             productList.innerHTML = "";
 
+            // Loop through products array and create HTML elements
             products.forEach((product, index) => {
                 const productDiv = document.createElement("div");
                 productDiv.classList.add("product");
@@ -91,12 +113,14 @@
             });
         }
 
+        // Function to add products to the cart (with promo code and color)
         function addToCart(index) {
-            let promoCode = document.getElementById("promo-code").value.trim();
-            let product = products[index];
-            let finalPrice = (promoCode === "TESTFREE") ? 0 : product.price;
-            let colorInput = document.getElementById(`color-${index}`).value || "No color specified";
+            const promoCode = document.getElementById("promo-code").value.trim();
+            const product = products[index];
+            const finalPrice = (promoCode === "TESTFREE") ? 0 : product.price;
+            const colorInput = document.getElementById(`color-${index}`).value || "No color specified";
 
+            // Get cart from localStorage or initialize as empty
             let cart = JSON.parse(localStorage.getItem("cart")) || [];
             cart.push({ name: product.name, price: finalPrice, color: colorInput });
             localStorage.setItem("cart", JSON.stringify(cart));
@@ -104,12 +128,13 @@
             alert(`${product.name} added to cart with color: ${colorInput} for $${finalPrice.toFixed(2)}`);
         }
 
+        // Function to apply promo code
         function applyPromo() {
             alert("Promo code applied! If valid, all items will be free.");
         }
 
+        // Load products when the page loads
         window.onload = loadProducts;
     </script>
 </body>
 </html>
-
