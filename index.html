@@ -39,14 +39,19 @@
         .container {
             margin-top: 50px;
         }
-        button {
+        input, button {
             padding: 10px;
-            background: #00bcd4;
-            color: white;
+            margin: 5px;
             border: none;
             border-radius: 5px;
+        }
+        input {
+            width: 80%;
+        }
+        button {
+            background: #00bcd4;
+            color: white;
             cursor: pointer;
-            margin-top: 20px;
         }
         button:hover {
             background: #0097a7;
@@ -63,19 +68,27 @@
             <li><a href="about.html">About</a></li>
             <li><a href="cart.html">Cart 🛒</a></li>
         </ul>
-        <button id="login-btn">Login with Google</button>
-        <button id="logout-btn" style="display: none;">Logout</button>
     </nav>
 
     <div class="container">
         <h1>Welcome to Survival Store</h1>
         <p>Your best source for survival gear and handmade products.</p>
+        
+        <h3>Login</h3>
+        <input type="email" id="email" placeholder="Email"><br>
+        <input type="password" id="password" placeholder="Password"><br>
+        <button id="login-btn">Login</button>
+        <button id="register-btn">Register</button>
+        <br><br>
+        <button id="google-login">Login with Google</button>
+        <br><br>
+        <button id="logout-btn" style="display: none;">Logout</button>
     </div>
 
     <script type="module">
         // Firebase Config
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -92,19 +105,51 @@
 
         const authorizedEmails = ["carr.isaiah@lposd.org", "nelson.jacob@lposd.org"];
 
-        document.getElementById("login-btn").addEventListener("click", () => {
+        // Google Login
+        document.getElementById("google-login").addEventListener("click", () => {
             signInWithPopup(auth, provider).then((result) => {
-                const user = result.user;
-                if (authorizedEmails.includes(user.email)) {
-                    window.location.href = "admin.html"; // Redirect to admin page
-                } else {
-                    window.location.href = "index.html"; // Redirect customers to home
-                }
+                handleLogin(result.user.email);
             }).catch((error) => {
                 console.error("Login failed:", error);
             });
         });
 
+        // Email/Password Login
+        document.getElementById("login-btn").addEventListener("click", () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    handleLogin(userCredential.user.email);
+                })
+                .catch((error) => {
+                    alert("Login Failed: " + error.message);
+                });
+        });
+
+        // Register New User
+        document.getElementById("register-btn").addEventListener("click", () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    alert("Account Created! Please log in.");
+                })
+                .catch((error) => {
+                    alert("Registration Failed: " + error.message);
+                });
+        });
+
+        // Handle Login & Redirect
+        function handleLogin(email) {
+            if (authorizedEmails.includes(email)) {
+                window.location.href = "admin.html"; // Admin Page
+            } else {
+                window.location.href = "index.html"; // Customer Home
+            }
+        }
+
+        // Logout
         document.getElementById("logout-btn").addEventListener("click", () => {
             signOut(auth).then(() => {
                 alert("Logged out successfully!");
@@ -112,12 +157,11 @@
             });
         });
 
+        // Auto Check Login State
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                document.getElementById("login-btn").style.display = "none";
                 document.getElementById("logout-btn").style.display = "block";
             } else {
-                document.getElementById("login-btn").style.display = "block";
                 document.getElementById("logout-btn").style.display = "none";
             }
         });
