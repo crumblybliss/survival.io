@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,12 @@
             color: #f1f1f1;
             text-align: center;
         }
+
+        /* Add space between navigation and content */
+        ul {
+            margin-bottom: 20px;
+        }
+
         .container {
             max-width: 900px;
             margin: 50px auto;
@@ -18,6 +25,7 @@
             padding: 20px;
             border-radius: 8px;
         }
+
         .product {
             background: #003c5a;
             padding: 15px;
@@ -27,6 +35,7 @@
             justify-content: space-between;
             align-items: center;
         }
+
         button {
             padding: 10px;
             background: #00bcd4;
@@ -35,9 +44,11 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         button:hover {
             background: #0097a7;
         }
+
         .input-field {
             padding: 10px;
             margin: 5px;
@@ -45,6 +56,16 @@
             border: 1px solid #ddd;
             color: white;
             border-radius: 5px;
+        }
+
+        /* Add hover effect for the input fields */
+        .input-field:hover {
+            background-color: #002d44;
+        }
+
+        /* Add focus effect for input fields */
+        .input-field:focus {
+            border-color: #00bcd4;
         }
     </style>
 
@@ -135,16 +156,19 @@
             }
         }
 
-        // Delete a product
+        // Delete a product with confirmation
         async function deleteProduct(id) {
-            const productRef = doc(db, "products", id);
-            await deleteDoc(productRef);
-            loadProducts(); // Refresh product list
+            if (confirm("Are you sure you want to delete this product?")) {
+                const productRef = doc(db, "products", id);
+                await deleteDoc(productRef);
+                loadProducts(); // Refresh product list
+            }
         }
 
         window.onload = loadProducts;
     </script>
 </head>
+
 <body>
     <ul>
         <li><a href="index.html">Home</a></li>
@@ -169,4 +193,5 @@
         <div id="products-list"></div>
     </div>
 </body>
+
 </html>
