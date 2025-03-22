@@ -100,8 +100,11 @@
             const productList = document.getElementById("products-list");
             productList.innerHTML = "";
 
+            console.log("Loading products..."); // Debugging log
+
             // Loop through products array and create HTML elements
             products.forEach((product, index) => {
+                console.log("Adding product:", product); // Debugging log
                 const productDiv = document.createElement("div");
                 productDiv.classList.add("product");
                 productDiv.innerHTML = `
@@ -134,7 +137,10 @@
         }
 
         // Load products when the page loads
-        window.onload = loadProducts;
+        window.onload = () => {
+            console.log("Page Loaded");
+            loadProducts();
+        };
     </script>
 </body>
 </html>
