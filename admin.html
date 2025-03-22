@@ -32,6 +32,15 @@
             margin-bottom: 10px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+        }
+        .product-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-right: 15px;
+            border-radius: 5px;
         }
         button {
             background-color: #ff4c4c;
@@ -45,7 +54,7 @@
         button:hover {
             background-color: #ff1a1a;
         }
-        input[type="text"], input[type="number"] {
+        input[type="text"], input[type="number"], input[type="file"] {
             padding: 10px;
             margin: 5px;
             border: 1px solid #ccc;
@@ -59,7 +68,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -73,8 +83,8 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
-        // Only allow admin access
         const authorizedUsers = ["cheapbraclets@outlook.com"];
 
         onAuthStateChanged(auth, async (user) => {
@@ -85,64 +95,53 @@
             }
         });
 
-        // Function to load and display products
         async function loadProducts() {
             const productsRef = collection(db, "products");
-            try {
-                const querySnapshot = await getDocs(productsRef);
-                const productList = document.getElementById("product-list");
-                productList.innerHTML = ""; // Clear existing products
+            const querySnapshot = await getDocs(productsRef);
+            const productList = document.getElementById("product-list");
+            productList.innerHTML = "";
 
-                if (querySnapshot.empty) {
-                    productList.innerHTML = "<p>No products available.</p>";
-                } else {
-                    querySnapshot.forEach((docSnap) => {
-                        const product = docSnap.data();
-                        const productDiv = document.createElement("div");
-                        productDiv.classList.add('product-item');
-                        productDiv.innerHTML = `
-                            <h3>${product.name}</h3>
-                            <p>Price: $${product.price}</p>
-                            <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
-                        `;
-                        productList.appendChild(productDiv);
-                    });
-                }
-            } catch (error) {
-                console.error("Error loading products:", error);
-            }
+            querySnapshot.forEach((docSnap) => {
+                const product = docSnap.data();
+                const productDiv = document.createElement("div");
+                productDiv.classList.add('product-item');
+                productDiv.innerHTML = `
+                    <img src="${product.imageURL}" alt="${product.name}">
+                    <div>
+                        <h3>${product.name}</h3>
+                        <p>Price: $${product.price}</p>
+                        <button onclick="deleteProduct('${docSnap.id}', '${product.imagePath}')">Delete</button>
+                    </div>
+                `;
+                productList.appendChild(productDiv);
+            });
         }
 
-        // Function to delete a product
-        window.deleteProduct = async (id) => {
-            try {
-                await deleteDoc(doc(db, "products", id));
-                alert("Product deleted successfully!");
-                loadProducts(); // Reload products after deletion
-            } catch (error) {
-                console.error("Error deleting product:", error);
-                alert("Failed to delete the product.");
-            }
+        window.deleteProduct = async (id, imagePath) => {
+            await deleteDoc(doc(db, "products", id));
+            await deleteObject(ref(storage, imagePath));
+            alert("Product deleted successfully!");
+            loadProducts();
         };
 
-        // Function to add a product
         window.addProduct = async () => {
             const name = document.getElementById("new-name").value;
             const price = parseFloat(document.getElementById("new-price").value);
+            const imageFile = document.getElementById("new-image").files[0];
 
-            if (!name || isNaN(price)) {
-                alert("Please provide both name and valid price.");
+            if (!name || isNaN(price) || !imageFile) {
+                alert("Please provide all details, including an image.");
                 return;
             }
 
-            try {
-                await addDoc(collection(db, "products"), { name, price });
-                alert("Product added successfully!");
-                loadProducts(); // Reload products after adding
-            } catch (error) {
-                console.error("Error adding product:", error);
-                alert("Failed to add the product.");
-            }
+            const imagePath = `product_images/${imageFile.name}`;
+            const imageRef = ref(storage, imagePath);
+            await uploadBytes(imageRef, imageFile);
+            const imageURL = await getDownloadURL(imageRef);
+
+            await addDoc(collection(db, "products"), { name, price, imageURL, imagePath });
+            alert("Product added successfully!");
+            loadProducts();
         };
     </script>
 </head>
@@ -153,6 +152,7 @@
         <div class="add-product">
             <input type="text" id="new-name" placeholder="Product Name" />
             <input type="number" id="new-price" placeholder="Price" />
+            <input type="file" id="new-image" accept="image/*" />
             <button onclick="addProduct()">Add Product</button>
         </div>
 
@@ -161,4 +161,3 @@
     </div>
 </body>
 </html>
-
