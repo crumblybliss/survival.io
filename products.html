@@ -12,39 +12,6 @@
             text-align: center;
         }
 
-        .profile-pic {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 3px solid #fff;
-        }
-
-        .nav-menu {
-            padding: 10px;
-            background: #001f3d; /* Dark Navy */
-        }
-
-        .nav-menu ul {
-            list-style: none;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-        }
-
-        .nav-menu ul li {
-            margin: 0 15px;
-        }
-
-        .nav-menu ul li a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
         .container {
             max-width: 900px;
             margin: 50px auto;
@@ -83,38 +50,29 @@
         button:hover {
             background: #0097a7;
         }
+
+        /* Calendar Styling */
+        #calendar {
+            margin-top: 20px;
+            background: white;
+            color: black;
+            padding: 15px;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
-
-    <!-- Profile Picture -->
-    <img id="profile-pic" src="default-profile.png" alt="Profile Picture" class="profile-pic" onclick="window.location.href='profile.html'">
-
-    <!-- Navigation Menu -->
-    <nav class="nav-menu">
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="products.html">Products</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="commitments.html">Commitments</a></li>
-            <li><a href="cart.html">Cart 🛒</a></li>
-        </ul>
-    </nav>
-
-    <div class="container">
-        <h1>Our Products</h1>
-
-        <div id="products-list">
-            <!-- Products will be loaded dynamically -->
-        </div>
-    </div>
-
+    <h1>Our Products</h1>
+    <div class="container" id="products-list"></div>
+    
+    <!-- Calendar -->
+    <div id="calendar"></div>
+    
     <script>
         const products = [
             { name: "Paracord Survival Bracelet", price: 12.99 },
-            { name: "Chocolate Chip Cookies", price: 5.99 },
-            { name: "Oatmeal Raisin Cookies", price: 6.49 },
-            { name: "Peanut Butter Cookies", price: 5.49 }
+            { name: "Bead Bracelet", price: 9.99 },
+            { name: "Chocolate Chip Cookies", price: 5.99 }
         ];
 
         function loadProducts() {
@@ -124,30 +82,48 @@
             products.forEach((product, index) => {
                 const productDiv = document.createElement("div");
                 productDiv.classList.add("product");
-
+                
                 productDiv.innerHTML = `
                     <span>${product.name} - $${product.price.toFixed(2)}</span>
                     <input type="text" id="color-${index}" placeholder="Enter color">
+                    <input type="text" id="promo-${index}" placeholder="Promo Code">
                     <button onclick="addToCart(${index})">Add to Cart</button>
                 `;
-
+                
                 productList.appendChild(productDiv);
             });
         }
 
         function addToCart(index) {
             const colorInput = document.getElementById(`color-${index}`).value || "No color specified";
-            const product = products[index];
+            const promoCode = document.getElementById(`promo-${index}`).value;
+            let product = products[index];
+            
+            if (promoCode === "TESTFREE") {
+                product.price = 0; 
+            }
 
-            let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            cart.push({ name: product.name, price: product.price, color: colorInput });
-            localStorage.setItem("cart", JSON.stringify(cart));
-
-            alert(`${product.name} added to cart with color: ${colorInput}`);
+            alert(`${product.name} added to cart with color: ${colorInput} and price: $${product.price}`);
+            sendSMSNotification(product.name, colorInput, product.price);
         }
 
-        window.onload = loadProducts;
-    </script>
+        function sendSMSNotification(name, color, price) {
+            fetch("https://your-server-endpoint.com/send-sms", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, color, price })
+            });
+        }
 
+        function loadCalendar() {
+            document.getElementById("calendar").innerHTML = "<iframe src='https://calendar.google.com/calendar/embed?src=your-calendar-id' width='300' height='300'></iframe>";
+        }
+
+        window.onload = () => {
+            loadProducts();
+            loadCalendar();
+        };
+    </script>
 </body>
 </html>
+
