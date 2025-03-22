@@ -1,169 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - CrumblyBliss</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #0a1d37;
+            color: #f1f1f1;
+            text-align: center;
+        }
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .product {
+            background: #003c5a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        button {
+            padding: 10px;
+            background: #00bcd4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0097a7;
+        }
+        .input-field {
+            padding: 10px;
+            margin: 5px;
+            background: #003c5a;
+            border: 1px solid #ddd;
+            color: white;
+            border-radius: 5px;
+        }
+    </style>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Load and display products
+        async function loadProducts() {
+            const productList = document.getElementById("products-list");
+            productList.innerHTML = "<p>Loading products...</p>";
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "products"));
+                productList.innerHTML = "";
+
+                if (querySnapshot.empty) {
+                    productList.innerHTML = "<p>No products available.</p>";
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const product = doc.data();
+                    const productDiv = document.createElement("div");
+                    productDiv.classList.add("product");
+
+                    productDiv.innerHTML = `
+                        <span>${product.name} - $${product.price.toFixed(2)}</span>
+                        <button onclick="editProduct('${doc.id}', '${product.name}', ${product.price}, '${product.category}')">Edit</button>
+                        <button onclick="deleteProduct('${doc.id}')">Delete</button>
+                    `;
+                    productList.appendChild(productDiv);
+                });
+
+            } catch (error) {
+                productList.innerHTML = "<p>Error loading products.</p>";
+                console.error("Error fetching products:", error);
+            }
+        }
+
+        // Add new product
+        async function addProduct(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("productName").value;
+            const price = parseFloat(document.getElementById("productPrice").value);
+            const category = document.getElementById("productCategory").value;
+
+            try {
+                await addDoc(collection(db, "products"), {
+                    name,
+                    price,
+                    category
+                });
+                loadProducts(); // Refresh product list
+            } catch (error) {
+                console.error("Error adding product:", error);
+            }
+        }
+
+        // Edit existing product
+        async function editProduct(id, name, price, category) {
+            const newName = prompt("Edit product name:", name);
+            const newPrice = prompt("Edit product price:", price);
+            const newCategory = prompt("Edit product category:", category);
+
+            if (newName && newPrice && newCategory) {
+                const productRef = doc(db, "products", id);
+                await updateDoc(productRef, {
+                    name: newName,
+                    price: parseFloat(newPrice),
+                    category: newCategory
+                });
+                loadProducts(); // Refresh product list
+            }
+        }
+
+        // Delete a product
+        async function deleteProduct(id) {
+            const productRef = doc(db, "products", id);
+            await deleteDoc(productRef);
+            loadProducts(); // Refresh product list
+        }
+
+        window.onload = loadProducts;
+    </script>
 </head>
-<body class="bg-[#0A192F] text-white">
+<body>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="commitments.html">Commitments</a></li>
+        <li><a href="cart.html">Cart 🛒</a></li>
+        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
+    </ul>
 
-  <div class="min-h-screen p-8">
-    <h1 class="text-3xl font-bold text-center mb-6">Admin Dashboard</h1>
+    <h1>Admin Dashboard</h1>
+    <div class="container">
+        <h2>Add New Product</h2>
+        <form onsubmit="addProduct(event)">
+            <input type="text" id="productName" class="input-field" placeholder="Product Name" required>
+            <input type="number" id="productPrice" class="input-field" placeholder="Product Price" required>
+            <input type="text" id="productCategory" class="input-field" placeholder="Product Category" required>
+            <button type="submit">Add Product</button>
+        </form>
 
-    <!-- Add Product Form -->
-    <div class="max-w-lg mx-auto bg-[#112240] p-6 rounded-lg shadow-lg">
-      <h2 class="text-xl mb-4">Add Product</h2>
-      <input type="text" id="productName" placeholder="Product Name" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
-      <input type="number" id="productPrice" placeholder="Price" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
-      <label class="text-white">Available</label>
-      <input type="checkbox" id="productAvailable" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
-      <input type="text" id="productTags" placeholder="Tags (comma separated)" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
-      <input type="text" id="productCategory" placeholder="Category" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
-      <button id="addProductBtn" class="w-full p-2 bg-blue-500 hover:bg-blue-600 rounded text-white font-bold">Add Product</button>
+        <h2>Manage Products</h2>
+        <div id="products-list"></div>
     </div>
-
-    <!-- Edit Product Form -->
-    <div class="max-w-lg mx-auto bg-[#112240] p-6 rounded-lg shadow-lg mt-6" id="editProductForm" style="display: none;">
-      <h2 class="text-xl mb-4">Edit Product</h2>
-      <input type="text" id="editProductName" placeholder="Product Name" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
-      <input type="number" id="editProductPrice" placeholder="Price" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
-      <label class="text-white">Available</label>
-      <input type="checkbox" id="editProductAvailable" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
-      <input type="text" id="editProductTags" placeholder="Tags (comma separated)" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
-      <input type="text" id="editProductCategory" placeholder="Category" class="w-full p-2 mb-2 bg-[#0A192F] border border-gray-600 rounded">
-      <button id="updateProductBtn" class="w-full p-2 bg-blue-500 hover:bg-blue-600 rounded text-white font-bold">Update Product</button>
-    </div>
-
-    <!-- Product List Table -->
-    <div class="max-w-2xl mx-auto mt-6">
-      <h2 class="text-xl mb-4">Products</h2>
-      <table class="w-full border-collapse border border-gray-700">
-        <thead>
-          <tr class="bg-[#112240]">
-            <th class="p-2 border border-gray-700">Name</th>
-            <th class="p-2 border border-gray-700">Price</th>
-            <th class="p-2 border border-gray-700">Available</th>
-            <th class="p-2 border border-gray-700">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="productList">
-          <!-- Product rows will be added here dynamically -->
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-      authDomain: "survival-f35e2.firebaseapp.com",
-      projectId: "survival-f35e2",
-      storageBucket: "survival-f35e2.appspot.com",
-      messagingSenderId: "704462603548",
-      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const productListElement = document.getElementById("productList");
-
-    // Function to get and display products
-    const fetchProducts = async () => {
-      const querySnapshot = await getDocs(collection(db, "products"));
-      productListElement.innerHTML = "";  // Clear the list before displaying new data
-
-      querySnapshot.forEach((docSnapshot) => {
-        const product = docSnapshot.data();
-        const tr = document.createElement("tr");
-
-        tr.innerHTML = `
-          <td class="p-2 border border-gray-700">${product.name}</td>
-          <td class="p-2 border border-gray-700">$${product.price}</td>
-          <td class="p-2 border border-gray-700">${product.available ? 'Yes' : 'No'}</td>
-          <td class="p-2 border border-gray-700">
-            <button class="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 rounded text-white" onclick="editProduct('${docSnapshot.id}')">Edit</button>
-            <button class="px-2 py-1 bg-red-500 hover:bg-red-600 rounded text-white" onclick="deleteProduct('${docSnapshot.id}')">Delete</button>
-          </td>
-        `;
-
-        productListElement.appendChild(tr);
-      });
-    };
-
-    // Add new product
-    document.getElementById("addProductBtn").addEventListener("click", async () => {
-      const name = document.getElementById("productName").value;
-      const price = parseFloat(document.getElementById("productPrice").value);
-      const available = document.getElementById("productAvailable").checked;
-      const tags = document.getElementById("productTags").value.split(",");
-      const category = document.getElementById("productCategory").value;
-      const createdAt = new Date().toISOString();
-
-      await addDoc(collection(db, "products"), {
-        name,
-        price,
-        available,
-        tags,
-        createdAt,
-        category
-      });
-
-      fetchProducts();  // Refresh product list
-    });
-
-    // Edit product form
-    let editingProductId = null;
-    const editProduct = async (productId) => {
-      editingProductId = productId;
-      const productDoc = await getDoc(doc(db, "products", productId));
-      const product = productDoc.data();
-
-      document.getElementById("editProductName").value = product.name;
-      document.getElementById("editProductPrice").value = product.price;
-      document.getElementById("editProductAvailable").checked = product.available;
-      document.getElementById("editProductTags").value = product.tags.join(",");
-      document.getElementById("editProductCategory").value = product.category;
-
-      document.getElementById("editProductForm").style.display = "block";
-    };
-
-    // Update product
-    document.getElementById("updateProductBtn").addEventListener("click", async () => {
-      const name = document.getElementById("editProductName").value;
-      const price = parseFloat(document.getElementById("editProductPrice").value);
-      const available = document.getElementById("editProductAvailable").checked;
-      const tags = document.getElementById("editProductTags").value.split(",");
-      const category = document.getElementById("editProductCategory").value;
-
-      await updateDoc(doc(db, "products", editingProductId), {
-        name,
-        price,
-        available,
-        tags,
-        category
-      });
-
-      fetchProducts();  // Refresh product list
-      document.getElementById("editProductForm").style.display = "none";
-    });
-
-    // Delete product
-    const deleteProduct = async (productId) => {
-      await deleteDoc(doc(db, "products", productId));
-      fetchProducts();  // Refresh product list
-    };
-
-    // Initialize product list
-    fetchProducts();
-  </script>
 </body>
 </html>
-
