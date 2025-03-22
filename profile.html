@@ -9,11 +9,11 @@
     <script type="module">
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
-        // Firebase Configuration
+        // ✅ Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
             authDomain: "survival-f35e2.firebaseapp.com",
@@ -28,95 +28,100 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const storage = getStorage(app);
-
-        let currentUser = null;
+        const provider = new GoogleAuthProvider();
 
         // DOM Elements
         const profilePic = document.getElementById("profile-pic");
-        const nameInput = document.getElementById("name");
-        const emailInput = document.getElementById("email");
-        const updateProfileBtn = document.getElementById("update-profile-btn");
-        const logoutBtn = document.getElementById("logout-btn");
+        const userName = document.getElementById("user-name");
         const fileInput = document.getElementById("file-input");
+        const saveBtn = document.getElementById("save-btn");
+        const googleLoginBtn = document.getElementById("google-login-btn");
+        const logoutBtn = document.getElementById("logout-btn");
 
-        // Check Authentication
+        let currentUser = null;
+
+        // ✅ Google Login
+        googleLoginBtn.addEventListener("click", async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                await setDoc(doc(db, "users", user.uid), { name: user.displayName, profilePic: user.photoURL }, { merge: true });
+                updateUI(user);
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // ✅ Check Authentication
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                loadProfile(user);
+                updateUI(user);
             } else {
-                window.location.href = "index.html";
+                profilePic.src = "default-profile.png";
+                userName.value = "";
             }
         });
 
-        // Load User Profile
-        async function loadProfile(user) {
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
-            
-            if (userSnap.exists()) {
-                const userData = userSnap.data();
-                nameInput.value = userData.name || "";
-                emailInput.value = userData.email || user.email;
+        // ✅ Update UI
+        async function updateUI(user) {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
                 profilePic.src = userData.profilePic || "default-profile.png";
+                userName.value = userData.name || "";
             }
         }
 
-        // Update Profile
-        updateProfileBtn.addEventListener("click", async () => {
-            if (!currentUser) return;
-            
-            const userRef = doc(db, "users", currentUser.uid);
-            await updateDoc(userRef, {
-                name: nameInput.value,
-                email: emailInput.value
-            });
-            
-            alert("Profile updated successfully!");
-        });
-
-        // Upload Profile Picture
+        // ✅ Upload Profile Picture
         fileInput.addEventListener("change", async (event) => {
             if (!currentUser) return;
-            
             const file = event.target.files[0];
             if (!file) return;
-            
+
             const storageRef = ref(storage, `profile_pics/${currentUser.uid}`);
             await uploadBytes(storageRef, file);
             const downloadURL = await getDownloadURL(storageRef);
-            
+
             await updateDoc(doc(db, "users", currentUser.uid), { profilePic: downloadURL });
             profilePic.src = downloadURL;
         });
 
-        // Logout
+        // ✅ Save Profile Name
+        saveBtn.addEventListener("click", async () => {
+            if (!currentUser) return;
+            await updateDoc(doc(db, "users", currentUser.uid), { name: userName.value });
+            alert("Profile updated!");
+        });
+
+        // ✅ Logout
         logoutBtn.addEventListener("click", async () => {
             await signOut(auth);
             window.location.href = "index.html";
         });
+
     </script>
 
     <style>
         body { font-family: Arial, sans-serif; background: navy; color: white; text-align: center; }
         .container { background: white; color: black; padding: 20px; border-radius: 8px; max-width: 500px; margin: 20px auto; }
-        .profile-pic { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; }
         button { background: #4CAF50; color: white; border: none; padding: 10px; cursor: pointer; width: 100%; margin-top: 10px; }
         button:hover { background: #45a049; }
     </style>
 </head>
 <body>
+
     <h1>My Profile</h1>
-    
+
     <div class="container">
-        <img id="profile-pic" class="profile-pic" src="default-profile.png" alt="Profile Picture">
-        <input type="file" id="file-input" accept="image/*">
-        
-        <input type="text" id="name" placeholder="Enter your name">
-        <input type="email" id="email" placeholder="Enter your email">
-        <button id="update-profile-btn">Update Profile</button>
+        <img id="profile-pic" src="default-profile.png" alt="Profile Picture" width="100" height="100"><br>
+        <input type="file" id="file-input"><br>
+        <input type="text" id="user-name" placeholder="Enter your name"><br>
+        <button id="save-btn">Save Profile</button>
+        <button id="google-login-btn">Login with Google</button>
+        <button id="logout-btn">Logout</button>
     </div>
-    
-    <button id="logout-btn">Logout</button>
+
 </body>
 </html>
+
