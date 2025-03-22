@@ -55,9 +55,10 @@
   </div>
 
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
     // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -69,18 +70,18 @@
     };
 
     // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
     const productListElement = document.getElementById("productList");
 
     // Function to get and display products
     const fetchProducts = async () => {
-      const querySnapshot = await db.collection("products").get();
+      const querySnapshot = await getDocs(collection(db, "products"));
       productListElement.innerHTML = "";  // Clear the list before displaying new data
 
-      querySnapshot.forEach((doc) => {
-        const product = doc.data();
+      querySnapshot.forEach((docSnapshot) => {
+        const product = docSnapshot.data();
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
@@ -88,8 +89,8 @@
           <td class="p-2 border border-gray-700">$${product.price}</td>
           <td class="p-2 border border-gray-700">${product.available ? 'Yes' : 'No'}</td>
           <td class="p-2 border border-gray-700">
-            <button class="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 rounded text-white" onclick="editProduct('${doc.id}')">Edit</button>
-            <button class="px-2 py-1 bg-red-500 hover:bg-red-600 rounded text-white" onclick="deleteProduct('${doc.id}')">Delete</button>
+            <button class="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 rounded text-white" onclick="editProduct('${docSnapshot.id}')">Edit</button>
+            <button class="px-2 py-1 bg-red-500 hover:bg-red-600 rounded text-white" onclick="deleteProduct('${docSnapshot.id}')">Delete</button>
           </td>
         `;
 
@@ -106,7 +107,7 @@
       const category = document.getElementById("productCategory").value;
       const createdAt = new Date().toISOString();
 
-      await db.collection("products").add({
+      await addDoc(collection(db, "products"), {
         name,
         price,
         available,
@@ -122,7 +123,7 @@
     let editingProductId = null;
     const editProduct = async (productId) => {
       editingProductId = productId;
-      const productDoc = await db.collection("products").doc(productId).get();
+      const productDoc = await getDoc(doc(db, "products", productId));
       const product = productDoc.data();
 
       document.getElementById("editProductName").value = product.name;
@@ -142,7 +143,7 @@
       const tags = document.getElementById("editProductTags").value.split(",");
       const category = document.getElementById("editProductCategory").value;
 
-      await db.collection("products").doc(editingProductId).update({
+      await updateDoc(doc(db, "products", editingProductId), {
         name,
         price,
         available,
@@ -156,7 +157,7 @@
 
     // Delete product
     const deleteProduct = async (productId) => {
-      await db.collection("products").doc(productId).delete();
+      await deleteDoc(doc(db, "products", productId));
       fetchProducts();  // Refresh product list
     };
 
@@ -165,3 +166,4 @@
   </script>
 </body>
 </html>
+
