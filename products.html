@@ -11,7 +11,6 @@
             color: #f1f1f1;
             text-align: center;
         }
-
         .container {
             max-width: 900px;
             margin: 50px auto;
@@ -19,9 +18,8 @@
             padding: 20px;
             border-radius: 8px;
         }
-
         .product {
-            background: #003c5a; /* Medium Navy */
+            background: #003c5a;
             padding: 15px;
             border-radius: 8px;
             margin: 15px 0;
@@ -29,7 +27,6 @@
             justify-content: space-between;
             align-items: center;
         }
-
         .product input {
             padding: 5px;
             margin-right: 10px;
@@ -37,7 +34,6 @@
             border: none;
             width: 120px;
         }
-
         button {
             padding: 10px;
             background: #00bcd4;
@@ -46,33 +42,29 @@
             border-radius: 5px;
             cursor: pointer;
         }
-
         button:hover {
             background: #0097a7;
-        }
-
-        /* Calendar Styling */
-        #calendar {
-            margin-top: 20px;
-            background: white;
-            color: black;
-            padding: 15px;
-            border-radius: 10px;
         }
     </style>
 </head>
 <body>
     <h1>Our Products</h1>
-    <div class="container" id="products-list"></div>
+    <div class="container">
+        <h2>Available Products</h2>
+        <div id="products-list"></div>
+        <input type="text" id="promo-code" placeholder="Enter Promo Code">
+        <button onclick="applyPromo()">Apply Promo Code</button>
+    </div>
     
-    <!-- Calendar -->
-    <div id="calendar"></div>
-    
+    <!-- Google Calendar Embed -->
+    <iframe src="https://calendar.google.com/calendar/embed?src=your-calendar-id&ctz=America%2FNew_York" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+
     <script>
         const products = [
             { name: "Paracord Survival Bracelet", price: 12.99 },
-            { name: "Bead Bracelet", price: 9.99 },
-            { name: "Chocolate Chip Cookies", price: 5.99 }
+            { name: "Chocolate Chip Cookies", price: 5.99 },
+            { name: "Oatmeal Raisin Cookies", price: 6.49 },
+            { name: "Peanut Butter Cookies", price: 5.49 }
         ];
 
         function loadProducts() {
@@ -82,47 +74,33 @@
             products.forEach((product, index) => {
                 const productDiv = document.createElement("div");
                 productDiv.classList.add("product");
-                
                 productDiv.innerHTML = `
                     <span>${product.name} - $${product.price.toFixed(2)}</span>
                     <input type="text" id="color-${index}" placeholder="Enter color">
-                    <input type="text" id="promo-${index}" placeholder="Promo Code">
                     <button onclick="addToCart(${index})">Add to Cart</button>
                 `;
-                
                 productList.appendChild(productDiv);
             });
         }
 
         function addToCart(index) {
-            const colorInput = document.getElementById(`color-${index}`).value || "No color specified";
-            const promoCode = document.getElementById(`promo-${index}`).value;
+            let promoCode = document.getElementById("promo-code").value.trim();
             let product = products[index];
-            
-            if (promoCode === "TESTFREE") {
-                product.price = 0; 
-            }
+            let finalPrice = (promoCode === "TESTFREE") ? 0 : product.price;
+            let colorInput = document.getElementById(`color-${index}`).value || "No color specified";
 
-            alert(`${product.name} added to cart with color: ${colorInput} and price: $${product.price}`);
-            sendSMSNotification(product.name, colorInput, product.price);
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.push({ name: product.name, price: finalPrice, color: colorInput });
+            localStorage.setItem("cart", JSON.stringify(cart));
+
+            alert(`${product.name} added to cart with color: ${colorInput} for $${finalPrice.toFixed(2)}`);
         }
 
-        function sendSMSNotification(name, color, price) {
-            fetch("https://your-server-endpoint.com/send-sms", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, color, price })
-            });
+        function applyPromo() {
+            alert("Promo code applied! If valid, all items will be free.");
         }
 
-        function loadCalendar() {
-            document.getElementById("calendar").innerHTML = "<iframe src='https://calendar.google.com/calendar/embed?src=your-calendar-id' width='300' height='300'></iframe>";
-        }
-
-        window.onload = () => {
-            loadProducts();
-            loadCalendar();
-        };
+        window.onload = loadProducts;
     </script>
 </body>
 </html>
