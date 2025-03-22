@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor Dashboard</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const authorizedUsers = ["carr.isaiah@lposd", "nelson.jacob@lposd.org"];
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user && authorizedUsers.includes(user.email)) {
+                loadProducts();
+            } else {
+                document.body.innerHTML = "<h2>Access Denied</h2>";
+            }
+        });
+
+        async function loadProducts() {
+            const productsRef = collection(db, "products");
+            const querySnapshot = await getDocs(productsRef);
+            const productList = document.getElementById("product-list");
+            productList.innerHTML = "";
+
+            querySnapshot.forEach((docSnap) => {
+                const product = docSnap.data();
+                const productDiv = document.createElement("div");
+                productDiv.innerHTML = `
+                    <div>
+                        <input type="text" value="${product.name}" id="name-${docSnap.id}" />
+                        <input type="number" value="${product.price}" id="price-${docSnap.id}" />
+                        <button onclick="updateProduct('${docSnap.id}')">Update</button>
+                        <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
+                    </div>
+                `;
+                productList.appendChild(productDiv);
+            });
+        }
+
+        window.updateProduct = async (id) => {
+            const name = document.getElementById(`name-${id}`).value;
+            const price = parseFloat(document.getElementById(`price-${id}`).value);
+            const productRef = doc(db, "products", id);
+            await updateDoc(productRef, { name, price });
+            alert("Product updated successfully!");
+        };
+
+        window.deleteProduct = async (id) => {
+            await deleteDoc(doc(db, "products", id));
+            alert("Product deleted successfully!");
+            loadProducts();
+        };
+
+        window.addProduct = async () => {
+            const name = document.getElementById("new-name").value;
+            const price = parseFloat(document.getElementById("new-price").value);
+            await addDoc(collection(db, "products"), { name, price });
+            alert("Product added successfully!");
+            loadProducts();
+        };
+    </script>
+</head>
+<body>
+    <h1>Editor Dashboard</h1>
+    <h2>Manage Products</h2>
+    <div>
+        <input type="text" id="new-name" placeholder="Product Name" />
+        <input type="number" id="new-price" placeholder="Price" />
+        <button onclick="addProduct()">Add Product</button>
+    </div>
+    <div id="product-list"></div>
+</body>
+</html>
