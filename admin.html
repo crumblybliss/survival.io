@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - CrumblyBliss</title>
+    <title>Admin Dashboard</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #0a1d37; /* Navy Blue */
+            background-color: #0a1d37;
             color: #f1f1f1;
             text-align: center;
         }
@@ -27,13 +27,6 @@
             justify-content: space-between;
             align-items: center;
         }
-        .product input {
-            padding: 5px;
-            margin-right: 10px;
-            border-radius: 5px;
-            border: none;
-            width: 120px;
-        }
         button {
             padding: 10px;
             background: #00bcd4;
@@ -45,106 +38,71 @@
         button:hover {
             background: #0097a7;
         }
-        ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-            background-color: #003c5a;
-        }
-        ul li {
-            display: inline;
-            margin: 10px;
-        }
-        ul li a {
-            color: white;
-            text-decoration: none;
-            font-size: 18px;
-        }
-        ul li a:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
-    <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="products.html">Products</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="commitments.html">Commitments</a></li>
-        <li><a href="cart.html">Cart 🛒</a></li>
-        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
-    </ul>
-
     <h1>Admin Dashboard</h1>
     <div class="container">
         <h2>Manage Products</h2>
+        <div>
+            <input type="text" id="new-name" placeholder="Product Name">
+            <input type="number" id="new-price" placeholder="Price">
+            <button onclick="addProduct()">Add Product</button>
+        </div>
         <div id="product-list"></div>
-
-        <h3>Add New Product</h3>
-        <input type="text" id="new-name" placeholder="Product Name">
-        <input type="number" id="new-price" placeholder="Price">
-        <button onclick="addProduct()">Add Product</button>
     </div>
 
-    <script>
-        const products = [
-            { id: 1, name: "Paracord Survival Bracelet", price: 12.99 },
-            { id: 2, name: "Chocolate Chip Cookies", price: 5.99 },
-            { id: 3, name: "Oatmeal Raisin Cookies", price: 6.49 },
-            { id: 4, name: "Peanut Butter Cookies", price: 5.49 }
-        ];
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        function loadProducts() {
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadProducts() {
+            const productsRef = collection(db, "products");
+            const querySnapshot = await getDocs(productsRef);
             const productList = document.getElementById("product-list");
-            productList.innerHTML = "";  // Clear the list before appending new items
+            productList.innerHTML = "";
 
-            products.forEach((product) => {
+            querySnapshot.forEach((docSnap) => {
+                const product = docSnap.data();
                 const productDiv = document.createElement("div");
                 productDiv.classList.add("product");
                 productDiv.innerHTML = `
-                    <span>${product.name} - $${product.price.toFixed(2)}</span>
-                    <input type="text" id="color-${product.id}" placeholder="Enter color">
-                    <button onclick="addToCart(${product.id})">Add to Cart</button>
-                    <button onclick="deleteProduct(${product.id})">Delete</button>
+                    <span>\${product.name} - $\${product.price.toFixed(2)}</span>
+                    <button onclick="deleteProduct('\${docSnap.id}')">Delete</button>
                 `;
                 productList.appendChild(productDiv);
             });
         }
 
-        // Function to add a product to the cart
-        function addToCart(id) {
-            const product = products.find(product => product.id === id);
-            const colorInput = document.getElementById(`color-${id}`).value || "No color specified";
-            alert(`${product.name} added to cart with color: ${colorInput} for $${product.price.toFixed(2)}`);
-        }
-
-        // Function to add a new product
-        function addProduct() {
-            const name = document.getElementById("new-name").value.trim();
-            const price = parseFloat(document.getElementById("new-price").value.trim());
-            if (name && !isNaN(price)) {
-                const newProduct = {
-                    id: products.length + 1,
-                    name: name,
-                    price: price
-                };
-                products.push(newProduct);
-                loadProducts();
-                alert("Product added successfully!");
-            } else {
-                alert("Please provide valid product name and price.");
+        window.addProduct = async () => {
+            const name = document.getElementById("new-name").value;
+            const price = parseFloat(document.getElementById("new-price").value);
+            if (!name || isNaN(price)) {
+                alert("Please enter valid product details.");
+                return;
             }
-        }
+            await addDoc(collection(db, "products"), { name, price });
+            alert("Product added successfully!");
+            loadProducts();
+        };
 
-        // Function to delete a product
-        function deleteProduct(id) {
-            const productIndex = products.findIndex(product => product.id === id);
-            if (productIndex !== -1) {
-                products.splice(productIndex, 1);
-                loadProducts();
-                alert("Product deleted successfully!");
-            }
-        }
+        window.deleteProduct = async (id) => {
+            await deleteDoc(doc(db, "products", id));
+            alert("Product deleted successfully!");
+            loadProducts();
+        };
 
         window.onload = loadProducts;
     </script>
