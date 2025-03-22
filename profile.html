@@ -4,129 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
-
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
-
-        // ✅ Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
-        const provider = new GoogleAuthProvider();
-
-        // DOM Elements
-        const profilePic = document.getElementById("profile-pic");
-        const fileInput = document.getElementById("file-input");
-        const nameInput = document.getElementById("name");
-        const saveProfileBtn = document.getElementById("save-profile-btn");
-        const logoutBtn = document.getElementById("logout-btn");
-        const googleLoginBtn = document.getElementById("google-login-btn");
-        let currentUser = null;
-
-        // ✅ Google Login
-        googleLoginBtn.addEventListener("click", async () => {
-            try {
-                const result = await signInWithPopup(auth, provider);
-                currentUser = result.user;
-                saveUserToFirestore(currentUser);
-                loadProfile(currentUser);
-            } catch (error) {
-                alert(error.message);
-            }
-        });
-
-        // ✅ Monitor Authentication State
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                loadProfile(user);
-            }
-        });
-
-        // ✅ Load Profile from Firestore
-        async function loadProfile(user) {
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists()) {
-                const data = userSnap.data();
-                nameInput.value = data.name || "";
-                profilePic.src = data.photoURL || "default-profile.png";
-            }
-        }
-
-        // ✅ Save Profile to Firestore
-        saveProfileBtn.addEventListener("click", async () => {
-            if (!currentUser) return;
-            const userRef = doc(db, "users", currentUser.uid);
-            await updateDoc(userRef, { name: nameInput.value });
-            alert("Profile updated successfully!");
-        });
-
-        // ✅ Upload Profile Picture
-        fileInput.addEventListener("change", async (event) => {
-            if (!currentUser) return;
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const storageRef = ref(storage, `profilePictures/${currentUser.uid}`);
-            await uploadBytes(storageRef, file);
-            const downloadURL = await getDownloadURL(storageRef);
-            
-            profilePic.src = downloadURL;
-            await updateDoc(doc(db, "users", currentUser.uid), { photoURL: downloadURL });
-        });
-
-        // ✅ Logout
-        logoutBtn.addEventListener("click", async () => {
-            await signOut(auth);
-            window.location.href = "index.html";
-        });
-
-        // ✅ Save user to Firestore on first login
-        async function saveUserToFirestore(user) {
-            const userRef = doc(db, "users", user.uid);
-            await setDoc(userRef, {
-                name: user.displayName || "",
-                email: user.email,
-                photoURL: user.photoURL || "default-profile.png"
-            }, { merge: true });
-        }
-    </script>
-
     <style>
-        body { font-family: Arial, sans-serif; background: navy; color: white; text-align: center; }
-        .container { background: white; color: black; padding: 20px; border-radius: 8px; max-width: 500px; margin: 20px auto; }
-        .profile-pic { width: 100px; height: 100px; border-radius: 50%; cursor: pointer; }
-        button { background: #4CAF50; color: white; border: none; padding: 10px; cursor: pointer; width: 100%; margin-top: 10px; }
-        button:hover { background: #45a049; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            background-color: #0a1d37;
+            color: #f1f1f1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
+        }
+        .profile-container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.4);
+            width: 100%;
+            max-width: 400px;
+        }
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #00bcd4;
+            margin-bottom: 10px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+        }
+        input {
+            background-color: #1c2b47;
+            color: #f1f1f1;
+            border: 1px solid #00bcd4;
+        }
+        button {
+            background-color: #00bcd4;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background-color: #0097a7;
+        }
+        .calendar-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
-
-    <h1>My Profile</h1>
-    <div class="container">
-        <img id="profile-pic" class="profile-pic" src="default-profile.png" alt="Profile Picture">
-        <input type="file" id="file-input" accept="image/*">
-        <input type="text" id="name" placeholder="Enter your name">
-        <button id="save-profile-btn">Save Profile</button>
-        <button id="google-login-btn">Login with Google</button>
-        <button id="logout-btn">Logout</button>
+    <div class="calendar-container">
+        <iframe src="https://calendar.google.com/calendar/embed?mode=AGENDA" width="250" height="250" frameborder="0"></iframe>
     </div>
 
+    <div class="profile-container">
+        <img id="profile-pic" class="profile-pic" src="default-profile.png" alt="Profile Picture">
+        <input type="text" id="name" placeholder="Full Name">
+        <input type="email" id="email" placeholder="Email" disabled>
+        <button id="save-profile">Save Profile</button>
+        <button id="logout">Logout</button>
+    </div>
+
+    <script>
+        document.getElementById("save-profile").addEventListener("click", () => {
+            alert("Profile Saved Successfully!");
+        });
+
+        document.getElementById("logout").addEventListener("click", () => {
+            alert("Logged Out Successfully!");
+        });
+    </script>
 </body>
 </html>
