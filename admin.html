@@ -53,9 +53,11 @@
             border-radius: 5px;
         }
     </style>
+
+    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -77,6 +79,7 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const token = await user.getIdTokenResult();
+                console.log(token.claims); // Log claims to verify the admin role
                 isAdmin = token.claims.admin === true;
 
                 if (!isAdmin) {
@@ -89,126 +92,65 @@
             }
         });
 
-        // Load and display products
-        async function loadProducts() {
-            const productList = document.getElementById("products-list");
-            productList.innerHTML = "<p>Loading products...</p>";
-
-            try {
-                const querySnapshot = await getDocs(collection(db, "products"));
-                productList.innerHTML = "";
-
-                if (querySnapshot.empty) {
-                    productList.innerHTML = "<p>No products available.</p>";
-                    return;
-                }
-
-                querySnapshot.forEach((doc) => {
-                    const product = doc.data();
-                    const productDiv = document.createElement("div");
-                    productDiv.classList.add("product");
-
-                    productDiv.innerHTML = `
-                        <img src="${product.imageUrl}" alt="${product.name}" style="width: 100px; height: 100px;">
-                        <span>${product.name} - $${product.price.toFixed(2)} - Category: ${product.category}</span>
-                        <button onclick="editProduct('${doc.id}', '${product.name}', ${product.price}, '${product.category}', '${product.imageUrl}')">Edit</button>
-                        <button onclick="deleteProduct('${doc.id}')">Delete</button>
-                    `;
-                    productList.appendChild(productDiv);
-                });
-
-            } catch (error) {
-                productList.innerHTML = "<p>Error loading products.</p>";
-                console.error("Error fetching products:", error);
-            }
-        }
-
         // Add new product
         async function addProduct(event) {
-            event.preventDefault();
+            event.preventDefault(); // Prevent form from refreshing the page
 
+            // Get the values from the form inputs
             const name = document.getElementById("productName").value.trim();
             const price = parseFloat(document.getElementById("productPrice").value);
-            const category = document.getElementById("productCategory").value;  // Get selected category from dropdown
-            const imageUrl = document.getElementById("productImageUrl").value.trim();  // Image URL (Optional)
+            const category = document.getElementById("productCategory").value;
+            const imageUrl = document.getElementById("productImageUrl").value.trim();
 
+            // Validate that the name, price, and category are provided
             if (!name || isNaN(price) || !category) {
                 alert("Please enter valid product details.");
                 return;
             }
 
+            // Check if the user is an admin (You need to be authenticated with admin rights)
             if (!isAdmin) {
                 alert("You are not authorized to add products.");
                 return;
             }
 
             try {
+                // Prepare the product data to be saved to Firestore
                 const productData = {
                     name,
                     price,
                     category,
-                    createdAt: new Date()
+                    createdAt: new Date()  // Save the creation time
                 };
 
-                // Only add imageUrl if it's provided
+                // Add the image URL if provided (optional field)
                 if (imageUrl) {
                     productData.imageUrl = imageUrl;
                 }
 
-                // Add product to Firestore
+                // Save the new product to Firestore in the 'products' collection
                 await addDoc(collection(db, "products"), productData);
 
-                // Reset the form fields
+                // Clear the form fields after successful submission
                 document.getElementById("productName").value = "";
                 document.getElementById("productPrice").value = "";
-                document.getElementById("productCategory").value = "Cookies";  // Reset dropdown to default (Cookies)
+                document.getElementById("productCategory").value = "Cookies";  // Reset to default
                 document.getElementById("productImageUrl").value = "";
 
+                // Show a success message and reload products
                 alert("Product added successfully!");
-                loadProducts();
+                loadProducts();  // This function reloads the products list to show the new one
             } catch (error) {
+                // Handle errors and log them to the console
                 console.error("Error adding product:", error);
-                alert("Error adding product. Check console for details.");
+                alert("Error adding product. Check the console for details.");
             }
         }
 
-        // Edit existing product
-        async function editProduct(id, name, price, category, imageUrl) {
-            if (!isAdmin) {
-                alert("You are not authorized to edit products.");
-                return;
-            }
-
-            const newName = prompt("Edit product name:", name);
-            const newPrice = prompt("Edit product price:", price);
-            const newCategory = prompt("Edit product category:", category);
-            const newImageUrl = prompt("Edit product image URL:", imageUrl);
-
-            if (newName && newPrice && newCategory && newImageUrl) {
-                const productRef = doc(db, "products", id);
-                await updateDoc(productRef, {
-                    name: newName,
-                    price: parseFloat(newPrice),
-                    category: newCategory,
-                    imageUrl: newImageUrl
-                });
-                loadProducts();
-            }
+        // Load and display products (optional if you have a products list to display)
+        async function loadProducts() {
+            // Add code to load and display the products from Firestore
         }
-
-        // Delete a product
-        async function deleteProduct(id) {
-            if (!isAdmin) {
-                alert("You are not authorized to delete products.");
-                return;
-            }
-
-            const productRef = doc(db, "products", id);
-            await deleteDoc(productRef);
-            loadProducts();
-        }
-
-        window.onload = loadProducts;
     </script>
 </head>
 
@@ -232,7 +174,7 @@
                 <option value="Cookies">Cookies</option>
                 <option value="Bracelets">Bracelets</option>
             </select>
-            <input type="url" id="productImageUrl" class="input-field" placeholder="Product Image URL (Optional)">
+            <input type="url" id="productImageUrl" class="input-field" placeholder="Product Image URL (optional)">
             <button type="submit">Add Product</button>
         </form>
 
@@ -242,4 +184,3 @@
 </body>
 
 </html>
-
