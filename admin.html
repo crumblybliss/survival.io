@@ -110,8 +110,9 @@
                     productDiv.classList.add("product");
 
                     productDiv.innerHTML = `
+                        <img src="${product.imageUrl}" alt="${product.name}" style="width: 100px; height: 100px;">
                         <span>${product.name} - $${product.price.toFixed(2)}</span>
-                        <button onclick="editProduct('${doc.id}', '${product.name}', ${product.price}, '${product.category}')">Edit</button>
+                        <button onclick="editProduct('${doc.id}', '${product.name}', ${product.price}, '${product.category}', '${product.imageUrl}')">Edit</button>
                         <button onclick="deleteProduct('${doc.id}')">Delete</button>
                     `;
                     productList.appendChild(productDiv);
@@ -130,8 +131,9 @@
             const name = document.getElementById("productName").value.trim();
             const price = parseFloat(document.getElementById("productPrice").value);
             const category = document.getElementById("productCategory").value.trim();
+            const imageUrl = document.getElementById("productImageUrl").value.trim();
 
-            if (!name || isNaN(price) || !category) {
+            if (!name || isNaN(price) || !category || !imageUrl) {
                 alert("Please enter valid product details.");
                 return;
             }
@@ -146,12 +148,14 @@
                     name,
                     price,
                     category,
+                    imageUrl,
                     createdAt: new Date()
                 });
 
                 document.getElementById("productName").value = "";
                 document.getElementById("productPrice").value = "";
                 document.getElementById("productCategory").value = "";
+                document.getElementById("productImageUrl").value = "";
 
                 alert("Product added successfully!");
                 loadProducts();
@@ -162,7 +166,7 @@
         }
 
         // Edit existing product
-        async function editProduct(id, name, price, category) {
+        async function editProduct(id, name, price, category, imageUrl) {
             if (!isAdmin) {
                 alert("You are not authorized to edit products.");
                 return;
@@ -171,13 +175,15 @@
             const newName = prompt("Edit product name:", name);
             const newPrice = prompt("Edit product price:", price);
             const newCategory = prompt("Edit product category:", category);
+            const newImageUrl = prompt("Edit product image URL:", imageUrl);
 
-            if (newName && newPrice && newCategory) {
+            if (newName && newPrice && newCategory && newImageUrl) {
                 const productRef = doc(db, "products", id);
                 await updateDoc(productRef, {
                     name: newName,
                     price: parseFloat(newPrice),
-                    category: newCategory
+                    category: newCategory,
+                    imageUrl: newImageUrl
                 });
                 loadProducts();
             }
@@ -216,6 +222,7 @@
             <input type="text" id="productName" class="input-field" placeholder="Product Name" required>
             <input type="number" id="productPrice" class="input-field" placeholder="Product Price" required>
             <input type="text" id="productCategory" class="input-field" placeholder="Product Category" required>
+            <input type="url" id="productImageUrl" class="input-field" placeholder="Product Image URL" required>
             <button type="submit">Add Product</button>
         </form>
 
