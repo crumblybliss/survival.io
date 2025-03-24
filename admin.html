@@ -53,8 +53,6 @@
             border-radius: 5px;
         }
     </style>
-
-    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
@@ -79,7 +77,6 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const token = await user.getIdTokenResult();
-                console.log(token.claims); // Log claims to verify the admin role
                 isAdmin = token.claims.admin === true;
 
                 if (!isAdmin) {
@@ -113,7 +110,7 @@
 
                     productDiv.innerHTML = `
                         <img src="${product.imageUrl}" alt="${product.name}" style="width: 100px; height: 100px;">
-                        <span>${product.name} - $${product.price.toFixed(2)}</span>
+                        <span>${product.name} - $${product.price.toFixed(2)} - Category: ${product.category}</span>
                         <button onclick="editProduct('${doc.id}', '${product.name}', ${product.price}, '${product.category}', '${product.imageUrl}')">Edit</button>
                         <button onclick="deleteProduct('${doc.id}')">Delete</button>
                     `;
@@ -132,10 +129,10 @@
 
             const name = document.getElementById("productName").value.trim();
             const price = parseFloat(document.getElementById("productPrice").value);
-            const category = document.getElementById("productCategory").value.trim();
-            const imageUrl = document.getElementById("productImageUrl").value.trim();
+            const category = document.getElementById("productCategory").value;  // Get selected category from dropdown
+            const imageUrl = document.getElementById("productImageUrl").value.trim();  // Image URL (Optional)
 
-            if (!name || isNaN(price) || !category || !imageUrl) {
+            if (!name || isNaN(price) || !category) {
                 alert("Please enter valid product details.");
                 return;
             }
@@ -146,17 +143,25 @@
             }
 
             try {
-                await addDoc(collection(db, "products"), {
+                const productData = {
                     name,
                     price,
                     category,
-                    imageUrl,
                     createdAt: new Date()
-                });
+                };
 
+                // Only add imageUrl if it's provided
+                if (imageUrl) {
+                    productData.imageUrl = imageUrl;
+                }
+
+                // Add product to Firestore
+                await addDoc(collection(db, "products"), productData);
+
+                // Reset the form fields
                 document.getElementById("productName").value = "";
                 document.getElementById("productPrice").value = "";
-                document.getElementById("productCategory").value = "";
+                document.getElementById("productCategory").value = "Cookies";  // Reset dropdown to default (Cookies)
                 document.getElementById("productImageUrl").value = "";
 
                 alert("Product added successfully!");
@@ -223,8 +228,11 @@
         <form onsubmit="addProduct(event)">
             <input type="text" id="productName" class="input-field" placeholder="Product Name" required>
             <input type="number" id="productPrice" class="input-field" placeholder="Product Price" required>
-            <input type="text" id="productCategory" class="input-field" placeholder="Product Category" required>
-            <input type="url" id="productImageUrl" class="input-field" placeholder="Product Image URL" required>
+            <select id="productCategory" class="input-field" required>
+                <option value="Cookies">Cookies</option>
+                <option value="Bracelets">Bracelets</option>
+            </select>
+            <input type="url" id="productImageUrl" class="input-field" placeholder="Product Image URL (Optional)">
             <button type="submit">Add Product</button>
         </form>
 
