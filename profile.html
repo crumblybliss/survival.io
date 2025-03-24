@@ -4,15 +4,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
+
+    <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0a1d37;
+            color: white;
+            margin: 0;
+        }
+
+        /* Navigation Bar */
+        nav {
+            background-color: #003c5a;
+            padding: 15px;
+            text-align: center;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Profile Container */
+        .profile-container {
+            background-color: #1c2b47;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            margin: 40px auto;
+            text-align: center;
+        }
+
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #00bcd4;
+            background-color: #1c2b47;
+            color: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #00bcd4;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+        }
+
+        button:hover {
+            background-color: #0097a7;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="cart.html">Cart</a></li>
+            <li><a href="login.html">Login</a></li>
+        </ul>
+    </nav>
+
+    <div class="profile-container">
+        <h1>Your Profile</h1>
+        <img id="profile-pic" class="profile-pic" src="default-profile.png" alt="Profile Picture">
+        <input type="file" id="file-input" accept="image/*">
+        <input type="text" id="name" placeholder="Enter your name">
+        <input type="email" id="email" placeholder="Enter your email" disabled>
+        <button id="update-profile-btn">Update Profile</button>
+        <button id="logout-btn">Logout</button>
+    </div>
+
     <script type="module">
-        // Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
         // Firebase Config
         const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q...",
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
             authDomain: "survival-f35e2.firebaseapp.com",
             projectId: "survival-f35e2",
             storageBucket: "survival-f35e2.appspot.com",
@@ -24,83 +132,55 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
+        const storage = getStorage(app);
 
-        // DOM Elements
-        const profilePic = document.getElementById("profile-pic");
-        const nameInput = document.getElementById("name");
-        const emailInput = document.getElementById("email");
-        const saveBtn = document.getElementById("save-profile");
-        const logoutBtn = document.getElementById("logout");
-
-        // Check Auth State
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                emailInput.value = user.email;
-                nameInput.value = user.displayName || "";
-                profilePic.src = user.photoURL || "default-profile.png";
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
 
-                // Check if user is an editor
-                const authorizedEmails = ["cheapbraclets@outlook.com"];
-                setTimeout(() => {
-                    if (authorizedEmails.includes(user.email)) {
-                        window.location.href = "admin.html";
-                    } else {
-                        window.location.href = "index.html";
-                    }
-                }, 1500);
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    document.getElementById("name").value = userData.name || "";
+                    document.getElementById("email").value = userData.email || user.email;
+                    document.getElementById("profile-pic").src = userData.profilePic || "default-profile.png";
+                }
             } else {
                 window.location.href = "login.html";
             }
         });
 
-        // Save Profile
-        saveBtn.addEventListener("click", async () => {
+        document.getElementById("update-profile-btn").addEventListener("click", async () => {
             const user = auth.currentUser;
-            if (!user) return;
-
-            const userRef = doc(db, "users", user.uid);
-            await setDoc(userRef, {
-                name: nameInput.value,
-                email: user.email,
-                profilePic: user.photoURL || ""
-            }, { merge: true });
-
-            alert("Profile Saved Successfully!");
+            if (user) {
+                const userRef = doc(db, "users", user.uid);
+                await updateDoc(userRef, {
+                    name: document.getElementById("name").value,
+                    email: document.getElementById("email").value
+                });
+                alert("Profile updated successfully!");
+            }
         });
 
-        // Logout
-        logoutBtn.addEventListener("click", async () => {
+        document.getElementById("file-input").addEventListener("change", async (event) => {
+            const user = auth.currentUser;
+            if (user) {
+                const file = event.target.files[0];
+                if (file) {
+                    const storageRef = ref(storage, `profile_pics/${user.uid}`);
+                    await uploadBytes(storageRef, file);
+                    const downloadURL = await getDownloadURL(storageRef);
+                    await updateDoc(doc(db, "users", user.uid), { profilePic: downloadURL });
+                    document.getElementById("profile-pic").src = downloadURL;
+                }
+            }
+        });
+
+        document.getElementById("logout-btn").addEventListener("click", async () => {
             await signOut(auth);
             window.location.href = "login.html";
         });
     </script>
-
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { background-color: #0a1d37; color: #f1f1f1; display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; text-align: center; }
-        .profile-container { background: rgba(0, 0, 0, 0.8); padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0, 188, 212, 0.4); width: 100%; max-width: 400px; }
-        .profile-pic { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #00bcd4; margin-bottom: 10px; }
-        input, button { width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: none; font-size: 16px; }
-        input { background-color: #1c2b47; color: #f1f1f1; border: 1px solid #00bcd4; }
-        button { background-color: #00bcd4; color: #fff; cursor: pointer; transition: all 0.3s ease; }
-        button:hover { background-color: #0097a7; }
-        .calendar-container { position: absolute; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.8); padding: 15px; border-radius: 8px; color: #fff; }
-    </style>
-</head>
-<body>
-
-    <div class="calendar-container">
-        <iframe src="https://calendar.google.com/calendar/embed?mode=AGENDA" width="250" height="250" frameborder="0"></iframe>
-    </div>
-
-    <div class="profile-container">
-        <img id="profile-pic" class="profile-pic" src="default-profile.png" alt="Profile Picture">
-        <input type="text" id="name" placeholder="Full Name">
-        <input type="email" id="email" placeholder="Email" disabled>
-        <button id="save-profile">Save Profile</button>
-        <button id="logout">Logout</button>
-    </div>
-
 </body>
 </html>
+
