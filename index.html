@@ -86,11 +86,15 @@
     </div>
 
     <script type="module">
-        // Firebase Config
+        // ✅ Import Firebase Modules (Fixed)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getIdTokenResult } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { 
+            getAuth, signInWithPopup, GoogleAuthProvider, signOut, 
+            onAuthStateChanged, createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, getIdTokenResult 
+        } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
+        // ✅ Firebase Config (Use your own credentials)
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
             authDomain: "survival-f35e2.firebaseapp.com",
@@ -100,20 +104,24 @@
             appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
         };
 
+        // ✅ Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth();
+        const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // Google Login
+        console.log("🔥 Firebase Initialized:", app);
+        console.log("✅ Auth Instance:", auth);
+
+        // ✅ Google Login
         document.getElementById("google-login").addEventListener("click", () => {
             signInWithPopup(auth, provider).then((result) => {
                 handleLogin(result.user);
             }).catch((error) => {
-                console.error("Login failed:", error);
+                console.error("❌ Google Login Failed:", error);
             });
         });
 
-        // Email/Password Login
+        // ✅ Email/Password Login
         document.getElementById("login-btn").addEventListener("click", () => {
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
@@ -122,49 +130,55 @@
                     handleLogin(userCredential.user);
                 })
                 .catch((error) => {
-                    alert("Login Failed: " + error.message);
+                    alert("❌ Login Failed: " + error.message);
                 });
         });
 
-        // Register New User
+        // ✅ Register New User
         document.getElementById("register-btn").addEventListener("click", () => {
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
-                    alert("Account Created! Please log in.");
+                    alert("✅ Account Created! Please log in.");
                 })
                 .catch((error) => {
-                    alert("Registration Failed: " + error.message);
+                    alert("❌ Registration Failed: " + error.message);
                 });
         });
 
-        // Handle Login & Redirect
+        // ✅ Handle Login & Redirect with Admin Debugging
         function handleLogin(user) {
             getIdTokenResult(user).then((idTokenResult) => {
+                console.log("👑 Custom Claims:", idTokenResult.claims); // Debugging Admin Claims
+
                 if (idTokenResult.claims.admin) {
-                    window.location.href = "admin.html"; // Admin Page
+                    console.log("✅ Redirecting to Admin Page...");
+                    window.location.href = "admin.html";
                 } else {
-                    window.location.href = "index.html"; // Customer Home
+                    console.log("🏠 Redirecting to Home Page...");
+                    window.location.href = "index.html";
                 }
             }).catch((error) => {
-                console.error("Error getting custom claims:", error);
+                console.error("❌ Error getting custom claims:", error);
             });
         }
 
-        // Logout
+        // ✅ Logout
         document.getElementById("logout-btn").addEventListener("click", () => {
             signOut(auth).then(() => {
-                alert("Logged out successfully!");
+                alert("✅ Logged out successfully!");
                 window.location.href = "index.html";
             });
         });
 
-        // Auto Check Login State
+        // ✅ Auto Check Login State
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                console.log("👤 User Logged In:", user.email);
                 document.getElementById("logout-btn").style.display = "block";
             } else {
+                console.log("🚪 No User Logged In");
                 document.getElementById("logout-btn").style.display = "none";
             }
         });
