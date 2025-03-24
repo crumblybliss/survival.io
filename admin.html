@@ -57,7 +57,7 @@
     <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -85,6 +85,8 @@
                 if (!isAdmin) {
                     alert("Access Denied: You are not an admin.");
                     window.location.href = "index.html";
+                } else {
+                    loadProducts();
                 }
             } else {
                 alert("Please log in as an admin.");
@@ -96,91 +98,20 @@
         async function addProduct(event) {
             event.preventDefault(); // Prevent form from refreshing the page
 
-            // Get the values from the form inputs
             const name = document.getElementById("productName").value.trim();
             const price = parseFloat(document.getElementById("productPrice").value);
             const category = document.getElementById("productCategory").value;
             const imageUrl = document.getElementById("productImageUrl").value.trim();
 
-            // Validate that the name, price, and category are provided
             if (!name || isNaN(price) || !category) {
                 alert("Please enter valid product details.");
                 return;
             }
 
-            // Check if the user is an admin (You need to be authenticated with admin rights)
             if (!isAdmin) {
                 alert("You are not authorized to add products.");
                 return;
             }
 
             try {
-                // Prepare the product data to be saved to Firestore
-                const productData = {
-                    name,
-                    price,
-                    category,
-                    createdAt: new Date()  // Save the creation time
-                };
-
-                // Add the image URL if provided (optional field)
-                if (imageUrl) {
-                    productData.imageUrl = imageUrl;
-                }
-
-                // Save the new product to Firestore in the 'products' collection
-                await addDoc(collection(db, "products"), productData);
-
-                // Clear the form fields after successful submission
-                document.getElementById("productName").value = "";
-                document.getElementById("productPrice").value = "";
-                document.getElementById("productCategory").value = "Cookies";  // Reset to default
-                document.getElementById("productImageUrl").value = "";
-
-                // Show a success message and reload products
-                alert("Product added successfully!");
-                loadProducts();  // This function reloads the products list to show the new one
-            } catch (error) {
-                // Handle errors and log them to the console
-                console.error("Error adding product:", error);
-                alert("Error adding product. Check the console for details.");
-            }
-        }
-
-        // Load and display products (optional if you have a products list to display)
-        async function loadProducts() {
-            // Add code to load and display the products from Firestore
-        }
-    </script>
-</head>
-
-<body>
-    <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="products.html">Products</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="commitments.html">Commitments</a></li>
-        <li><a href="cart.html">Cart 🛒</a></li>
-        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
-    </ul>
-
-    <h1>Admin Dashboard</h1>
-    <div class="container">
-        <h2>Add New Product</h2>
-        <form onsubmit="addProduct(event)">
-            <input type="text" id="productName" class="input-field" placeholder="Product Name" required>
-            <input type="number" id="productPrice" class="input-field" placeholder="Product Price" required>
-            <select id="productCategory" class="input-field" required>
-                <option value="Cookies">Cookies</option>
-                <option value="Bracelets">Bracelets</option>
-            </select>
-            <input type="url" id="productImageUrl" class="input-field" placeholder="Product Image URL (optional)">
-            <button type="submit">Add Product</button>
-        </form>
-
-        <h2>Manage Products</h2>
-        <div id="products-list"></div>
-    </div>
-</body>
-
-</html>
+                const
