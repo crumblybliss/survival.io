@@ -73,7 +73,7 @@
     <div class="container">
         <h1>Welcome to Survival Store</h1>
         <p>Your best source for survival gear and handmade products.</p>
-        
+
         <h3>Login</h3>
         <input type="email" id="email" placeholder="Email"><br>
         <input type="password" id="password" placeholder="Password"><br>
@@ -89,6 +89,7 @@
         // Firebase Config
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getIdTokenResult } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -103,12 +104,10 @@
         const auth = getAuth();
         const provider = new GoogleAuthProvider();
 
-        const authorizedEmails = ["carr.isaiah@lposd.org", "nelson.jacob@lposd.org"];
-
         // Google Login
         document.getElementById("google-login").addEventListener("click", () => {
             signInWithPopup(auth, provider).then((result) => {
-                handleLogin(result.user.email);
+                handleLogin(result.user);
             }).catch((error) => {
                 console.error("Login failed:", error);
             });
@@ -120,7 +119,7 @@
             const password = document.getElementById("password").value;
             signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
-                    handleLogin(userCredential.user.email);
+                    handleLogin(userCredential.user);
                 })
                 .catch((error) => {
                     alert("Login Failed: " + error.message);
@@ -141,12 +140,16 @@
         });
 
         // Handle Login & Redirect
-        function handleLogin(email) {
-            if (authorizedEmails.includes(email)) {
-                window.location.href = "admin.html"; // Admin Page
-            } else {
-                window.location.href = "index.html"; // Customer Home
-            }
+        function handleLogin(user) {
+            getIdTokenResult(user).then((idTokenResult) => {
+                if (idTokenResult.claims.admin) {
+                    window.location.href = "admin.html"; // Admin Page
+                } else {
+                    window.location.href = "index.html"; // Customer Home
+                }
+            }).catch((error) => {
+                console.error("Error getting custom claims:", error);
+            });
         }
 
         // Logout
@@ -165,29 +168,6 @@
                 document.getElementById("logout-btn").style.display = "none";
             }
         });
-
-        // PWA Install
-        let deferredPrompt;
-        window.addEventListener("beforeinstallprompt", (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const installBtn = document.createElement("button");
-            installBtn.textContent = "Install App";
-            installBtn.style.position = "fixed";
-            installBtn.style.bottom = "20px";
-            installBtn.style.right = "20px";
-            installBtn.onclick = () => {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choice) => {
-                    if (choice.outcome === "accepted") {
-                        console.log("User installed the app");
-                    }
-                    deferredPrompt = null;
-                });
-            };
-            document.body.appendChild(installBtn);
-        });
     </script>
-
 </body>
 </html>
