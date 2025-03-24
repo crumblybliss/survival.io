@@ -3,170 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Cart - CrumblyBliss</title>
+    <title>Your Cart</title>
+
     <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background-color: #0a1d37; /* Navy Blue */
-            text-align: center;
-            color: #f1f1f1;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 50px auto;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-        }
-
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 10px;
-            background: #003c5a;
-            border-radius: 5px;
-        }
-
-        .cart-item button {
-            background: #f44336;
+            background-color: #0a1d37;
             color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
+            margin: 0;
         }
 
-        .cart-item button:hover {
-            background: #d32f2f;
+        /* Navigation Bar */
+        nav {
+            background-color: #003c5a;
+            padding: 15px;
+            text-align: center;
         }
 
-        .total {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
-
-        /* Profile picture and nav menu styles */
-        .profile-pic {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 3px solid #00bcd4;
-            box-shadow: 0 0 15px rgba(0, 188, 212, 0.6);
-        }
-
-        .nav-menu {
-            padding: 10px;
-            background: #001f3d; /* Dark Navy */
-        }
-
-        .nav-menu ul {
+        nav ul {
             list-style: none;
             padding: 0;
-            display: flex;
-            justify-content: center;
         }
 
-        .nav-menu ul li {
+        nav ul li {
+            display: inline;
             margin: 0 15px;
         }
 
-        .nav-menu ul li a {
+        nav a {
             color: white;
             text-decoration: none;
-            font-weight: bold;
+            font-size: 18px;
         }
 
-        button {
-            padding: 12px 24px;
-            margin: 20px 0;
-            border: none;
-            cursor: pointer;
-            background: #00bcd4;
-            color: white;
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Cart Container */
+        .cart-container {
+            background-color: #1c2b47;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            margin: 40px auto;
+            text-align: center;
+        }
+
+        #cart-items {
+            list-style: none;
+            padding: 0;
+        }
+
+        #cart-items li {
+            background-color: #1c2b47;
+            padding: 10px;
+            margin: 10px 0;
             border-radius: 5px;
         }
 
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #00bcd4;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+        }
+
         button:hover {
-            background: #0097a7;
+            background-color: #0097a7;
         }
     </style>
 </head>
 <body>
-
-    <!-- Profile Picture -->
-    <img id="profile-pic" src="default-profile.png" alt="Profile Picture" class="profile-pic" onclick="window.location.href='profile.html'">
-
-    <!-- Navigation Menu -->
-    <nav class="nav-menu">
+    <!-- Navigation Bar -->
+    <nav>
         <ul>
             <li><a href="index.html">Home</a></li>
-            <li><a href="products.html">Products</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="commitments.html">Commitments</a></li>
-            <li><a href="cart.html">Cart 🛒</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="cart.html">Cart</a></li>
+            <li><a href="login.html">Login</a></li>
         </ul>
     </nav>
 
-    <div class="container">
-        <h1>Your Cart</h1>
-        <div id="cart-items">
-            <!-- Cart items will be populated here -->
-        </div>
-        <div id="cart-total" class="total">
-            Total: $0
-        </div>
-        <button onclick="checkout()">Proceed to Checkout</button>
+    <div class="cart-container">
+        <h1>Your Shopping Cart</h1>
+        <ul id="cart-items">
+            <!-- Cart items will be dynamically loaded here -->
+        </ul>
+        <button id="checkout-btn">Checkout</button>
     </div>
 
     <script>
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-        function renderCart() {
-            const cartItemsContainer = document.getElementById('cart-items');
-            const cartTotalContainer = document.getElementById('cart-total');
-            cartItemsContainer.innerHTML = ''; 
-            let total = 0;
-
-            cart.forEach((item, index) => {
-                total += item.price;
-                const cartItemDiv = document.createElement('div');
-                cartItemDiv.classList.add('cart-item');
-                cartItemDiv.innerHTML = `
-                    <span>${item.name} - $${item.price.toFixed(2)}</span>
-                    <button onclick="removeItem(${index})">Remove</button>
-                `;
-                cartItemsContainer.appendChild(cartItemDiv);
-            });
-
-            cartTotalContainer.innerHTML = `Total: $${total.toFixed(2)}`;
-        }
-
-        function removeItem(index) {
-            cart.splice(index, 1);
-            localStorage.setItem('cart', JSON.stringify(cart));
-            renderCart();
-        }
-
-        function checkout() {
-            if (cart.length === 0) {
-                alert('Your cart is empty!');
-            } else {
-                window.location.href = 'checkout.html';
-            }
-        }
-
-        window.onload = renderCart;
+        // Placeholder for cart functionality
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("Cart page loaded.");
+        });
     </script>
-
 </body>
 </html>
