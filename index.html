@@ -3,50 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Survival Store</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Cookies - CrumblyBliss</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #0a1d37;
+            color: #f1f1f1;
+            text-align: center;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            background: #001f3d;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .nav-bar ul {
+            list-style: none;
+            display: flex;
+        }
+
+        .nav-bar ul li {
+            margin: 0 15px;
+        }
+
+        .nav-bar ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: url('https://via.placeholder.com/1600x500') no-repeat center center/cover;
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+        }
+
+        .cta-btn {
+            background-color: #00bcd4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .cta-btn:hover {
+            background-color: #0097a7;
+        }
+
+        /* Product Section */
+        .product-section {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .product {
+            background-color: #1f2b41;
+            border-radius: 8px;
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .product img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .product h2 {
+            font-size: 1.5rem;
+            margin-top: 10px;
+        }
+
+        .product p {
+            font-size: 1rem;
+            margin: 10px 0;
+        }
+
+        /* Footer Section */
+        .footer {
+            background-color: #001f3d;
+            padding: 20px 0;
+            color: white;
+            margin-top: 40px;
+        }
+
+        .footer p {
+            font-size: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .product-section {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nav-bar ul {
+                flex-direction: column;
+            }
+
+            .nav-bar ul li {
+                margin: 10px 0;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
 </head>
 <body>
 
     <!-- Navigation Bar -->
     <nav class="nav-bar">
-        <div class="logo">Survival Store</div>
         <ul>
             <li><a href="index.html">Home</a></li>
             <li><a href="products.html">Products</a></li>
-            <li><a href="cookies.html">Cookies 🍪</a></li>
-            <li><a href="about.html">About</a></li>
+            <li><a href="cookies.html">Cookies</a></li>
             <li><a href="cart.html">Cart 🛒</a></li>
-            <li><a href="admin.html">Admin ⚙️</a></li>
+            <li><a href="admin.html">Admin</a></li>
         </ul>
     </nav>
 
     <!-- Hero Section -->
-    <header class="hero">
-        <h1>Welcome to Survival Store</h1>
-        <p>Your best source for survival gear and handmade products</p>
-        <a href="products.html" class="cta-btn">Shop Now</a>
-    </header>
+    <section class="hero">
+        <h1>Delicious Handmade Cookies</h1>
+        <p>Freshly baked with love, only at CrumblyBliss!</p>
+        <a href="cart.html" class="cta-btn">Order Now</a>
+    </section>
 
-    <!-- Featured Products -->
+    <!-- Cookies Product Section -->
     <section class="product-section">
         <div class="product">
-            <img src="assets/survival-kit.jpg" alt="Survival Kit">
-            <h2>Survival Kit</h2>
-            <p>Everything you need for survival in the wild</p>
-            <a href="product1.html" class="cta-btn">View Product</a>
+            <img src="https://via.placeholder.com/300x300" alt="Chocolate Chip Cookie">
+            <h2>Chocolate Chip</h2>
+            <p>Classic and irresistible chocolate chip cookies.</p>
+            <a href="cart.html" class="cta-btn">Add to Cart</a>
         </div>
         <div class="product">
-            <img src="assets/camping-gear.jpg" alt="Camping Gear">
-            <h2>Camping Gear</h2>
-            <p>Essential gear for your next adventure</p>
-            <a href="product2.html" class="cta-btn">View Product</a>
+            <img src="https://via.placeholder.com/300x300" alt="Oatmeal Raisin Cookie">
+            <h2>Oatmeal Raisin</h2>
+            <p>Chewy oatmeal cookies with a hint of cinnamon.</p>
+            <a href="cart.html" class="cta-btn">Add to Cart</a>
+        </div>
+        <div class="product">
+            <img src="https://via.placeholder.com/300x300" alt="Peanut Butter Cookie">
+            <h2>Peanut Butter</h2>
+            <p>Rich, nutty, and oh-so-delicious!</p>
+            <a href="cart.html" class="cta-btn">Add to Cart</a>
+        </div>
+        <div class="product">
+            <img src="https://via.placeholder.com/300x300" alt="Sugar Cookie">
+            <h2>Sugar Cookie</h2>
+            <p>Soft, sweet, and perfect for any occasion.</p>
+            <a href="cart.html" class="cta-btn">Add to Cart</a>
         </div>
     </section>
 
-    <!-- Footer -->
+    <!-- Footer Section -->
     <footer class="footer">
-        <p>&copy; 2025 Survival Store. All rights reserved.</p>
+        <p>&copy; 2025 CrumblyBliss. All rights reserved.</p>
     </footer>
 
 </body>
