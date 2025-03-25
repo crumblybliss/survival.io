@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookies - CrumblyBliss</title>
+    
+    <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #0a1d37;
+            color: white;
+            text-align: center;
+            padding-top: 70px;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            background: #001f3d;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-bar .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            margin-left: 20px;
+        }
+
+        .nav-bar ul {
+            list-style: none;
+            display: flex;
+            margin-right: 20px;
+        }
+
+        .nav-bar ul li {
+            margin: 0 15px;
+        }
+
+        .nav-bar ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .nav-bar ul li a:hover {
+            color: #00bcd4;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: url('https://via.placeholder.com/1600x500') no-repeat center center/cover;
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+        }
+
+        /* Product Section */
+        .product-section {
+            margin: 40px auto;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1200px;
+        }
+
+        .product {
+            background-color: #1f2b41;
+            border-radius: 8px;
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .product img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .product h2 {
+            font-size: 1.5rem;
+            margin-top: 10px;
+        }
+
+        .product p {
+            font-size: 1rem;
+            margin: 10px 0;
+        }
+
+        .cta-btn {
+            background-color: #00bcd4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .cta-btn:hover {
+            background-color: #0097a7;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #001f3d;
+            padding: 20px 0;
+            color: white;
+            margin-top: 40px;
+        }
+
+        .footer p {
+            font-size: 1rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <div class="logo">CrumblyBliss</div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="cookies.html">Cookies</a></li>
+            <li><a href="cart.html">Cart 🛒</a></li>
+            <li><a href="admin.html">Admin</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Delicious Cookies</h1>
+        <p>Freshly baked and full of flavor, only at CrumblyBliss!</p>
+    </section>
+
+    <!-- Cookie Listings -->
+    <section class="product-section">
+        <div class="product">
+            <img src="https://via.placeholder.com/300x300" alt="Chocolate Chip Cookies">
+            <h2>Chocolate Chip Cookies</h2>
+            <p>Classic and delicious chocolate chip cookies.</p>
+            <a href="#" class="cta-btn">Add to Cart</a>
+        </div>
+
+        <div class="product">
+            <img src="https://via.placeholder.com/300x300" alt="Oatmeal Raisin Cookies">
+            <h2>Oatmeal Raisin Cookies</h2>
+            <p>Soft and chewy oatmeal cookies with raisins.</p>
+            <a href="#" class="cta-btn">Add to Cart</a>
+        </div>
+
+        <div class="product">
+            <img src="https://via.placeholder.com/300x300" alt="Peanut Butter Cookies">
+            <h2>Peanut Butter Cookies</h2>
+            <p>Rich and nutty peanut butter cookies.</p>
+            <a href="#" class="cta-btn">Add to Cart</a>
+        </div>
+
+        <div class="product">
+            <img src="https://via.placeholder.com/300x300" alt="Sugar Cookies">
+            <h2>Sugar Cookies</h2>
+            <p>Sweet and buttery sugar cookies.</p>
+            <a href="#" class="cta-btn">Add to Cart</a>
+        </div>
+
+        <div class="product">
+            <img src="https://via.placeholder.com/300x300" alt="Double Chocolate Cookies">
+            <h2>Double Chocolate Cookies</h2>
+            <p>Chocolate cookies with extra chocolate chips.</p>
+            <a href="#" class="cta-btn">Add to Cart</a>
+        </div>
+
+        <div class="product">
+            <img src="https://via.placeholder.com/300x300" alt="Macadamia Nut Cookies">
+            <h2>Macadamia Nut Cookies</h2>
+            <p>Crispy cookies with macadamia nuts and white chocolate.</p>
+            <a href="#" class="cta-btn">Add to Cart</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 CrumblyBliss. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
