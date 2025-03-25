@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - CrumblyBliss</title>
+    <title>Admin Panel - CrumblyBliss</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -19,10 +19,9 @@
             border-radius: 8px;
         }
         input, select, button {
-            display: block;
             width: 100%;
-            margin: 10px 0;
             padding: 10px;
+            margin: 10px 0;
             border-radius: 5px;
             border: none;
         }
@@ -35,22 +34,7 @@
             background: #0097a7;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Admin Panel</h1>
-        <h2>Add a Product</h2>
-        <input type="text" id="product-name" placeholder="Product Name" required>
-        <input type="number" id="product-price" placeholder="Price" required>
-        <input type="text" id="product-image" placeholder="Image URL (optional)">
-        <select id="product-category">
-            <option value="products">Bracelets</option>
-            <option value="cookies">Cookies</option>
-        </select>
-        <button onclick="addProduct()">Add Product</button>
-        <p id="message"></p>
-    </div>
-
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
@@ -67,29 +51,49 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        window.addProduct = async function() {
-            const name = document.getElementById("product-name").value;
-            const price = document.getElementById("product-price").value;
-            const imageUrl = document.getElementById("product-image").value || "default-image.jpg";
-            const category = document.getElementById("product-category").value;
-
-            if (!name || !price) {
-                document.getElementById("message").innerText = "Please enter a name and price.";
+        window.addProduct = async () => {
+            const name = document.getElementById("name").value;
+            const price = parseFloat(document.getElementById("price").value);
+            const category = document.getElementById("category").value;
+            let imageUrl = document.getElementById("imageUrl").value;
+            
+            if (!name || isNaN(price)) {
+                alert("Please enter a valid name and price.");
                 return;
+            }
+
+            if (!imageUrl) {
+                imageUrl = "https://via.placeholder.com/100"; // Default placeholder image
             }
 
             try {
                 await addDoc(collection(db, category), {
                     name,
-                    price: parseFloat(price),
+                    price,
                     imageUrl
                 });
-                document.getElementById("message").innerText = "Product added successfully!";
+                alert("Product added successfully!");
+                document.getElementById("productForm").reset();
             } catch (error) {
-                console.error("Error adding product:", error);
-                document.getElementById("message").innerText = "Error adding product.";
+                alert("Error adding product: " + error.message);
+                console.error("Error:", error);
             }
         };
     </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Panel</h1>
+        <form id="productForm">
+            <input type="text" id="name" placeholder="Product Name" required>
+            <input type="number" id="price" placeholder="Price" required>
+            <input type="text" id="imageUrl" placeholder="Image URL (Optional)">
+            <select id="category">
+                <option value="products">Bracelets</option>
+                <option value="cookies">Cookies</option>
+            </select>
+            <button type="button" onclick="addProduct()">Add Product</button>
+        </form>
+    </div>
 </body>
 </html>
