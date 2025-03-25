@@ -6,7 +6,7 @@
     <title>Admin Dashboard - CrumblyBliss</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: #0a1d37;
             color: #f1f1f1;
             text-align: center;
@@ -14,19 +14,17 @@
         .container {
             max-width: 600px;
             margin: 50px auto;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.7);
             padding: 20px;
             border-radius: 8px;
         }
-        input, button {
+        input, select, button {
+            display: block;
             width: 100%;
-            padding: 10px;
             margin: 10px 0;
-            border: none;
+            padding: 10px;
             border-radius: 5px;
-        }
-        input {
-            background: #f1f1f1;
+            border: none;
         }
         button {
             background: #00bcd4;
@@ -36,103 +34,62 @@
         button:hover {
             background: #0097a7;
         }
-        .product {
-            background: #003c5a;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .product img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
     </style>
-    
-    <!-- Firebase -->
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Panel</h1>
+        <h2>Add a Product</h2>
+        <input type="text" id="product-name" placeholder="Product Name" required>
+        <input type="number" id="product-price" placeholder="Price" required>
+        <input type="text" id="product-image" placeholder="Image URL (optional)">
+        <select id="product-category">
+            <option value="products">Bracelets</option>
+            <option value="cookies">Cookies</option>
+        </select>
+        <button onclick="addProduct()">Add Product</button>
+        <p id="message"></p>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-        
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
         };
-        
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        
-        async function addProduct() {
+
+        window.addProduct = async function() {
             const name = document.getElementById("product-name").value;
             const price = document.getElementById("product-price").value;
-            let imageUrl = document.getElementById("product-image").value || "default.jpg";
-            
+            const imageUrl = document.getElementById("product-image").value || "default-image.jpg";
+            const category = document.getElementById("product-category").value;
+
             if (!name || !price) {
-                alert("Please enter product name and price.");
+                document.getElementById("message").innerText = "Please enter a name and price.";
                 return;
             }
-            
+
             try {
-                await addDoc(collection(db, "products"), {
+                await addDoc(collection(db, category), {
                     name,
                     price: parseFloat(price),
                     imageUrl
                 });
-                alert("Product added successfully!");
-                loadProducts();
+                document.getElementById("message").innerText = "Product added successfully!";
             } catch (error) {
                 console.error("Error adding product:", error);
-                alert("Failed to add product.");
+                document.getElementById("message").innerText = "Error adding product.";
             }
-        }
-        
-        async function loadProducts() {
-            const productList = document.getElementById("products-list");
-            productList.innerHTML = "<p>Loading products...</p>";
-            
-            try {
-                const querySnapshot = await getDocs(collection(db, "products"));
-                productList.innerHTML = "";
-                
-                querySnapshot.forEach((doc) => {
-                    const product = doc.data();
-                    const productDiv = document.createElement("div");
-                    productDiv.classList.add("product");
-                    
-                    productDiv.innerHTML = `
-                        <img src="${product.imageUrl}" alt="${product.name}">
-                        <span>${product.name} - $${product.price.toFixed(2)}</span>
-                    `;
-                    productList.appendChild(productDiv);
-                });
-            } catch (error) {
-                productList.innerHTML = "<p>Error loading products.</p>";
-                console.error("Error fetching products:", error);
-            }
-        }
-        
-        window.onload = loadProducts;
+        };
     </script>
-</head>
-<body>
-    <div class="container">
-        <h1>Admin Dashboard</h1>
-        <h3>Add New Product</h3>
-        <input type="text" id="product-name" placeholder="Product Name">
-        <input type="number" id="product-price" placeholder="Product Price">
-        <input type="text" id="product-image" placeholder="Image URL (Optional)">
-        <button onclick="addProduct()">Add Product</button>
-        
-        <h3>Existing Products</h3>
-        <div id="products-list"></div>
-    </div>
 </body>
 </html>
