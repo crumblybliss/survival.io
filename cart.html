@@ -3,112 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Cart</title>
-
+    <title>Tactics & Treats - Cart</title>
     <style>
-        /* General Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: #0a1d37;
-            color: white;
+            color: #f1f1f1;
+            text-align: center;
             margin: 0;
         }
-
-        /* Navigation Bar */
-        nav {
+        ul {
             background-color: #003c5a;
-            padding: 15px;
-            text-align: center;
-        }
-
-        nav ul {
+            padding: 10px;
             list-style: none;
-            padding: 0;
+            margin: 0;
         }
-
-        nav ul li {
+        ul li {
             display: inline;
             margin: 0 15px;
         }
-
-        nav a {
-            color: white;
+        ul li a {
+            color: #f1f1f1;
             text-decoration: none;
             font-size: 18px;
         }
-
-        nav a:hover {
-            text-decoration: underline;
+        ul li a:hover {
+            color: #00bcd4;
         }
-
-        /* Cart Container */
-        .cart-container {
-            background-color: #1c2b47;
-            padding: 20px;
+        .container {
+            padding: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            margin: 20px;
             border-radius: 8px;
-            max-width: 400px;
-            margin: 40px auto;
-            text-align: center;
         }
-
-        #cart-items {
-            list-style: none;
-            padding: 0;
-        }
-
-        #cart-items li {
-            background-color: #1c2b47;
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
             padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            background-color: #00bcd4;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            color: white;
-        }
-
-        button:hover {
-            background-color: #0097a7;
+            background: #003c5a;
+            border-radius: 8px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav>
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="profile.html">Profile</a></li>
-            <li><a href="cart.html">Cart</a></li>
-            <li><a href="login.html">Login</a></li>
-        </ul>
-    </nav>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="bracelets.html">Bracelets</a></li>
+        <li><a href="cookies.html">Cookies</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="commitments.html">Commitments</a></li>
+        <li><a href="cart.html">Cart 🛒</a></li>
+        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
+    </ul>
 
-    <div class="cart-container">
-        <h1>Your Shopping Cart</h1>
-        <ul id="cart-items">
-            <!-- Cart items will be dynamically loaded here -->
-        </ul>
-        <button id="checkout-btn">Checkout</button>
+    <div class="container">
+        <h1>Your Cart</h1>
+        <div id="cart-items"></div>
     </div>
 
     <script>
-        // Placeholder for cart functionality
-        document.addEventListener("DOMContentLoaded", function() {
-            console.log("Cart page loaded.");
-        });
+        // Display cart items from localStorage
+        window.onload = function () {
+            const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
+            const cartList = document.getElementById("cart-items");
+
+            if (cartItems.length === 0) {
+                cartList.innerHTML = "<p>Your cart is empty.</p>";
+            } else {
+                cartItems.forEach(item => {
+                    const itemDiv = document.createElement("div");
+                    itemDiv.classList.add("cart-item");
+                    itemDiv.innerHTML = `
+                        <img src="${item.imageUrl}" alt="${item.name}" width="50">
+                        <span>${item.name} - $${item.price}</span>
+                    `;
+                    cartList.appendChild(itemDiv);
+                });
+            }
+        };
     </script>
 </body>
 </html>
