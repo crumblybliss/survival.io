@@ -5,54 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - CrumblyBliss</title>
 
-    <style>
-        /* General Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #0a1d37;
-            color: white;
-            margin: 0;
-        }
-
-        .login-container {
-            background-color: #1c2b47;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 400px;
-            margin: 40px auto;
-            text-align: center;
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #00bcd4;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0097a7;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-container">
-        <h1>Login</h1>
-        <button id="google-login">Login with Google</button>
-    </div>
-
+    <!-- Firebase SDK -->
     <script type="module">
+        // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
             authDomain: "survival-f35e2.firebaseapp.com",
@@ -62,19 +21,167 @@
             appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-        document.getElementById("google-login").addEventListener("click", () => {
-            const provider = new GoogleAuthProvider();
-            signInWithPopup(auth, provider)
-                .then(result => {
-                    window.location.href = "index.html";
-                })
-                .catch(error => {
-                    console.error(error.message);
-                });
+        // DOM Elements
+        const loginForm = document.getElementById("login-form");
+        const registerForm = document.getElementById("register-form");
+        const forgotPasswordBtn = document.getElementById("forgot-password");
+        const googleLoginBtn = document.getElementById("google-login");
+        const toggleFormsLink = document.getElementById("toggle-forms");
+
+        // Handle Login with Email/Password
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = loginForm.email.value;
+            const password = loginForm.password.value;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                alert("Login successful!");
+                window.location.href = "index.html";
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // Handle Registration with Email/Password
+        registerForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = registerForm.email.value;
+            const password = registerForm.password.value;
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                alert("Registration successful! You can now log in.");
+                toggleForms();
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // Handle Google Login
+        googleLoginBtn.addEventListener("click", async () => {
+            try {
+                await signInWithPopup(auth, provider);
+                alert("Google login successful!");
+                window.location.href = "index.html";
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // Handle Password Reset
+        forgotPasswordBtn.addEventListener("click", async () => {
+            const email = prompt("Enter your email to reset your password:");
+            if (!email) return;
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert("Password reset email sent!");
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // Toggle between Login and Register forms
+        function toggleForms() {
+            const loginContainer = document.getElementById("login-container");
+            const registerContainer = document.getElementById("register-container");
+
+            if (loginContainer.style.display === "none") {
+                loginContainer.style.display = "block";
+                registerContainer.style.display = "none";
+                toggleFormsLink.textContent = "Don't have an account? Register here.";
+            } else {
+                loginContainer.style.display = "none";
+                registerContainer.style.display = "block";
+                toggleFormsLink.textContent = "Already have an account? Login here.";
+            }
+        }
+        toggleFormsLink.addEventListener("click", toggleForms);
+
+        // Redirect if already logged in
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = "index.html";
+            }
         });
     </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0a1d37;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background: white;
+            color: black;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            margin: 50px auto;
+            box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4);
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+        }
+        input {
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #00bcd4;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background-color: #0097a7;
+        }
+        .toggle-link {
+            color: #00bcd4;
+            cursor: pointer;
+            margin-top: 10px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="login-container">
+        <h2>Login</h2>
+        <form id="login-form">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <button id="google-login">Sign in with Google</button>
+        <button id="forgot-password">Forgot Password?</button>
+        <p class="toggle-link" id="toggle-forms">Don't have an account? Register here.</p>
+    </div>
+
+    <div class="container" id="register-container" style="display: none;">
+        <h2>Register</h2>
+        <form id="register-form">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Register</button>
+        </form>
+        <p class="toggle-link" id="toggle-forms">Already have an account? Login here.</p>
+    </div>
+
 </body>
 </html>
