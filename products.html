@@ -72,33 +72,36 @@
         // Function to load products from Firestore
         async function loadProducts() {
             const productList = document.getElementById("products-list");
-            productList.innerHTML = "<p>Loading products...</p>";
+            productList.innerHTML = "<p>Loading products...</p>";  // Default loading text
 
             try {
+                // Fetch the products from Firestore
                 const querySnapshot = await getDocs(collection(db, "products"));
-                productList.innerHTML = "";
+                productList.innerHTML = ""; // Clear loading message
 
+                // If no products are found
                 if (querySnapshot.empty) {
                     productList.innerHTML = "<p>No products available.</p>";
                     return;
                 }
 
+                // Loop through the products and display them
                 querySnapshot.forEach((doc) => {
                     const product = doc.data();
                     const productDiv = document.createElement("div");
                     productDiv.classList.add("product");
 
+                    // Create HTML content for the product
                     productDiv.innerHTML = `
-                        <img src="${product.imageUrl}" alt="${product.name}">
+                        <img src="${product.imageUrl || 'https://via.placeholder.com/100'}" alt="${product.name}">
                         <span>${product.name} - $${product.price.toFixed(2)}</span>
                         <button onclick="addToCart('${doc.id}', '${product.name}', ${product.price}, '${product.imageUrl}')">Add to Cart</button>
                     `;
                     productList.appendChild(productDiv);
                 });
-
             } catch (error) {
-                productList.innerHTML = "<p>Error loading products.</p>";
                 console.error("Error fetching products:", error);
+                productList.innerHTML = "<p>Error loading products. Please try again later.</p>";
             }
         }
 
@@ -110,6 +113,7 @@
             alert(`${name} added to cart!`);
         };
 
+        // Load products when the page is ready
         window.onload = loadProducts;
     </script>
 </head>
