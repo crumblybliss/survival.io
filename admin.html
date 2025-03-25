@@ -6,7 +6,7 @@
     <title>Admin Dashboard - CrumblyBliss</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: #0a1d37;
             color: #f1f1f1;
             text-align: center;
@@ -18,45 +18,35 @@
             padding: 20px;
             border-radius: 8px;
         }
-        .product {
+        .form-container {
             background: #003c5a;
             padding: 15px;
             border-radius: 8px;
             margin: 15px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        }
+        label, input, button {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            font-size: 1rem;
         }
         button {
-            padding: 10px;
             background: #00bcd4;
             color: white;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
         }
         button:hover {
             background: #0097a7;
         }
-        .input-field {
-            padding: 10px;
-            margin: 5px;
-            background: #003c5a;
-            border: 1px solid #ddd;
-            color: white;
-            border-radius: 5px;
-        }
     </style>
 
-    <!-- Firebase Setup -->
+    <!-- Firebase -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        console.log("✅ Firebase script loaded");
-
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
             authDomain: "survival-f35e2.firebaseapp.com",
@@ -66,113 +56,36 @@
             appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
 
-        let isAdmin = false;
-
-        // Check if user is an admin
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const token = await user.getIdTokenResult();
-                console.log("User claims:", token.claims);
-                isAdmin = token.claims.admin === true;
-
-                if (!isAdmin) {
-                    alert("Access Denied: You are not an admin.");
-                    window.location.href = "index.html";
-                } else {
-                    loadProducts();  // Load products after admin check
-                }
-            } else {
-                alert("Please log in as an admin.");
-                window.location.href = "login.html";
-            }
-        });
-
-        // Function to Add a Product
+        // Add new product to Firestore
         async function addProduct(event) {
             event.preventDefault();
 
-            const name = document.getElementById("productName").value.trim();
-            const price = parseFloat(document.getElementById("productPrice").value);
-            const category = document.getElementById("productCategory").value;
-            const imageUrl = document.getElementById("productImageUrl").value.trim();
+            // Get values from the form
+            const name = document.getElementById("name").value;
+            const price = parseFloat(document.getElementById("price").value);
+            const imageUrl = document.getElementById("imageUrl").value;
 
-            if (!name || isNaN(price) || !category) {
-                alert("Please enter valid product details.");
-                return;
-            }
-
-            if (!isAdmin) {
-                alert("You are not authorized to add products.");
+            if (!name || isNaN(price) || !imageUrl) {
+                alert("Please fill in all fields correctly!");
                 return;
             }
 
             try {
-                const productData = {
+                // Add product to Firestore
+                await addDoc(collection(db, "products"), {
                     name,
                     price,
-                    category,
-                    createdAt: new Date(),
-                    imageUrl: imageUrl || null  // Make image optional
-                };
-
-                await addDoc(collection(db, "products"), productData);
-
-                document.getElementById("productForm").reset();
-                alert("Product added successfully!");
-                loadProducts();  
-            } catch (error) {
-                console.error("Error adding product:", error);
-                alert("Error adding product.");
-            }
-        }
-
-        // Function to Load Products
-        async function loadProducts() {
-            try {
-                const productsList = document.getElementById("products-list");
-                productsList.innerHTML = "<p>Loading products...</p>";
-
-                const querySnapshot = await getDocs(collection(db, "products"));
-                productsList.innerHTML = "";
-
-                querySnapshot.forEach((doc) => {
-                    const product = doc.data();
-                    const productElement = document.createElement("div");
-                    productElement.classList.add("product");
-                    productElement.innerHTML = `
-                        <div>
-                            <strong>${product.name}</strong> - $${product.price} (${product.category})
-                        </div>
-                        ${product.imageUrl ? `<img src="${product.imageUrl}" alt="${product.name}" style="max-width: 50px; max-height: 50px;">` : ""}
-                        <button onclick="deleteProduct('${doc.id}')">Delete</button>
-                    `;
-                    productsList.appendChild(productElement);
+                    imageUrl
                 });
 
-                if (querySnapshot.empty) {
-                    productsList.innerHTML = "<p>No products found.</p>";
-                }
+                alert("Product added successfully!");
+                document.getElementById("product-form").reset(); // Reset form
             } catch (error) {
-                console.error("Error loading products:", error);
-                document.getElementById("products-list").innerHTML = "<p>Error loading products.</p>";
-            }
-        }
-
-        // Function to Delete Product
-        async function deleteProduct(productId) {
-            if (confirm("Are you sure you want to delete this product?")) {
-                try {
-                    await deleteDoc(doc(db, "products", productId));
-                    alert("Product deleted!");
-                    loadProducts();
-                } catch (error) {
-                    console.error("Error deleting product:", error);
-                }
+                console.error("Error adding product:", error);
+                alert("Error adding product. Please try again.");
             }
         }
     </script>
@@ -185,25 +98,29 @@
         <li><a href="about.html">About</a></li>
         <li><a href="commitments.html">Commitments</a></li>
         <li><a href="cart.html">Cart 🛒</a></li>
-        <li><a href="admin.html">Admin Dashboard</a></li>
+        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
     </ul>
 
     <h1>Admin Dashboard</h1>
     <div class="container">
         <h2>Add New Product</h2>
-        <form id="productForm" onsubmit="addProduct(event)">
-            <input type="text" id="productName" class="input-field" placeholder="Product Name" required>
-            <input type="number" id="productPrice" class="input-field" placeholder="Product Price" required>
-            <select id="productCategory" class="input-field" required>
-                <option value="Cookies">Cookies</option>
-                <option value="Bracelets">Bracelets</option>
-            </select>
-            <input type="url" id="productImageUrl" class="input-field" placeholder="Product Image URL (optional)">
-            <button type="submit">Add Product</button>
-        </form>
+        
+        <!-- Product Add Form -->
+        <div class="form-container">
+            <form id="product-form" onsubmit="addProduct(event)">
+                <label for="name">Product Name</label>
+                <input type="text" id="name" required />
 
-        <h2>Manage Products</h2>
-        <div id="products-list"></div>
+                <label for="price">Product Price</label>
+                <input type="number" id="price" required />
+
+                <label for="imageUrl">Product Image URL</label>
+                <input type="text" id="imageUrl" required />
+
+                <button type="submit">Add Product</button>
+            </form>
+        </div>
+
     </div>
 </body>
 </html>
