@@ -3,109 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leave a Comment</title>
+    <title>Tactics & Treats - Commitments</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+            background-color: #0a1d37;
+            color: #f1f1f1;
             text-align: center;
-            color: #333;
+            margin: 0;
+        }
+        ul {
+            background-color: #003c5a;
+            padding: 10px;
+            list-style: none;
+            margin: 0;
+        }
+        ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+        ul li a {
+            color: #f1f1f1;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        ul li a:hover {
+            color: #00bcd4;
         }
         .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background: white;
-            padding: 20px;
+            padding: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            margin: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .stars input {
-            display: none;
-        }
-        .stars label {
-            font-size: 30px;
-            color: #ddd;
-            cursor: pointer;
-        }
-        .stars input:checked ~ label,
-        .stars label:hover,
-        .stars label:hover ~ label {
-            color: gold;
-        }
-        button {
-            padding: 10px;
-            margin: 10px;
-            border: none;
-            cursor: pointer;
-            background: #007BFF;
-            color: white;
-            border-radius: 5px;
-        }
-        button:hover {
-            background: #0056b3;
         }
     </style>
 </head>
 <body>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="bracelets.html">Bracelets</a></li>
+        <li><a href="cookies.html">Cookies</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="commitments.html">Commitments</a></li>
+        <li><a href="cart.html">Cart 🛒</a></li>
+        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
+    </ul>
+
     <div class="container">
-        <h2>Leave a Comment</h2>
-        <div class="stars">
-            <input type="radio" name="rating" id="star5" value="5"><label for="star5">★</label>
-            <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
-            <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
-            <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
-            <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
-        </div>
-        <textarea id="comment" rows="4" placeholder="Write your comment..."></textarea><br>
-        <button onclick="submitComment()">Submit</button>
-        <h3>Comments</h3>
-        <div id="comments-section"></div>
+        <h1>Our Commitments</h1>
+        <p>We are committed to creating high-quality products, sourcing responsibly, and promoting sustainability.</p>
     </div>
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-                apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-  authDomain: "survival-f35e2.firebaseapp.com",
-  projectId: "survival-f35e2",
-  storageBucket: "survival-f35e2.appspot.com",
-  messagingSenderId: "704462603548",
-  appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        async function submitComment() {
-            const commentText = document.getElementById("comment").value;
-            const rating = document.querySelector('input[name="rating"]:checked')?.value || "0";
-            if (!commentText.trim()) {
-                alert("Please enter a comment.");
-                return;
-            }
-            
-            await addDoc(collection(db, "comments"), {
-                text: commentText,
-                rating: rating,
-                timestamp: new Date()
-            });
-            document.getElementById("comment").value = "";
-            loadComments();
-        }
-
-        async function loadComments() {
-            const commentsSection = document.getElementById("comments-section");
-            commentsSection.innerHTML = "";
-            const querySnapshot = await getDocs(collection(db, "comments"));
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                commentsSection.innerHTML += `<p><strong>${'★'.repeat(data.rating)}</strong> ${data.text}</p>`;
-            });
-        }
-
-        loadComments();
-    </script>
 </body>
 </html>
