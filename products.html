@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - CrumblyBliss</title>
+    <title>Products - CrumblyBliss</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -11,33 +11,6 @@
             color: #f1f1f1;
             text-align: center;
         }
-
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            background-color: #001f3d;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            padding: 15px 0;
-        }
-
-        li {
-            display: inline;
-        }
-
-        a {
-            text-decoration: none;
-            color: white;
-            padding: 10px;
-            transition: background 0.3s;
-        }
-
-        a:hover {
-            background-color: #00bcd4;
-        }
-
         .container {
             max-width: 900px;
             margin: 50px auto;
@@ -45,11 +18,9 @@
             padding: 20px;
             border-radius: 8px;
         }
-
-        h1, h2 {
+        h1 {
             color: #00bcd4;
         }
-
         .product {
             background: #003c5a;
             padding: 15px;
@@ -59,73 +30,103 @@
             justify-content: space-between;
             align-items: center;
         }
-
         .product img {
             width: 100px;
             height: 100px;
             object-fit: cover;
-            border-radius: 8px;
         }
-
-        .product button {
-            padding: 10px;
-            background: #ff3b30;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .product button:hover {
-            background: #ff1e16;
-        }
-
-        .add-product-form {
-            margin-bottom: 30px;
-        }
-
-        input, button {
-            padding: 10px;
-            margin: 5px;
-            border-radius: 5px;
-            border: none;
-        }
-
-        input {
-            width: 200px;
-        }
-
         button {
+            padding: 10px;
             background: #00bcd4;
             color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
         }
-
         button:hover {
             background: #0097a7;
         }
-
-        /* Mobile Responsiveness */
-        @media (max-width: 600px) {
-            .product {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .product img {
-                margin-bottom: 10px;
-            }
+        .error {
+            color: red;
+            margin-top: 10px;
         }
     </style>
 
     <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
             authDomain: "survival-f35e2.firebaseapp.com",
             projectId: "survival-f35e2",
             storageBucket: "survival-f35e2.appspot.com",
-           
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Function to load products from Firestore
+        async function loadProducts() {
+            const productList = document.getElementById("products-list");
+            productList.innerHTML = "<p>Loading products...</p>";
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "products"));
+                productList.innerHTML = "";
+
+                if (querySnapshot.empty) {
+                    productList.innerHTML = "<p>No products available.</p>";
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const product = doc.data();
+                    const productDiv = document.createElement("div");
+                    productDiv.classList.add("product");
+
+                    productDiv.innerHTML = `
+                        <img src="${product.imageUrl}" alt="${product.name}">
+                        <span>${product.name} - $${product.price.toFixed(2)}</span>
+                        <button onclick="addToCart('${doc.id}', '${product.name}', ${product.price}, '${product.imageUrl}')">Add to Cart</button>
+                    `;
+                    productList.appendChild(productDiv);
+                });
+
+            } catch (error) {
+                productList.innerHTML = "<p>Error loading products.</p>";
+                console.error("Error fetching products:", error);
+            }
+        }
+
+        // Add product to the cart (store in localStorage)
+        window.addToCart = (id, name, price, imageUrl) => {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.push({ id, name, price, imageUrl });
+            localStorage.setItem("cart", JSON.stringify(cart));
+            alert(`${name} added to cart!`);
+        };
+
+        window.onload = loadProducts;
+    </script>
+</head>
+<body>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="commitments.html">Commitments</a></li>
+        <li><a href="cart.html">Cart 🛒</a></li>
+        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
+    </ul>
+
+    <h1>Our Products</h1>
+    <div class="container">
+        <h2>Available Products</h2>
+        <div id="products-list"></div>
+    </div>
+</body>
+</html>
