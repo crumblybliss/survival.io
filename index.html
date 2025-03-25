@@ -3,244 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Survival Store</title>
+    <title>Home - Tactics & Treats</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-
+        /* General body styles */
         body {
+            font-family: 'Arial', sans-serif;
             background-color: #0a1d37;
             color: #f1f1f1;
             text-align: center;
-            font-size: 16px;
-            line-height: 1.5;
+            margin: 0;
         }
 
-        /* Navigation Bar */
-        .nav-bar {
-            background: linear-gradient(135deg, #003366, #1a5d80);
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 100;
-            transition: all 0.3s ease;
-        }
-
-        .nav-bar ul {
+        /* Header Styles */
+        ul {
+            background-color: #003c5a;
+            padding: 10px;
             list-style: none;
-            display: flex;
-            padding: 0;
+            margin: 0;
         }
 
-        .nav-bar ul li {
-            margin: 0 20px;
+        ul li {
+            display: inline;
+            margin: 0 15px;
         }
 
-        .nav-bar ul li a {
-            color: white;
+        ul li a {
+            color: #f1f1f1;
             text-decoration: none;
-            font-weight: bold;
             font-size: 18px;
-            transition: color 0.3s ease;
         }
 
-        .nav-bar ul li a:hover {
+        ul li a:hover {
             color: #00bcd4;
         }
 
-        /* Hero Section */
-        .hero {
-            background: url('https://via.placeholder.com/1600x600') no-repeat center center/cover;
-            color: white;
-            padding: 120px 20px 60px 20px;
-            text-align: center;
-            background-size: cover;
-            background-position: center;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-weight: bold;
-            animation: fadeIn 2s ease-out;
-        }
-
-        .hero p {
-            font-size: 1.5rem;
-            margin-bottom: 30px;
-            animation: fadeIn 3s ease-out;
-        }
-
-        .cta-btn {
-            background-color: #00bcd4;
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-        }
-
-        .cta-btn:hover {
-            background-color: #0097a7;
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Product Section */
-        .product-section {
-            margin-top: 80px;
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 30px;
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: rgba(0, 0, 0, 0.7);
             padding: 20px;
-        }
-
-        .product {
-            background-color: #1f2b41;
-            border-radius: 10px;
-            padding: 20px;
-            width: 300px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .product:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .product img {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
             border-radius: 8px;
         }
 
-        .product h2 {
-            font-size: 1.8rem;
-            margin-top: 20px;
-            font-weight: bold;
+        /* Product Styles */
+        .product {
+            background: #003c5a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .product p {
-            font-size: 1.1rem;
-            margin: 10px 0;
+        .product img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
         }
 
-        .product a {
-            color: #00bcd4;
-            font-weight: bold;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .product a:hover {
-            color: #0097a7;
-        }
-
-        /* Footer Section */
-        .footer {
-            background-color: #001f3d;
-            padding: 20px 0;
+        button {
+            padding: 10px;
+            background: #00bcd4;
             color: white;
-            margin-top: 40px;
-            text-align: center;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
 
-        .footer p {
-            font-size: 1rem;
+        button:hover {
+            background: #0097a7;
         }
 
-        /* Media Queries for Responsiveness */
-        @media (max-width: 768px) {
-            .product-section {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero p {
-                font-size: 1.2rem;
-            }
+        /* Form and Input Styles */
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
         }
 
-        /* Animation Keyframes */
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        button {
+            background: #00bcd4;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0097a7;
+        }
+
+        h1 {
+            color: #00bcd4;
+        }
+
+        /* Error message */
+        .error {
+            color: red;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="commitments.html">Commitments</a></li>
+        <li><a href="cart.html">Cart 🛒</a></li>
+        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
+    </ul>
 
-    <!-- Navigation Bar -->
-    <nav class="nav-bar">
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="braclets.html">Bracelets</a></li>
-            <li><a href="cookies.html">Cookies</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="cart.html">Cart 🛒</a></li>
-        </ul>
-    </nav>
+    <h1>Welcome to Tactics & Treats!</h1>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <h1>Welcome to Survival Store</h1>
-        <p>Handmade Paracord Bracelets, Bead Bracelets, and Delicious Cookies</p>
-        <a href="braclets.html" class="cta-btn">Shop Now</a>
-    </section>
-
-    <!-- Featured Products Section -->
-    <section class="product-section">
-        <div class="product">
-            <img src="https://via.placeholder.com/300x300" alt="Paracord Bracelet">
-            <h2>Paracord Survival Bracelet</h2>
-            <p>Durable and stylish. Ready for your next adventure.</p>
-            <a href="product1.html">View Product</a>
-        </div>
-        <div class="product">
-            <img src="https://via.placeholder.com/300x300" alt="Bead Bracelet">
-            <h2>Bead Bracelet</h2>
-            <p>Unique and colorful designs to match any style.</p>
-            <a href="product2.html">View Product</a>
-        </div>
-        <div class="product">
-            <img src="https://via.placeholder.com/300x300" alt="Cookies">
-            <h2>Delicious Cookies</h2>
-            <p>Handmade with love for the best taste.</p>
-            <a href="product3.html">View Product</a>
-        </div>
-    </section>
-
-    <!-- Footer Section -->
-    <footer class="footer">
-        <p>&copy; 2025 Survival Store. All rights reserved.</p>
-    </footer>
+    <!-- Content here -->
 
 </body>
 </html>
