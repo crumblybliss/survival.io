@@ -3,217 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cookies - CrumblyBliss</title>
-    
+    <title>Cookies - Tactics & Treats</title>
     <style>
-        /* General Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-
         body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f1f1f1;
+            color: #333;
+            text-align: center;
+            margin: 0;
+        }
+        /* Navigation Bar */
+        .navbar {
             background-color: #0a1d37;
             color: white;
+            padding: 15px 0;
             text-align: center;
-            padding-top: 70px;
-        }
-
-        /* Navigation Bar */
-        .nav-bar {
-            background: #001f3d;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            font-size: 18px;
             position: fixed;
-            width: 100%;
             top: 0;
-            z-index: 1000;
+            width: 100%;
+            z-index: 100;
         }
-
-        .nav-bar .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
+        .navbar a {
             color: white;
-            margin-left: 20px;
-        }
-
-        .nav-bar ul {
-            list-style: none;
-            display: flex;
-            margin-right: 20px;
-        }
-
-        .nav-bar ul li {
-            margin: 0 15px;
-        }
-
-        .nav-bar ul li a {
-            color: white;
+            margin: 0 20px;
             text-decoration: none;
             font-weight: bold;
-            transition: 0.3s;
         }
-
-        .nav-bar ul li a:hover {
-            color: #00bcd4;
+        .navbar a:hover {
+            text-decoration: underline;
         }
-
-        /* Hero Section */
-        .hero {
-            background: url('https://via.placeholder.com/1600x500') no-repeat center center/cover;
-            color: white;
-            padding: 100px 20px;
-            text-align: center;
-        }
-
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-
-        .hero p {
-            font-size: 1.5rem;
-        }
-
-        /* Product Section */
-        .product-section {
-            margin: 40px auto;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            max-width: 1200px;
-        }
-
-        .product {
-            background-color: #1f2b41;
-            border-radius: 8px;
-            padding: 20px;
-            width: 300px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .product img {
-            width: 100%;
-            height: auto;
-            border-radius: 5px;
-        }
-
-        .product h2 {
-            font-size: 1.5rem;
-            margin-top: 10px;
-        }
-
-        .product p {
-            font-size: 1rem;
-            margin: 10px 0;
-        }
-
-        .cta-btn {
+        .navbar .auth-btn {
             background-color: #00bcd4;
             color: white;
             padding: 10px 20px;
             border: none;
-            border-radius: 5px;
-            font-size: 1.2rem;
             cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 10px;
+            border-radius: 5px;
         }
-
-        .cta-btn:hover {
+        .navbar .auth-btn:hover {
             background-color: #0097a7;
         }
-
-        /* Footer */
-        .footer {
-            background-color: #001f3d;
-            padding: 20px 0;
-            color: white;
-            margin-top: 40px;
+        .content {
+            padding-top: 70px; /* Adjust to prevent navbar from overlapping content */
         }
-
-        .footer p {
-            font-size: 1rem;
+        #cookiesList {
+            list-style-type: none;
+            padding: 0;
         }
-
+        #cookiesList li {
+            background-color: #fff;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #cookiesList img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        h3 {
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
-
     <!-- Navigation Bar -->
-    <nav class="nav-bar">
-        <div class="logo">CrumblyBliss</div>
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="products.html">Products</a></li>
-            <li><a href="cookies.html">Cookies</a></li>
-            <li><a href="cart.html">Cart 🛒</a></li>
-            <li><a href="admin.html">Admin</a></li>
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="bracelets.html">Bracelets</a>
+        <a href="cookies.html">Cookies</a>
+        <a href="admin.html">Admin Panel</a>
+        <button id="loginButton" class="auth-btn">Login</button>
+    </div>
+
+    <!-- Content Section -->
+    <div class="content">
+        <h1>Our Delicious Cookies</h1>
+        <ul id="cookiesList">
+            <!-- Cookies will be displayed here -->
         </ul>
-    </nav>
+    </div>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <h1>Delicious Cookies</h1>
-        <p>Freshly baked and full of flavor, only at CrumblyBliss!</p>
-    </section>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    <!-- Cookie Listings -->
-    <section class="product-section">
-        <div class="product">
-            <img src="https://via.placeholder.com/300x300" alt="Chocolate Chip Cookies">
-            <h2>Chocolate Chip Cookies</h2>
-            <p>Classic and delicious chocolate chip cookies.</p>
-            <a href="#" class="cta-btn">Add to Cart</a>
-        </div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
 
-        <div class="product">
-            <img src="https://via.placeholder.com/300x300" alt="Oatmeal Raisin Cookies">
-            <h2>Oatmeal Raisin Cookies</h2>
-            <p>Soft and chewy oatmeal cookies with raisins.</p>
-            <a href="#" class="cta-btn">Add to Cart</a>
-        </div>
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth();
+        const provider = new GoogleAuthProvider();
 
-        <div class="product">
-            <img src="https://via.placeholder.com/300x300" alt="Peanut Butter Cookies">
-            <h2>Peanut Butter Cookies</h2>
-            <p>Rich and nutty peanut butter cookies.</p>
-            <a href="#" class="cta-btn">Add to Cart</a>
-        </div>
+        // Login function
+        window.login = async () => {
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error("Error signing in:", error);
+            }
+        };
 
-        <div class="product">
-            <img src="https://via.placeholder.com/300x300" alt="Sugar Cookies">
-            <h2>Sugar Cookies</h2>
-            <p>Sweet and buttery sugar cookies.</p>
-            <a href="#" class="cta-btn">Add to Cart</a>
-        </div>
+        // Logout function
+        window.logout = async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Error signing out:", error);
+            }
+        };
 
-        <div class="product">
-            <img src="https://via.placeholder.com/300x300" alt="Double Chocolate Cookies">
-            <h2>Double Chocolate Cookies</h2>
-            <p>Chocolate cookies with extra chocolate chips.</p>
-            <a href="#" class="cta-btn">Add to Cart</a>
-        </div>
+        // On authentication state change, update button text
+        onAuthStateChanged(auth, (user) => {
+            const loginButton = document.getElementById("loginButton");
+            if (user) {
+                loginButton.innerText = "Logout";
+                loginButton.onclick = logout;
+            } else {
+                loginButton.innerText = "Login";
+                loginButton.onclick = login;
+            }
+        });
 
-        <div class="product">
-            <img src="https://via.placeholder.com/300x300" alt="Macadamia Nut Cookies">
-            <h2>Macadamia Nut Cookies</h2>
-            <p>Crispy cookies with macadamia nuts and white chocolate.</p>
-            <a href="#" class="cta-btn">Add to Cart</a>
-        </div>
-    </section>
+        window.loadCookies = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, "cookies"));
+                const cookiesList = document.getElementById("cookiesList");
 
-    <!-- Footer -->
-    <footer class="footer">
-        <p>&copy; 2025 CrumblyBliss. All rights reserved.</p>
-    </footer>
+                querySnapshot.forEach((doc) => {
+                    const cookie = doc.data();
+                    const listItem = document.createElement("li");
 
+                    listItem.innerHTML = `
+                        <img src="${cookie.imageUrl}" alt="${cookie.name}" />
+                        <h3>${cookie.name}</h3>
+                        <p>$${cookie.price.toFixed(2)}</p>
+                    `;
+                    cookiesList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            }
+        };
+
+        window.onload = loadCookies;
+    </script>
 </body>
 </html>
+
