@@ -129,9 +129,18 @@
                     const productDiv = document.createElement("div");
                     productDiv.classList.add("product");
 
+                    // Define the available colors (main colors including camo)
+                    const availableColors = [
+                        'Camo', 'Pink Camo', 'Red Camo', 'Blue', 'Black', 'White', 'Gray', 'Yellow',
+                        'Green', 'Orange', 'Purple', 'Brown', 'Turquoise', 'Teal', 'Navy', 'Gold', 'Silver'
+                    ];
+
+                    // Define the available sizes
+                    const availableSizes = ['Small', 'Medium', 'Large']; 
+
                     // Create the select elements for color and size
-                    const colorSelect = createSelectElement('color', product.colors || []);
-                    const sizeSelect = createSelectElement('size', product.sizes || []);
+                    const colorSelect = createSelectElement('color', availableColors, true);  // 'true' allows multiple selections
+                    const sizeSelect = createSelectElement('size', availableSizes, false);  // 'false' allows only single selection
 
                     productDiv.innerHTML = `
                         <img src="${product.imageUrl}" alt="${product.name}">
@@ -144,7 +153,7 @@
 
                     const addToCartButton = document.createElement("button");
                     addToCartButton.textContent = "Add to Cart";
-                    addToCartButton.onclick = () => addToCart(doc.id, product.name, product.price, product.imageUrl, colorSelect.value, sizeSelect.value);
+                    addToCartButton.onclick = () => addToCart(doc.id, product.name, product.price, product.imageUrl, colorSelect.selectedOptions, sizeSelect.value);
                     productDiv.appendChild(addToCartButton);
 
                     productList.appendChild(productDiv);
@@ -155,10 +164,13 @@
             }
         }
 
-        // Function to create select dropdowns
-        function createSelectElement(type, options) {
+        // Function to create select dropdowns with multiple selection option
+        function createSelectElement(type, options, isMultiple) {
             const selectElement = document.createElement("select");
             selectElement.name = type;
+            if (isMultiple) {
+                selectElement.setAttribute("multiple", "multiple");
+            }
             const placeholderOption = document.createElement("option");
             placeholderOption.value = "";
             placeholderOption.textContent = `Select ${type}`;
@@ -175,11 +187,12 @@
         }
 
         // Function to add products to cart (localStorage)
-        window.addToCart = (id, name, price, imageUrl, color, size) => {
+        window.addToCart = (id, name, price, imageUrl, selectedColors, size) => {
+            const selectedColorArray = Array.from(selectedColors).map(option => option.value);
             let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            cart.push({ id, name, price, imageUrl, color, size });
+            cart.push({ id, name, price, imageUrl, colors: selectedColorArray, size });
             localStorage.setItem("cart", JSON.stringify(cart));
-            alert(`${name} added to cart with color ${color} and size ${size}!`);
+            alert(`${name} added to cart with colors ${selectedColorArray.join(", ")} and size ${size}!`);
         };
 
         // Load products on page load
