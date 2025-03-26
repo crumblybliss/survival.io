@@ -1,112 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cart - CrumblyBliss</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f8f8;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-        .cart-container {
-            width: 80%;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        }
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        .cart-item img {
-            width: 50px;
-            height: 50px;
-            border-radius: 5px;
-        }
-        .remove-btn {
-            background: red;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-    </style>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        
-        function loadCart(userId) {
-            const cartContainer = document.getElementById("cart-items");
-            cartContainer.innerHTML = "Loading...";
-            const cartRef = collection(db, "users", userId, "cart");
-            
-            getDocs(cartRef).then(snapshot => {
-                cartContainer.innerHTML = "";
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const item = document.createElement("div");
-                    item.className = "cart-item";
-                    item.innerHTML = `
-                        <img src="${data.image || 'placeholder.jpg'}" alt="${data.name}">
-                        <span>${data.name} - $${data.price}</span>
-                        <button class="remove-btn" onclick="removeFromCart('${doc.id}', '${userId}')">Remove</button>
-                    `;
-                    cartContainer.appendChild(item);
-                });
-            }).catch(error => {
-                cartContainer.innerHTML = "Error loading cart.";
-                console.error("Error fetching cart:", error);
-            });
-        }
-        
-        function removeFromCart(itemId, userId) {
-            const itemRef = doc(db, "users", userId, "cart", itemId);
-            deleteDoc(itemRef).then(() => {
-                loadCart(userId);
-            }).catch(error => {
-                console.error("Error removing item:", error);
-            });
-        }
-        
-        window.removeFromCart = removeFromCart;
-        
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                loadCart(user.uid);
-            } else {
-                document.getElementById("cart-items").innerHTML = "Please log in to see your cart.";
-            }
-        });
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrumblyBliss - Cart</title>
+  
+  <!-- Firebase Configuration -->
+  <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore.js"></script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+    }
+    
+    header {
+      background-color: #003366; /* Navy Blue */
+      padding: 1rem;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    nav a {
+      color: white;
+      margin: 0 1rem;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    
+    .container {
+      padding: 2rem;
+    }
+
+    .cart-item {
+      background-color: white;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .cart-item img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+    }
+
+    .cart-item-details {
+      flex: 1;
+      padding-left: 1rem;
+    }
+
+    .cart-item-details h4 {
+      margin: 0;
+    }
+
+    .cart-item-details p {
+      margin: 5px 0;
+    }
+
+    .cart-total {
+      margin-top: 2rem;
+      font-size: 1.5rem;
+      text-align: right;
+    }
+
+    button {
+      background-color: #003366;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #002244;
+    }
+  </style>
 </head>
 <body>
-    <div class="cart-container">
-        <h2>Your Cart</h2>
-        <div id="cart-items"></div>
+  <header>
+    <div class="logo">
+      <a href="/" style="color: white; font-size: 1.5rem;">CrumblyBliss</a>
     </div>
+    <nav>
+      <a href="/index.html">Home</a>
+      <a href="/products.html">Products</a>
+      <a href="/cart.html">Cart</a>
+      <a href="#" id="auth-button">Login/Logout</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h2>Your Cart</h2>
+    <div id="cart-items"></div>
+    <div class="cart-total">
+      <span>Total: $<span id="total-price">0.00</span></span>
+      <br>
+      <button onclick="checkout()">Checkout</button>
+    </div>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script>
+    // Firebase config and initialization
+    const firebaseConfig = {
+      apiKey: "AIzaSyBv9Il87-eTEXJ1oCO54G_dUm7df3h9Y0Q",
+      authDomain: "crumblybliss.firebaseapp.com",
+      projectId: "crumblybliss",
+      storageBucket: "crumblybliss.appspot.com",
+      messagingSenderId: "111143105543",
+      appId: "1:111143105543:web:2f2de68bb63143160d7791"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    
+    // UI elements
+    const cartItemsContainer = document.getElementById('cart-items');
+    const totalPriceElement = document.getElementById('total-price');
+    const authButton = document.getElementById('auth-button');
+
+    // Function to display cart items
+    function loadCart() {
+      const user = auth.currentUser;
+      if (user) {
+        const cartRef = db.collection('carts').doc(user.uid);
+        cartRef.get().then(doc => {
+          const cartData = doc.data();
+          if (cartData && cartData.items) {
+            cartItemsContainer.innerHTML = '';
+            let totalPrice = 0;
+
+            cartData.items.forEach(item => {
+              const cartItemDiv = document.createElement('div');
+              cartItemDiv.classList.add('cart-item');
+              cartItemDiv.innerHTML = `
+                <img src="${item.imageUrl}" alt="${item.name}">
+                <div class="cart-item-details">
+                  <h4>${item.name}</h4>
+                  <p>Price: $${item.price}</p>
+                  <p>Quantity: ${item.quantity}</p>
+                  <button onclick="removeFromCart('${item.id}')">Remove</button>
+                </div>
+              `;
+              cartItemsContainer.appendChild(cartItemDiv);
+              totalPrice += item.price * item.quantity;
+            });
+
+            totalPriceElement.textContent = totalPrice.toFixed(2);
+          } else {
+            cartItemsContainer.innerHTML = '<p>Your cart is empty.</p>';
+          }
+        }).catch(error => console.error("Error fetching cart data:", error));
+      } else {
+        cartItemsContainer.innerHTML = '<p>You need to be logged in to view your cart.</p>';
+      }
+    }
+
+    // Function to remove an item from the cart
+    function removeFromCart(itemId) {
+      const user = auth.currentUser;
+      if (user) {
+        const cartRef = db.collection('carts').doc(user.uid);
+        cartRef.update({
+          items: firebase.firestore.FieldValue.arrayRemove({ id: itemId })
+        }).then(() => {
+          loadCart();
+        }).catch(error => console.error("Error removing item:", error));
+      }
+    }
+
+    // Function to handle login/logout
+    authButton.addEventListener('click', () => {
+      if (auth.currentUser) {
+        auth.signOut().then(() => {
+          authButton.textContent = 'Login';
+          loadCart();
+        });
+      } else {
+        // Add your login flow here
+        auth.signInAnonymously().then(() => {
+          authButton.textContent = 'Logout';
+          loadCart();
+        }).catch(error => console.error("Error signing in:", error));
+      }
+    });
+
+    // Checkout function
+    function checkout() {
+      // You can implement the checkout process here
+      alert("Checkout functionality is coming soon!");
+    }
+
+    // Load the cart when the page is loaded
+    window.onload = () => {
+      loadCart();
+    };
+  </script>
 </body>
 </html>
+
