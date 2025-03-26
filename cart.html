@@ -67,14 +67,13 @@
             background-color: #45a049;
         }
     </style>
-    <!-- Modular Firebase SDK -->
+
+    <!-- Firebase modular SDK v9 -->
     <script type="module">
-        // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBv9Il87-eTEXJ1oCO54G_dUm7df3h9Y0Q",
             authDomain: "crumblybliss.firebaseapp.com",
@@ -84,12 +83,10 @@
             appId: "1:111143105543:web:2f2de68bb63143160d7791"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const firestore = getFirestore(app);
 
-        // Load cart from Firestore
         async function loadCart() {
             const user = auth.currentUser;
             const cartItemsContainer = document.getElementById('cart-items');
@@ -102,7 +99,6 @@
                 if (userDocSnap.exists()) {
                     const cart = userDocSnap.data().cart || [];
                     cartItemsContainer.innerHTML = '';
-                    
                     if (cart.length === 0) {
                         emptyMessage.style.display = 'block';
                     } else {
@@ -127,7 +123,6 @@
             }
         }
 
-        // Remove item from the cart
         async function removeFromCart(index) {
             const user = auth.currentUser;
             if (user) {
@@ -140,11 +135,11 @@
             }
         }
 
-        // Sign in with Google
         function signIn() {
             const provider = new GoogleAuthProvider();
             signInWithPopup(auth, provider)
                 .then((result) => {
+                    console.log(result);
                     loadCart();
                 })
                 .catch((error) => {
@@ -152,42 +147,33 @@
                 });
         }
 
-        // Sign out
         function signOut() {
-            signOut(auth).then(() => {
-                loadCart();
-            }).catch((error) => {
-                console.error("Error signing out: ", error);
-            });
+            signOut(auth)
+                .then(() => {
+                    console.log("User signed out");
+                    loadCart();
+                })
+                .catch((error) => {
+                    console.error("Error signing out: ", error);
+                });
         }
 
-        // Auth state change listener
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                document.getElementById('login-btn').style.display = 'none';
-                document.getElementById('logout-btn').style.display = 'inline-block';
-                loadCart();
-            } else {
-                document.getElementById('login-btn').style.display = 'inline-block';
-                document.getElementById('logout-btn').style.display = 'none';
-                loadCart();
-            }
+        document.addEventListener('DOMContentLoaded', function () {
+            loadCart();
         });
-
-        // Load cart when the page is ready
-        document.addEventListener('DOMContentLoaded', loadCart);
     </script>
 </head>
 <body>
     <div class="container">
         <h2>Your Shopping Cart</h2>
         <div id="cart-items"></div>
-        <p id="empty-message" class="empty-cart">Your cart is empty.</p>
-    </div>
-
-    <div class="auth-buttons">
-        <button id="login-btn" onclick="signIn()">Sign In</button>
-        <button id="logout-btn" onclick="signOut()" style="display: none;">Sign Out</button>
+        <div class="empty-cart" id="empty-message" style="display: none;">
+            Your cart is empty. Please sign in to see your cart.
+        </div>
+        <div class="auth-buttons">
+            <button id="login-btn" onclick="signIn()">Sign In</button>
+            <button id="logout-btn" onclick="signOut()">Sign Out</button>
+        </div>
     </div>
 </body>
 </html>
