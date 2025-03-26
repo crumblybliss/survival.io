@@ -1,211 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CrumblyBliss - Cart</title>
-  
-  <!-- Firebase Configuration -->
-  <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore.js"></script>
-  
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-    }
-    
-    header {
-      background-color: #003366; /* Navy Blue */
-      padding: 1rem;
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    nav a {
-      color: white;
-      margin: 0 1rem;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    
-    .container {
-      padding: 2rem;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Page</title>
+    <style>
+        /* Your custom CSS (Ensure it is set as required) */
+        body {
+            background-color: #f3f3f3;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
 
-    .cart-item {
-      background-color: white;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      display: flex;
-      justify-content: space-between;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+        header {
+            background-color: #003366;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+        }
 
-    .cart-item img {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-    }
+        .cart-container {
+            margin-top: 20px;
+        }
 
-    .cart-item-details {
-      flex: 1;
-      padding-left: 1rem;
-    }
+        .cart-item {
+            background-color: #fff;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
 
-    .cart-item-details h4 {
-      margin: 0;
-    }
+        .cart-item button {
+            background-color: #ff4d4d;
+            border: none;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
 
-    .cart-item-details p {
-      margin: 5px 0;
-    }
-
-    .cart-total {
-      margin-top: 2rem;
-      font-size: 1.5rem;
-      text-align: right;
-    }
-
-    button {
-      background-color: #003366;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-
-    button:hover {
-      background-color: #002244;
-    }
-  </style>
+        .cart-item button:hover {
+            background-color: #ff1a1a;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <div class="logo">
-      <a href="/" style="color: white; font-size: 1.5rem;">CrumblyBliss</a>
+
+    <header>
+        <h1>My Shopping Cart</h1>
+    </header>
+
+    <div class="cart-container" id="cartItems">
+        <!-- Cart items will be dynamically loaded here -->
     </div>
-    <nav>
-      <a href="/index.html">Home</a>
-      <a href="/products.html">Products</a>
-      <a href="/cart.html">Cart</a>
-      <a href="#" id="auth-button">Login/Logout</a>
-    </nav>
-  </header>
 
-  <div class="container">
-    <h2>Your Cart</h2>
-    <div id="cart-items"></div>
-    <div class="cart-total">
-      <span>Total: $<span id="total-price">0.00</span></span>
-      <br>
-      <button onclick="checkout()">Checkout</button>
-    </div>
-  </div>
+    <footer>
+        <p>© 2025 CrumblyBliss. All rights reserved.</p>
+    </footer>
 
-  <!-- Firebase Scripts -->
-  <script>
-    // Firebase config and initialization
-    const firebaseConfig = {
-      apiKey: "AIzaSyBv9Il87-eTEXJ1oCO54G_dUm7df3h9Y0Q",
-      authDomain: "crumblybliss.firebaseapp.com",
-      projectId: "crumblybliss",
-      storageBucket: "crumblybliss.appspot.com",
-      messagingSenderId: "111143105543",
-      appId: "1:111143105543:web:2f2de68bb63143160d7791"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-    
-    // UI elements
-    const cartItemsContainer = document.getElementById('cart-items');
-    const totalPriceElement = document.getElementById('total-price');
-    const authButton = document.getElementById('auth-button');
+    <!-- Firebase SDK Script -->
+    <script type="module">
+        // Firebase imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        
+        // Your Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBv9Il87-eTEXJ1oCO54G_dUm7df3h9Y0Q",
+            authDomain: "crumblybliss.firebaseapp.com",
+            projectId: "crumblybliss",
+            storageBucket: "crumblybliss.appspot.com",
+            messagingSenderId: "111143105543",
+            appId: "1:111143105543:web:2f2de68bb63143160d7791"
+        };
 
-    // Function to display cart items
-    function loadCart() {
-      const user = auth.currentUser;
-      if (user) {
-        const cartRef = db.collection('carts').doc(user.uid);
-        cartRef.get().then(doc => {
-          const cartData = doc.data();
-          if (cartData && cartData.items) {
-            cartItemsContainer.innerHTML = '';
-            let totalPrice = 0;
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const firestore = getFirestore(app);
 
-            cartData.items.forEach(item => {
-              const cartItemDiv = document.createElement('div');
-              cartItemDiv.classList.add('cart-item');
-              cartItemDiv.innerHTML = `
-                <img src="${item.imageUrl}" alt="${item.name}">
-                <div class="cart-item-details">
-                  <h4>${item.name}</h4>
-                  <p>Price: $${item.price}</p>
-                  <p>Quantity: ${item.quantity}</p>
-                  <button onclick="removeFromCart('${item.id}')">Remove</button>
-                </div>
-              `;
-              cartItemsContainer.appendChild(cartItemDiv);
-              totalPrice += item.price * item.quantity;
+        // Function to load cart items from Firestore
+        async function loadCart() {
+            const user = auth.currentUser; // Get current user
+            if (!user) {
+                alert("You need to be logged in to view the cart.");
+                return;
+            }
+            const cartItemsRef = collection(firestore, "carts", user.uid, "items"); // Path: 'carts/{userId}/items'
+            const cartSnapshot = await getDocs(cartItemsRef);
+            const cartItems = cartSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            
+            const cartContainer = document.getElementById("cartItems");
+            cartContainer.innerHTML = ''; // Clear existing cart items
+
+            cartItems.forEach(item => {
+                const itemElement = document.createElement("div");
+                itemElement.classList.add("cart-item");
+                itemElement.innerHTML = `
+                    <span>${item.name} - $${item.price}</span>
+                    <button onclick="removeFromCart('${item.id}')">Remove</button>
+                `;
+                cartContainer.appendChild(itemElement);
             });
+        }
 
-            totalPriceElement.textContent = totalPrice.toFixed(2);
-          } else {
-            cartItemsContainer.innerHTML = '<p>Your cart is empty.</p>';
-          }
-        }).catch(error => console.error("Error fetching cart data:", error));
-      } else {
-        cartItemsContainer.innerHTML = '<p>You need to be logged in to view your cart.</p>';
-      }
-    }
+        // Function to remove item from cart (FireStore example)
+        async function removeFromCart(itemId) {
+            const user = auth.currentUser; // Get current user
+            if (!user) {
+                alert("You need to be logged in to remove items.");
+                return;
+            }
+            const itemRef = doc(firestore, "carts", user.uid, "items", itemId);
+            await deleteDoc(itemRef);
+            loadCart(); // Reload the cart after removal
+        }
 
-    // Function to remove an item from the cart
-    function removeFromCart(itemId) {
-      const user = auth.currentUser;
-      if (user) {
-        const cartRef = db.collection('carts').doc(user.uid);
-        cartRef.update({
-          items: firebase.firestore.FieldValue.arrayRemove({ id: itemId })
-        }).then(() => {
-          loadCart();
-        }).catch(error => console.error("Error removing item:", error));
-      }
-    }
+        // Function to login (For example purposes, you may want to add a proper login system)
+        async function login() {
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword("user@example.com", "password"); // Replace with real login logic
+                loadCart();
+            } catch (error) {
+                console.error("Error logging in: ", error);
+            }
+        }
 
-    // Function to handle login/logout
-    authButton.addEventListener('click', () => {
-      if (auth.currentUser) {
-        auth.signOut().then(() => {
-          authButton.textContent = 'Login';
-          loadCart();
-        });
-      } else {
-        // Add your login flow here
-        auth.signInAnonymously().then(() => {
-          authButton.textContent = 'Logout';
-          loadCart();
-        }).catch(error => console.error("Error signing in:", error));
-      }
-    });
+        // Function to logout
+        function logout() {
+            auth.signOut().then(() => {
+                alert("Logged out successfully");
+                window.location.reload();
+            }).catch((error) => {
+                console.error("Error logging out: ", error);
+            });
+        }
 
-    // Checkout function
-    function checkout() {
-      // You can implement the checkout process here
-      alert("Checkout functionality is coming soon!");
-    }
+        // Load cart items when page loads
+        loadCart();
+    </script>
 
-    // Load the cart when the page is loaded
-    window.onload = () => {
-      loadCart();
-    };
-  </script>
 </body>
 </html>
-
