@@ -54,6 +54,17 @@
             height: 100px;
             object-fit: cover;
         }
+        select {
+            padding: 8px;
+            margin: 5px;
+            background-color: #003c5a;
+            color: #f1f1f1;
+            border-radius: 5px;
+            border: 1px solid #00bcd4;
+        }
+        select:hover {
+            background-color: #0097a7;
+        }
         button {
             padding: 10px;
             background: #00bcd4;
@@ -65,21 +76,9 @@
         button:hover {
             background: #0097a7;
         }
-        .logout-btn {
-            padding: 10px;
-            background-color: #d9534f;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .logout-btn:hover {
-            background-color: #c9302c;
-        }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
     <ul>
         <li><a href="index.html">Home</a></li>
         <li><a href="bracelets.html">Bracelets</a></li>
@@ -88,7 +87,8 @@
         <li><a href="commitments.html">Commitments</a></li>
         <li><a href="cart.html">Cart 🛒</a></li>
         <li><a href="admin.html">Admin Dashboard 🛒</a></li>
-        <li><button class="logout-btn" onclick="logout()">Logout</button></li>
+        <li><a href="login.html" id="login-btn">Login</a></li>
+        <li><a href="logout.html" id="logout-btn">Logout</a></li>
     </ul>
 
     <div class="container">
@@ -101,9 +101,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-        // Firebase configuration (Replace with your project settings)
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
             authDomain: "survival-f35e2.firebaseapp.com",
@@ -115,9 +113,8 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
 
-        // Function to load products
+        // Function to load bracelets with color and size options
         async function loadBracelets() {
             const productList = document.getElementById("products-list");
             productList.innerHTML = "<p>Loading bracelets...</p>";
@@ -136,10 +133,15 @@
                     const productDiv = document.createElement("div");
                     productDiv.classList.add("product");
 
+                    const colorOptions = product.colors.map(color => `<option value="${color}">${color}</option>`).join("");
+                    const sizeOptions = product.sizes.map(size => `<option value="${size}">${size}</option>`).join("");
+
                     productDiv.innerHTML = `
                         <img src="${product.imageUrl}" alt="${product.name}">
                         <h3>${product.name}</h3>
                         <p>$${product.price.toFixed(2)}</p>
+                        <p>Colors: <select id="color-${doc.id}">${colorOptions}</select></p>
+                        <p>Sizes: <select id="size-${doc.id}">${sizeOptions}</select></p>
                         <button onclick="addToCart('${doc.id}', '${product.name}', ${product.price}, '${product.imageUrl}')">Add to Cart</button>
                     `;
                     productList.appendChild(productDiv);
@@ -150,27 +152,19 @@
             }
         }
 
-        // Function to add products to cart (localStorage)
+        // Function to add products to cart with selected color and size
         window.addToCart = (id, name, price, imageUrl) => {
+            const color = document.getElementById(`color-${id}`).value;
+            const size = document.getElementById(`size-${id}`).value;
+
             let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            cart.push({ id, name, price, imageUrl });
+            cart.push({ id, name, price, imageUrl, color, size });
             localStorage.setItem("cart", JSON.stringify(cart));
             alert(`${name} added to cart!`);
         };
 
-        // Logout function
-        function logout() {
-            signOut(auth).then(() => {
-                // Redirect to the login page after logout
-                window.location.href = "login.html";  // Redirects to login.html
-            }).catch((error) => {
-                console.error("Error logging out: ", error);
-            });
-        }
-
-        // Load products on page load
+        // Load bracelets on page load
         window.onload = loadBracelets;
     </script>
 </body>
 </html>
-
