@@ -3,140 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bracelets</title>
+    <title>Tactics & Treats - Bracelets</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            background-color: #0a1d37;
+            color: #f1f1f1;
+            text-align: center;
+            margin: 0;
+        }
+        ul {
+            background-color: #003c5a;
+            padding: 10px;
+            list-style: none;
+            margin: 0;
+        }
+        ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+        ul li a {
+            color: #f1f1f1;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        ul li a:hover {
+            color: #00bcd4;
+        }
+        .container {
+            padding: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            margin: 20px;
+            border-radius: 8px;
+        }
+        .product-list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .product {
+            background: #003c5a;
             padding: 20px;
-            background-color: #f9f9f9;
+            margin: 10px;
+            border-radius: 8px;
+            width: 200px;
+            text-align: center;
         }
-        h2 {
-            color: #333;
-        }
-        form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        label {
-            display: block;
-            margin: 8px 0;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            margin: 8px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+        .product img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
         }
         button {
-            background-color: #007BFF;
+            padding: 10px;
+            background: #00bcd4;
             color: white;
-            padding: 10px 15px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            width: 100%;
         }
         button:hover {
-            background-color: #0056b3;
+            background: #0097a7;
         }
-        .color-selection {
-            display: none;
-            margin-top: 20px;
+        select, input {
+            padding: 5px;
+            margin-top: 10px;
+            background-color: #003c5a;
+            color: #f1f1f1;
+            border: none;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <h2>Choose your Bracelet</h2>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="bracelets.html">Bracelets</a></li>
+        <li><a href="cookies.html">Cookies</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="commitments.html">Commitments</a></li>
+        <li><a href="cart.html">Cart 🛒</a></li>
+        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
+    </ul>
 
-    <button id="addToCartButton">Add to Cart</button>
-
-    <!-- Color selection form will appear after clicking "Add to Cart" -->
-    <div id="colorSelection" class="color-selection">
-        <form id="braceletForm">
-            <label for="color1">Color 1:</label>
-            <input type="text" id="color1" name="color1" placeholder="Enter first color" required>
-            
-            <label for="color2">Color 2 (optional):</label>
-            <input type="text" id="color2" name="color2" placeholder="Enter second color (optional)">
-            
-            <button type="submit">Confirm and Add Bracelet</button>
-        </form>
+    <div class="container">
+        <h1>Bracelets</h1>
+        <p>Explore our collection of amazing bracelets!</p>
+        <div class="product-list" id="products-list"></div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <!-- Firebase SDK for app integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    <script>
-        // Firebase Configuration (replace with your Firebase details)
+        // Firebase configuration (Replace with your project settings)
         const firebaseConfig = {
-            apiKey: "AIzaSyBsTrGTsmH5enA9hOCaAjk8JSP0NEmrE4gth",
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
             authDomain: "survival-f35e2.firebaseapp.com",
             projectId: "survival-f35e2",
             storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "755467264415",
-            appId: "1:755467264415:web:168b51c62a6846aada774d"
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
         };
 
-        // Initialize Firebase app
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(app);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        // Show color selection form after clicking "Add to Cart"
-        document.getElementById('addToCartButton').addEventListener('click', function() {
-            // Hide the "Add to Cart" button and show the color selection form
-            document.getElementById('addToCartButton').style.display = 'none';
-            document.getElementById('colorSelection').style.display = 'block';
-        });
+        // Function to load products
+        async function loadBracelets() {
+            const productList = document.getElementById("products-list");
+            productList.innerHTML = "<p>Loading bracelets...</p>";
 
-        // Handle the form submission
-        document.getElementById('braceletForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the default form submission
+            try {
+                const querySnapshot = await getDocs(collection(db, "bracelets"));
+                productList.innerHTML = "";
 
-            const color1 = document.getElementById('color1').value.trim();
-            const color2 = document.getElementById('color2').value.trim();
+                if (querySnapshot.empty) {
+                    productList.innerHTML = "<p>No bracelets available.</p>";
+                    return;
+                }
 
-            if (!color1) {
-                alert("Color 1 is required!");
-                return;
+                querySnapshot.forEach((doc) => {
+                    const product = doc.data();
+                    const productDiv = document.createElement("div");
+                    productDiv.classList.add("product");
+
+                    // Create the select elements for color and size
+                    const colorSelect = createSelectElement('color', product.colors || []);
+                    const sizeSelect = createSelectElement('size', product.sizes || []);
+
+                    productDiv.innerHTML = `
+                        <img src="${product.imageUrl}" alt="${product.name}">
+                        <h3>${product.name}</h3>
+                        <p>$${product.price.toFixed(2)}</p>
+                    `;
+
+                    productDiv.appendChild(colorSelect);
+                    productDiv.appendChild(sizeSelect);
+
+                    const addToCartButton = document.createElement("button");
+                    addToCartButton.textContent = "Add to Cart";
+                    addToCartButton.onclick = () => addToCart(doc.id, product.name, product.price, product.imageUrl, colorSelect.value, sizeSelect.value);
+                    productDiv.appendChild(addToCartButton);
+
+                    productList.appendChild(productDiv);
+                });
+            } catch (error) {
+                productList.innerHTML = "<p>Error loading products.</p>";
+                console.error("Error fetching products:", error);
             }
+        }
 
-            // Collect the colors (one or two)
-            const colors = color2 ? [color1, color2] : [color1];
+        // Function to create select dropdowns
+        function createSelectElement(type, options) {
+            const selectElement = document.createElement("select");
+            selectElement.name = type;
+            const placeholderOption = document.createElement("option");
+            placeholderOption.value = "";
+            placeholderOption.textContent = `Select ${type}`;
+            selectElement.appendChild(placeholderOption);
 
-            // Example data to add to cart (replace with actual product details)
-            const cartItem = {
-                name: "Awesome Bracelet",  // Replace with actual name
-                price: 19.99,              // Replace with actual price
-                color: colors,             // Store colors as an array (one or two)
-                size: "M",                 // Replace with actual size
-                imageUrl: "url-to-image"   // Replace with actual image URL
-            };
-
-            // Add the cart item to Firebase
-            const userId = firebase.auth().currentUser.uid; // Assuming user is logged in
-            const cartRef = db.collection('carts').doc(userId);
-            
-            cartRef.update({
-                products: firebase.firestore.FieldValue.arrayUnion(cartItem)
-            })
-            .then(() => {
-                alert("Bracelet added to cart!");
-                // Hide the color selection form and reset the page
-                document.getElementById('colorSelection').style.display = 'none';
-                document.getElementById('addToCartButton').style.display = 'block';
-                document.getElementById('color1').value = '';
-                document.getElementById('color2').value = '';
-            })
-            .catch(error => {
-                console.error("Error adding item to cart:", error);
-                alert("There was an error adding the item to your cart.");
+            options.forEach(option => {
+                const optionElement = document.createElement("option");
+                optionElement.value = option;
+                optionElement.textContent = option;
+                selectElement.appendChild(optionElement);
             });
-        });
+
+            return selectElement;
+        }
+
+        // Function to add products to cart (localStorage)
+        window.addToCart = (id, name, price, imageUrl, color, size) => {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.push({ id, name, price, imageUrl, color, size });
+            localStorage.setItem("cart", JSON.stringify(cart));
+            alert(`${name} added to cart with color ${color} and size ${size}!`);
+        };
+
+        // Load products on page load
+        window.onload = loadBracelets;
     </script>
 </body>
 </html>
