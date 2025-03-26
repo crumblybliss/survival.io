@@ -3,85 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactics & Treats - Cart</title>
+    <title>Cart - Tactics & Treats</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
             background-color: #0a1d37;
             color: #f1f1f1;
             text-align: center;
-            margin: 0;
         }
-        ul {
-            background-color: #003c5a;
-            padding: 10px;
-            list-style: none;
-            margin: 0;
+        .nav-bar {
+            background-color: #002f5d;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 100;
         }
-        ul li {
-            display: inline;
+        .nav-bar a {
+            color: #fff;
+            text-decoration: none;
             margin: 0 15px;
         }
-        ul li a {
-            color: #f1f1f1;
-            text-decoration: none;
-            font-size: 18px;
-        }
-        ul li a:hover {
-            color: #00bcd4;
+        .nav-bar a:hover {
+            text-decoration: underline;
         }
         .container {
-            padding: 50px;
+            max-width: 600px;
+            margin: 100px auto;
             background: rgba(0, 0, 0, 0.7);
-            margin: 20px;
+            padding: 20px;
             border-radius: 8px;
         }
         .cart-item {
             display: flex;
             justify-content: space-between;
-            padding: 10px;
-            background: #003c5a;
-            border-radius: 8px;
+            align-items: center;
             margin-bottom: 10px;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 8px;
+        }
+        .cart-item span {
+            margin-right: 10px;
+        }
+        .cart-item button {
+            background-color: #e57373;
+            border: none;
+            padding: 5px 10px;
+            color: white;
+            cursor: pointer;
+        }
+        .cart-item button:hover {
+            background-color: #ff4d4d;
+        }
+        .total {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        .checkout-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #00bcd4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .checkout-btn:hover {
+            background-color: #0097a7;
         }
     </style>
+    <script type="module">
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth();
+
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        // Function to display cart items
+        const displayCart = () => {
+            const cartListDiv = document.getElementById("cartList");
+            cartListDiv.innerHTML = ""; // Clear existing cart list
+
+            let totalPrice = 0;
+
+            cart.forEach(item => {
+                const cartItemDiv = document.createElement("div");
+                cartItemDiv.classList.add("cart-item");
+                cartItemDiv.innerHTML = `
+                    <span>${item.name} - $${item.price}</span>
+                    <button onclick="removeFromCart('${item.id}')">Remove</button>
+                `;
+                cartListDiv.appendChild(cartItemDiv);
+                totalPrice += item.price;
+            });
+
+            // Display total price
+            const totalDiv = document.getElementById("total");
+            totalDiv.textContent = `Total: $${totalPrice.toFixed(2)}`;
+        };
+
+        // Remove item from cart
+        window.removeFromCart = (itemId) => {
+            cart = cart.filter(item => item.id !== itemId);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            displayCart();
+        };
+
+        // Checkout function (basic implementation)
+        window.checkout = () => {
+            if (cart.length === 0) {
+                alert("Your cart is empty. Please add products to your cart before checking out.");
+                return;
+            }
+            // For now, we will just show an alert. This is where you could implement a payment process.
+            alert("Proceeding to checkout...");
+            // For now, just reset cart after checkout
+            localStorage.removeItem('cart');
+            cart = [];
+            displayCart();
+        };
+
+        // Check user authentication status
+        onAuthStateChanged(auth, (user) => {
+            const loginButton = document.getElementById("loginButton");
+            if (user) {
+                loginButton.innerText = "Logout";
+                loginButton.onclick = logout;
+            } else {
+                loginButton.innerText = "Login";
+                loginButton.onclick = login;
+            }
+        });
+
+        // Login function
+        window.login = async () => {
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error("Error signing in:", error);
+            }
+        };
+
+        // Logout function
+        window.logout = async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Error signing out:", error);
+            }
+        };
+
+        // Initialize cart on page load
+        window.onload = displayCart;
+    </script>
 </head>
 <body>
-    <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="bracelets.html">Bracelets</a></li>
-        <li><a href="cookies.html">Cookies</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="commitments.html">Commitments</a></li>
-        <li><a href="cart.html">Cart 🛒</a></li>
-        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
-    </ul>
+    <div class="nav-bar">
+        <a href="index.html">Home</a>
+        <a href="bracelets.html">Bracelets</a>
+        <a href="cookies.html">Cookies</a>
+        <a href="cart.html">Cart</a>
+        <a href="admin.html" id="loginButton">Login</a>
+    </div>
 
     <div class="container">
         <h1>Your Cart</h1>
-        <div id="cart-items"></div>
+
+        <!-- Cart list will be populated dynamically -->
+        <div id="cartList"></div>
+
+        <!-- Total price display -->
+        <div id="total" class="total">Total: $0.00</div>
+
+        <!-- Checkout Button -->
+        <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
     </div>
-
-    <script>
-        // Display cart items from localStorage
-        window.onload = function () {
-            const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
-            const cartList = document.getElementById("cart-items");
-
-            if (cartItems.length === 0) {
-                cartList.innerHTML = "<p>Your cart is empty.</p>";
-            } else {
-                cartItems.forEach(item => {
-                    const itemDiv = document.createElement("div");
-                    itemDiv.classList.add("cart-item");
-                    itemDiv.innerHTML = `
-                        <img src="${item.imageUrl}" alt="${item.name}" width="50">
-                        <span>${item.name} - $${item.price}</span>
-                    `;
-                    cartList.appendChild(itemDiv);
-                });
-            }
-        };
-    </script>
 </body>
 </html>
