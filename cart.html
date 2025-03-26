@@ -6,161 +6,93 @@
     <title>Shopping Cart</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #0a1d37;
-            color: #f1f1f1;
-            text-align: center;
+            font-family: Arial, sans-serif;
             margin: 0;
-        }
-        ul {
-            background-color: #003c5a;
-            padding: 10px;
-            list-style: none;
-            margin: 0;
-        }
-        ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-        ul li a {
-            color: #f1f1f1;
-            text-decoration: none;
-            font-size: 18px;
-        }
-        ul li a:hover {
-            color: #00bcd4;
+            padding: 0;
+            background-color: #f8f8f8;
         }
         .container {
-            padding: 50px;
-            background: rgba(0, 0, 0, 0.7);
-            margin: 20px;
+            width: 80%;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
             border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
         }
         .cart-item {
-            background: #003c5a;
-            padding: 15px;
-            margin: 10px;
-            border-radius: 8px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
         }
         .cart-item img {
-            width: 80px;
-            height: 80px;
+            width: 50px;
+            height: 50px;
             object-fit: cover;
             border-radius: 5px;
         }
-        button {
-            padding: 10px;
-            background: #00bcd4;
+        .remove-btn {
+            background: red;
             color: white;
             border: none;
-            border-radius: 5px;
+            padding: 5px 10px;
             cursor: pointer;
+            border-radius: 5px;
         }
-        button:hover {
-            background: #0097a7;
+        .remove-btn:hover {
+            background: darkred;
+        }
+        .empty-cart {
+            text-align: center;
+            color: gray;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-
-    <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="bracelets.html">Bracelets</a></li>
-        <li><a href="cookies.html">Cookies</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="commitments.html">Commitments</a></li>
-        <li><a href="cart.html">Cart 🛒</a></li>
-        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
-    </ul>
-
     <div class="container">
-        <h1>Your Shopping Cart</h1>
-        <div id="cart-list"></div>
-        <h2>Total: $<span id="total-price">0.00</span></h2>
-        <button onclick="checkout()">Checkout</button>
+        <h2>Your Shopping Cart</h2>
+        <div id="cart-items"></div>
+        <p id="empty-message" class="empty-cart">Your cart is empty.</p>
     </div>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
+    <script>
         function loadCart() {
-            const cartList = document.getElementById("cart-list");
-            const totalPrice = document.getElementById("total-price");
-
-            let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            cartList.innerHTML = "";
-            let total = 0;
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartItemsContainer = document.getElementById('cart-items');
+            const emptyMessage = document.getElementById('empty-message');
+            cartItemsContainer.innerHTML = '';
 
             if (cart.length === 0) {
-                cartList.innerHTML = "<p>Your cart is empty.</p>";
+                emptyMessage.style.display = 'block';
                 return;
             }
+            emptyMessage.style.display = 'none';
 
             cart.forEach((item, index) => {
-                const itemDiv = document.createElement("div");
-                itemDiv.classList.add("cart-item");
-
-                itemDiv.innerHTML = `
-                    <img src="${item.imageUrl}" alt="${item.name}">
-                    <p>${item.name} - $${item.price.toFixed(2)}</p>
-                    <p>Color: ${item.color}</p>
-                    <p>Size: ${item.size}</p>
-                    <button onclick="removeFromCart(${index})">Remove</button>
+                const cartItem = document.createElement('div');
+                cartItem.classList.add('cart-item');
+                cartItem.innerHTML = `
+                    <img src="${item.image || 'placeholder.jpg'}" alt="${item.name}">
+                    <span>${item.name} - $${item.price}</span>
+                    <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
                 `;
-
-                cartList.appendChild(itemDiv);
-                total += item.price;
+                cartItemsContainer.appendChild(cartItem);
             });
-
-            totalPrice.textContent = total.toFixed(2);
         }
 
         function removeFromCart(index) {
-            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
             cart.splice(index, 1);
-            localStorage.setItem("cart", JSON.stringify(cart));
+            localStorage.setItem('cart', JSON.stringify(cart));
             loadCart();
         }
 
-        async function checkout() {
-            let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            if (cart.length === 0) {
-                alert("Your cart is empty!");
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "orders"), {
-                    items: cart,
-                    timestamp: new Date()
-                });
-                alert("Order placed successfully!");
-                localStorage.removeItem("cart");
-                loadCart();
-            } catch (error) {
-                console.error("Error placing order:", error);
-                alert("Checkout failed!");
-            }
-        }
-
-        window.onload = loadCart;
+        document.addEventListener('DOMContentLoaded', loadCart);
     </script>
 </body>
 </html>
