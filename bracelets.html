@@ -1,212 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bracelets Collection</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #0c1a33; /* Navy blue background */
-            color: white;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrumblyBliss</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
 
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-        }
+    /* Navbar Styling */
+    nav {
+      background-color: #003366; /* Navy Blue */
+      padding: 10px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-        h1 {
-            text-align: center;
-            color: #fff;
-        }
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 10px 15px;
+      font-size: 18px;
+    }
 
-        nav {
-            background-color: #1e3a58; /* Dark navy blue for the navbar */
-            padding: 10px 0;
-            text-align: center;
-        }
+    nav a:hover {
+      background-color: #00509E;
+      border-radius: 5px;
+    }
 
-        nav a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            margin: 0 15px;
-            font-size: 1.2em;
-        }
+    /* Main Content */
+    .container {
+      padding: 20px;
+    }
 
-        nav a:hover {
-            background-color: #2a4f77;
-        }
+    .product-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-around;
+    }
 
-        .product-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            margin-top: 20px;
-        }
+    .product {
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 15px;
+      width: 200px;
+      text-align: center;
+    }
 
-        .product {
-            background-color: white;
-            color: #333;
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin: 10px;
-            width: 180px; /* Smaller product box */
-            text-align: center;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+    .product img {
+      width: 100%;
+      border-radius: 5px;
+      height: 150px;
+      object-fit: cover;
+    }
 
-        .product img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
+    .product h3 {
+      font-size: 18px;
+      color: #333;
+      margin: 10px 0;
+    }
 
-        .product h3 {
-            font-size: 1.2em;
-            color: #333;
-        }
+    .product p {
+      font-size: 14px;
+      color: #666;
+    }
 
-        .product p {
-            font-size: 1em;
-            color: #888;
-        }
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #003366;
+      color: white;
+      font-size: 14px;
+    }
 
-        .product select {
-            margin: 10px 0;
-            padding: 8px;
-            width: 100%;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
+    .logout-btn {
+      background-color: #d9534f;
+      color: white;
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      border: none;
+    }
 
-        .product button {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-
-        .product button:hover {
-            background-color: #218838;
-        }
-    </style>
+    .logout-btn:hover {
+      background-color: #c9302c;
+    }
+  </style>
 </head>
 <body>
-    <nav>
-        <a href="/">Home</a>
-        <a href="/cart">Cart</a>
-    </nav>
 
-    <div class="container">
-        <h1>Bracelets</h1>
-        <p>Explore our collection of amazing bracelets!</p>
-        <div class="product-list" id="products-list"></div>
+  <!-- Navbar -->
+  <nav>
+    <div>
+      <a href="index.html">Home</a>
+      <a href="bracelets.html">Bracelets</a>
+      <a href="cookies.html">Cookies</a>
     </div>
+    <div>
+      <a href="cart.html">Cart</a>
+      <a href="profile.html">Profile</a>
+      <!-- Logout Button -->
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </nav>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  <!-- Main Content Section -->
+  <div class="container">
+    <h2>Welcome to CrumblyBliss!</h2>
+    <p>Explore our wonderful range of products. Whether you are looking for delicious cookies or handcrafted bracelets, we have something for everyone.</p>
 
-        // Firebase configuration (Replace with your project settings)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
+    <div class="product-box">
+      <!-- Example Product 1 -->
+      <div class="product">
+        <img src="path_to_image1.jpg" alt="Bracelet">
+        <h3>Elegant Bracelet</h3>
+        <p>Handcrafted with love.</p>
+      </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+      <!-- Example Product 2 -->
+      <div class="product">
+        <img src="path_to_image2.jpg" alt="Cookie">
+        <h3>Chocolate Chip Cookie</h3>
+        <p>Freshly baked for you!</p>
+      </div>
 
-        // Function to load bracelets
-        async function loadBracelets() {
-            const productList = document.getElementById("products-list");
-            productList.innerHTML = "<p>Loading bracelets...</p>";
+      <!-- More products can be added here -->
+    </div>
+  </div>
 
-            try {
-                const querySnapshot = await getDocs(collection(db, "bracelets"));
-                productList.innerHTML = "";
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 CrumblyBliss. All Rights Reserved.</p>
+  </footer>
 
-                if (querySnapshot.empty) {
-                    productList.innerHTML = "<p>No bracelets available.</p>";
-                    return;
-                }
+  <!-- Firebase Script for Logout -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
 
-                querySnapshot.forEach(async (docSnapshot) => {
-                    const productData = docSnapshot.data();
-                    const braceletRef = doc(db, "bracelets", docSnapshot.id, "bracelet_1", "sizes_colors");
-                    const sizesColorsSnapshot = await getDoc(braceletRef);
-                    const sizesColors = sizesColorsSnapshot.data();
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-                    const productDiv = document.createElement("div");
-                    productDiv.classList.add("product");
+    // Logout function
+    function logout() {
+      auth.signOut().then(() => {
+        // Redirect to the login page after logout
+        window.location.href = "login.html";  // Redirects to login.html
+      }).catch((error) => {
+        console.error("Error logging out: ", error);
+      });
+    }
+  </script>
 
-                    // Create the select elements for color and size
-                    const colorSelect = createSelectElement('color', sizesColors.colors || []);
-                    const sizeSelect = createSelectElement('size', sizesColors.sizes || []);
-
-                    productDiv.innerHTML = `
-                        <img src="${productData.imageUrl}" alt="${productData.name}">
-                        <h3>${productData.name}</h3>
-                        <p>$${productData.price.toFixed(2)}</p>
-                    `;
-
-                    productDiv.appendChild(colorSelect);
-                    productDiv.appendChild(sizeSelect);
-
-                    const addToCartButton = document.createElement("button");
-                    addToCartButton.textContent = "Add to Cart";
-                    addToCartButton.onclick = () => addToCart(docSnapshot.id, productData.name, productData.price, productData.imageUrl, colorSelect.value, sizeSelect.value);
-                    productDiv.appendChild(addToCartButton);
-
-                    productList.appendChild(productDiv);
-                });
-            } catch (error) {
-                productList.innerHTML = "<p>Error loading products.</p>";
-                console.error("Error fetching products:", error);
-            }
-        }
-
-        // Function to create select dropdowns
-        function createSelectElement(type, options) {
-            const selectElement = document.createElement("select");
-            selectElement.name = type;
-            const placeholderOption = document.createElement("option");
-            placeholderOption.value = "";
-            placeholderOption.textContent = `Select ${type}`;
-            selectElement.appendChild(placeholderOption);
-
-            options.forEach(option => {
-                const optionElement = document.createElement("option");
-                optionElement.value = option;
-                optionElement.textContent = option;
-                selectElement.appendChild(optionElement);
-            });
-
-            return selectElement;
-        }
-
-        // Function to add products to cart (localStorage)
-        window.addToCart = (id, name, price, imageUrl, color, size) => {
-            let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            cart.push({ id, name, price, imageUrl, color, size });
-            localStorage.setItem("cart", JSON.stringify(cart));
-            alert(`${name} added to cart with color ${color} and size ${size}!`);
-        };
-
-        // Load products on page load
-        window.onload = loadBracelets;
-    </script>
 </body>
 </html>
