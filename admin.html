@@ -7,16 +7,47 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #0a1d37;
-            color: #f1f1f1;
+            background-color: #f1f1f1;
+            color: #333;
             text-align: center;
+            margin: 0;
+        }
+        /* Navigation Bar */
+        .navbar {
+            background-color: #0a1d37;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            font-size: 18px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+        }
+        .navbar a {
+            color: white;
+            margin: 0 20px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+        .navbar .auth-btn {
+            background-color: #00bcd4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .navbar .auth-btn:hover {
+            background-color: #0097a7;
         }
         .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 20px;
-            border-radius: 8px;
+            padding-top: 70px; /* Adjust to prevent navbar from overlapping content */
+            max-width: 800px;
+            margin: 0 auto;
         }
         input, select, button {
             width: 100%;
@@ -33,13 +64,36 @@
         button:hover {
             background: #0097a7;
         }
-        .login-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+        h1 {
+            margin-top: 20px;
         }
     </style>
-    
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="bracelets.html">Bracelets</a>
+        <a href="cookies.html">Cookies</a>
+        <a href="admin.html">Admin Panel</a>
+        <button id="loginButton" class="auth-btn">Login</button>
+    </div>
+
+    <!-- Admin Panel Content -->
+    <div class="container">
+        <h1>Admin Panel</h1>
+        <form id="productForm">
+            <input type="text" id="name" placeholder="Product Name" required>
+            <input type="number" id="price" placeholder="Price" required>
+            <input type="text" id="imageUrl" placeholder="Image URL (Optional)">
+            <select id="category">
+                <option value="bracelets">Bracelets</option>
+                <option value="cookies">Cookies</option>
+            </select>
+            <button type="button" onclick="addProduct()">Add Product</button>
+        </form>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
@@ -59,6 +113,7 @@
         const auth = getAuth();
         const provider = new GoogleAuthProvider();
 
+        // Login function
         window.login = async () => {
             try {
                 await signInWithPopup(auth, provider);
@@ -67,6 +122,7 @@
             }
         };
 
+        // Logout function
         window.logout = async () => {
             try {
                 await signOut(auth);
@@ -75,6 +131,7 @@
             }
         };
 
+        // On authentication state change, update button text
         onAuthStateChanged(auth, (user) => {
             const loginButton = document.getElementById("loginButton");
             if (user) {
@@ -86,6 +143,7 @@
             }
         });
 
+        // Add Product function
         window.addProduct = async () => {
             const name = document.getElementById("name").value;
             const price = parseFloat(document.getElementById("price").value);
@@ -115,23 +173,6 @@
             }
         };
     </script>
-</head>
-<body>
-    <div class="login-container">
-        <button id="loginButton">Login</button>
-    </div>
-    <div class="container">
-        <h1>Admin Panel</h1>
-        <form id="productForm">
-            <input type="text" id="name" placeholder="Product Name" required>
-            <input type="number" id="price" placeholder="Price" required>
-            <input type="text" id="imageUrl" placeholder="Image URL (Optional)">
-            <select id="category">
-                <option value="bracelets">Bracelets</option>
-                <option value="cookies">Cookies</option>
-            </select>
-            <button type="button" onclick="addProduct()">Add Product</button>
-        </form>
-    </div>
 </body>
 </html>
+
