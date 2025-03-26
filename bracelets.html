@@ -145,7 +145,7 @@
                     productDiv.innerHTML = `
                         <img src="${product.imageUrl}" alt="${product.name}">
                         <h3>${product.name}</h3>
-                        <p>$${product.price.toFixed(2)}</p>
+                        <p id="price">$${product.price.toFixed(2)}</p>
                     `;
 
                     productDiv.appendChild(colorSelect);
@@ -153,7 +153,7 @@
 
                     const addToCartButton = document.createElement("button");
                     addToCartButton.textContent = "Add to Cart";
-                    addToCartButton.onclick = () => addToCart(doc.id, product.name, product.price, product.imageUrl, colorSelect.selectedOptions, sizeSelect.value);
+                    addToCartButton.onclick = () => addToCart(doc.id, product.name, product.price, product.imageUrl, colorSelect, sizeSelect);
                     productDiv.appendChild(addToCartButton);
 
                     productList.appendChild(productDiv);
@@ -187,12 +187,29 @@
         }
 
         // Function to add products to cart (localStorage)
-        window.addToCart = (id, name, price, imageUrl, selectedColors, size) => {
-            const selectedColorArray = Array.from(selectedColors).map(option => option.value);
+        window.addToCart = (id, name, price, imageUrl, colorSelect, sizeSelect) => {
+            // Get the selected colors
+            const selectedColors = Array.from(colorSelect.selectedOptions).map(option => option.value);
+            const size = sizeSelect.value;
+
+            if (!selectedColors.length || !size) {
+                alert("Please select at least one color and size.");
+                return;
+            }
+
+            // Apply the discount based on the selected size
+            let finalPrice = price;
+            if (size === "Small") {
+                finalPrice = price * 0.3333;  // Small is 66.67% off
+            } else if (size === "Medium") {
+                finalPrice = price * 0.6667;  // Medium is 33.33% off
+            }
+
             let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            cart.push({ id, name, price, imageUrl, colors: selectedColorArray, size });
+            cart.push({ id, name, price: finalPrice, imageUrl, colors: selectedColors, size });
             localStorage.setItem("cart", JSON.stringify(cart));
-            alert(`${name} added to cart with colors ${selectedColorArray.join(", ")} and size ${size}!`);
+
+            alert(`${name} added to cart with colors ${selectedColors.join(", ")} and size ${size}! Price: $${finalPrice.toFixed(2)}`);
         };
 
         // Load products on page load
