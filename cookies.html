@@ -145,17 +145,13 @@
                 loginButton.onclick = logout;
             } else {
                 loginButton.innerText = "Login";
-                loginButton.onclick = login;
+                loginButton.onclick = () => window.location.href = "login.html"; // Redirect to login page
             }
         });
 
-        // Login function
-        window.login = async () => {
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                console.error("Error signing in:", error);
-            }
+        // Login function (Redirect to login page)
+        window.login = () => {
+            window.location.href = "login.html"; // Redirect to login.html
         };
 
         // Logout function
@@ -172,4 +168,3 @@
     </script>
 </body>
 </html>
-
