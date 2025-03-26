@@ -9,20 +9,19 @@
             font-family: 'Arial', sans-serif;
             background-color: #f1f1f1;
             color: #333;
-            text-align: center;
             margin: 0;
+            text-align: center;
         }
-        /* Navigation Bar */
         .navbar {
             background-color: #0a1d37;
             color: white;
             padding: 15px 0;
-            text-align: center;
             font-size: 18px;
             position: fixed;
             top: 0;
             width: 100%;
             z-index: 100;
+            text-align: center;
         }
         .navbar a {
             color: white;
@@ -46,8 +45,14 @@
         }
         .container {
             padding-top: 70px; /* Adjust to prevent navbar from overlapping content */
-            max-width: 800px;
-            margin: 0 auto;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 8px;
         }
         input, select, button {
             width: 100%;
@@ -64,9 +69,6 @@
         button:hover {
             background: #0097a7;
         }
-        h1 {
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
@@ -79,19 +81,21 @@
         <button id="loginButton" class="auth-btn">Login</button>
     </div>
 
-    <!-- Admin Panel Content -->
+    <!-- Admin Form Section -->
     <div class="container">
         <h1>Admin Panel</h1>
-        <form id="productForm">
-            <input type="text" id="name" placeholder="Product Name" required>
-            <input type="number" id="price" placeholder="Price" required>
-            <input type="text" id="imageUrl" placeholder="Image URL (Optional)">
-            <select id="category">
-                <option value="bracelets">Bracelets</option>
-                <option value="cookies">Cookies</option>
-            </select>
-            <button type="button" onclick="addProduct()">Add Product</button>
-        </form>
+        <div class="form-container">
+            <form id="productForm">
+                <input type="text" id="name" placeholder="Product Name" required>
+                <input type="number" id="price" placeholder="Price" required>
+                <input type="text" id="imageUrl" placeholder="Image URL (Optional)">
+                <select id="category">
+                    <option value="bracelets">Bracelets</option>
+                    <option value="cookies">Cookies</option>
+                </select>
+                <button type="button" onclick="addProduct()">Add Product</button>
+            </form>
+        </div>
     </div>
 
     <script type="module">
@@ -113,43 +117,13 @@
         const auth = getAuth();
         const provider = new GoogleAuthProvider();
 
-        // Login function
-        window.login = async () => {
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                console.error("Error signing in:", error);
-            }
-        };
-
-        // Logout function
-        window.logout = async () => {
-            try {
-                await signOut(auth);
-            } catch (error) {
-                console.error("Error signing out:", error);
-            }
-        };
-
-        // On authentication state change, update button text
-        onAuthStateChanged(auth, (user) => {
-            const loginButton = document.getElementById("loginButton");
-            if (user) {
-                loginButton.innerText = "Logout";
-                loginButton.onclick = logout;
-            } else {
-                loginButton.innerText = "Login";
-                loginButton.onclick = login;
-            }
-        });
-
-        // Add Product function
+        // Add Product to Firebase
         window.addProduct = async () => {
             const name = document.getElementById("name").value;
             const price = parseFloat(document.getElementById("price").value);
             const category = document.getElementById("category").value;
             let imageUrl = document.getElementById("imageUrl").value;
-            
+
             if (!name || isNaN(price)) {
                 alert("Please enter a valid name and price.");
                 return;
@@ -172,7 +146,28 @@
                 console.error("Error:", error);
             }
         };
+
+        // On authentication state change, update button text
+        onAuthStateChanged(auth, (user) => {
+            const loginButton = document.getElementById("loginButton");
+            if (user) {
+                loginButton.innerText = "Logout";
+                loginButton.onclick = logout;
+            } else {
+                loginButton.innerText = "Login";
+                loginButton.onclick = () => window.location.href = "login.html"; // Redirect to login page
+            }
+        });
+
+        // Logout function
+        window.logout = async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Error signing out:", error);
+            }
+        };
+
     </script>
 </body>
 </html>
-
