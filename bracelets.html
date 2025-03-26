@@ -54,17 +54,6 @@
             height: 100px;
             object-fit: cover;
         }
-        select {
-            padding: 8px;
-            margin: 5px;
-            background-color: #003c5a;
-            color: #f1f1f1;
-            border-radius: 5px;
-            border: 1px solid #00bcd4;
-        }
-        select:hover {
-            background-color: #0097a7;
-        }
         button {
             padding: 10px;
             background: #00bcd4;
@@ -87,8 +76,6 @@
         <li><a href="commitments.html">Commitments</a></li>
         <li><a href="cart.html">Cart 🛒</a></li>
         <li><a href="admin.html">Admin Dashboard 🛒</a></li>
-        <li><a href="login.html" id="login-btn">Login</a></li>
-        <li><a href="logout.html" id="logout-btn">Logout</a></li>
     </ul>
 
     <div class="container">
@@ -133,8 +120,12 @@
                     const productDiv = document.createElement("div");
                     productDiv.classList.add("product");
 
-                    const colorOptions = product.colors.map(color => `<option value="${color}">${color}</option>`).join("");
-                    const sizeOptions = product.sizes.map(size => `<option value="${size}">${size}</option>`).join("");
+                    // Ensure colors and sizes are arrays before calling map
+                    const colors = Array.isArray(product.colors) ? product.colors : [];
+                    const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+
+                    const colorOptions = colors.map(color => `<option value="${color}">${color}</option>`).join("");
+                    const sizeOptions = sizes.map(size => `<option value="${size}">${size}</option>`).join("");
 
                     productDiv.innerHTML = `
                         <img src="${product.imageUrl}" alt="${product.name}">
