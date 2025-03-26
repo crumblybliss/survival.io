@@ -3,147 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cart - Tactics & Treats</title>
+    <title>Shopping Cart</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: #0a1d37;
             color: #f1f1f1;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #003366;
-            color: white;
-            padding: 10px;
             text-align: center;
+            margin: 0;
         }
-        #cart-container {
-            max-width: 1000px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: rgba(0, 0, 0, 0.7);
+        ul {
+            background-color: #003c5a;
+            padding: 10px;
+            list-style: none;
+            margin: 0;
+        }
+        ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+        ul li a {
+            color: #f1f1f1;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        ul li a:hover {
+            color: #00bcd4;
+        }
+        .container {
+            padding: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            margin: 20px;
             border-radius: 8px;
         }
         .cart-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 10px;
+            background: #003c5a;
+            padding: 15px;
+            margin: 10px;
             border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .cart-item img {
-            width: 100px;
-            height: auto;
-            margin-right: 20px;
-        }
-        .cart-item-info {
-            flex-grow: 1;
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
         }
         button {
-            background-color: #00bcd4;
-            color: white;
             padding: 10px;
+            background: #00bcd4;
+            color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
         button:hover {
-            background-color: #0097a7;
-        }
-        .checkout-btn {
-            background-color: #4caf50;
-            color: white;
-            width: 100%;
-            padding: 15px;
-            font-size: 18px;
-            margin-top: 20px;
-        }
-        .checkout-btn:hover {
-            background-color: #45a049;
+            background: #0097a7;
         }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Shopping Cart</h1>
-</header>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="bracelets.html">Bracelets</a></li>
+        <li><a href="cookies.html">Cookies</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="commitments.html">Commitments</a></li>
+        <li><a href="cart.html">Cart 🛒</a></li>
+        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
+    </ul>
 
-<div id="cart-container">
-    <!-- Cart items will be dynamically injected here -->
-</div>
+    <div class="container">
+        <h1>Your Shopping Cart</h1>
+        <div id="cart-list"></div>
+        <h2>Total: $<span id="total-price">0.00</span></h2>
+        <button onclick="checkout()">Checkout</button>
+    </div>
 
-<!-- Checkout Button -->
-<button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-<script>
-    // Simulating the current user (replace this with actual Firebase authentication logic)
-    const currentUser = { uid: "user123" };  // Example user object
-    
-    // Firebase Firestore setup (replace with your Firestore initialization)
-    const db = firebase.firestore();
-    
-    // Function to display cart items
-    async function displayCartItems() {
-        if (!currentUser) return;
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
 
-        const cartRef = db.collection("carts").doc(currentUser.uid);
-        const cartDoc = await cartRef.get();
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        if (cartDoc.exists) {
-            const cartItems = cartDoc.data().items;
-            const cartContainer = document.getElementById("cart-container");
-            cartContainer.innerHTML = ""; // Clear previous content
+        function loadCart() {
+            const cartList = document.getElementById("cart-list");
+            const totalPrice = document.getElementById("total-price");
 
-            cartItems.forEach(item => {
-                const itemElement = document.createElement("div");
-                itemElement.classList.add("cart-item");
-                itemElement.innerHTML = `
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cartList.innerHTML = "";
+            let total = 0;
+
+            if (cart.length === 0) {
+                cartList.innerHTML = "<p>Your cart is empty.</p>";
+                return;
+            }
+
+            cart.forEach((item, index) => {
+                const itemDiv = document.createElement("div");
+                itemDiv.classList.add("cart-item");
+
+                itemDiv.innerHTML = `
                     <img src="${item.imageUrl}" alt="${item.name}">
-                    <div class="cart-item-info">
-                        <h3>${item.name}</h3>
-                        <p>Price: $${item.price}</p>
-                        <p>Quantity: ${item.quantity}</p>
-                        <p>Size: ${item.size}</p> <!-- Display Size -->
-                        <p>Color: ${item.color}</p> <!-- Display Color -->
-                        <button onclick="removeFromCart('${item.id}')">Remove</button>
-                    </div>
+                    <p>${item.name} - $${item.price.toFixed(2)}</p>
+                    <p>Color: ${item.color}</p>
+                    <p>Size: ${item.size}</p>
+                    <button onclick="removeFromCart(${index})">Remove</button>
                 `;
-                cartContainer.appendChild(itemElement);
+
+                cartList.appendChild(itemDiv);
+                total += item.price;
             });
-        } else {
-            console.log("No cart found for this user.");
+
+            totalPrice.textContent = total.toFixed(2);
         }
-    }
 
-    // Function to remove item from cart
-    async function removeFromCart(productId) {
-        if (!currentUser) return;
-
-        const cartRef = db.collection("carts").doc(currentUser.uid);
-        const cartDoc = await cartRef.get();
-
-        if (cartDoc.exists) {
-            let cartItems = cartDoc.data().items;
-            cartItems = cartItems.filter(item => item.id !== productId);  // Remove item by ID
-
-            await cartRef.update({ items: cartItems });
-            displayCartItems();  // Refresh cart
+        function removeFromCart(index) {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.splice(index, 1);
+            localStorage.setItem("cart", JSON.stringify(cart));
+            loadCart();
         }
-    }
 
-    // Function for checkout (simple alert for now)
-    function checkout() {
-        alert("Proceeding to checkout...");
-        // Implement the checkout process here (e.g., payment gateway integration)
-    }
+        async function checkout() {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            if (cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
 
-    // Display cart items when page loads
-    displayCartItems();
-</script>
+            try {
+                await addDoc(collection(db, "orders"), {
+                    items: cart,
+                    timestamp: new Date()
+                });
+                alert("Order placed successfully!");
+                localStorage.removeItem("cart");
+                loadCart();
+            } catch (error) {
+                console.error("Error placing order:", error);
+                alert("Checkout failed!");
+            }
+        }
 
+        window.onload = loadCart;
+    </script>
 </body>
 </html>
-
