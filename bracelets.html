@@ -1,176 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CrumblyBliss</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f9;
-    }
-
-    /* Navbar Styling */
-    nav {
-      background-color: #003366; /* Navy Blue */
-      padding: 10px;
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    nav a {
-      color: white;
-      text-decoration: none;
-      padding: 10px 15px;
-      font-size: 18px;
-    }
-
-    nav a:hover {
-      background-color: #00509E;
-      border-radius: 5px;
-    }
-
-    /* Main Content */
-    .container {
-      padding: 20px;
-    }
-
-    .product-box {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      justify-content: space-around;
-    }
-
-    .product {
-      background-color: white;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      padding: 15px;
-      width: 200px;
-      text-align: center;
-    }
-
-    .product img {
-      width: 100%;
-      border-radius: 5px;
-      height: 150px;
-      object-fit: cover;
-    }
-
-    .product h3 {
-      font-size: 18px;
-      color: #333;
-      margin: 10px 0;
-    }
-
-    .product p {
-      font-size: 14px;
-      color: #666;
-    }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      padding: 20px;
-      background-color: #003366;
-      color: white;
-      font-size: 14px;
-    }
-
-    .logout-btn {
-      background-color: #d9534f;
-      color: white;
-      padding: 10px 15px;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      border: none;
-    }
-
-    .logout-btn:hover {
-      background-color: #c9302c;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tactics & Treats - Bracelets</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #0a1d37;
+            color: #f1f1f1;
+            text-align: center;
+            margin: 0;
+        }
+        ul {
+            background-color: #003c5a;
+            padding: 10px;
+            list-style: none;
+            margin: 0;
+        }
+        ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+        ul li a {
+            color: #f1f1f1;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        ul li a:hover {
+            color: #00bcd4;
+        }
+        .container {
+            padding: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            margin: 20px;
+            border-radius: 8px;
+        }
+        .product-list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .product {
+            background: #003c5a;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 8px;
+            width: 200px;
+            text-align: center;
+        }
+        .product img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+        button {
+            padding: 10px;
+            background: #00bcd4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0097a7;
+        }
+        .logout-btn {
+            padding: 10px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background-color: #c9302c;
+        }
+    </style>
 </head>
 <body>
+    <!-- Navigation Bar -->
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="bracelets.html">Bracelets</a></li>
+        <li><a href="cookies.html">Cookies</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="commitments.html">Commitments</a></li>
+        <li><a href="cart.html">Cart 🛒</a></li>
+        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
+        <li><button class="logout-btn" onclick="logout()">Logout</button></li>
+    </ul>
 
-  <!-- Navbar -->
-  <nav>
-    <div>
-      <a href="index.html">Home</a>
-      <a href="bracelets.html">Bracelets</a>
-      <a href="cookies.html">Cookies</a>
+    <div class="container">
+        <h1>Bracelets</h1>
+        <p>Explore our collection of amazing bracelets!</p>
+        <div class="product-list" id="products-list"></div>
     </div>
-    <div>
-      <a href="cart.html">Cart</a>
-      <a href="profile.html">Profile</a>
-      <!-- Logout Button -->
-      <button class="logout-btn" onclick="logout()">Logout</button>
-    </div>
-  </nav>
 
-  <!-- Main Content Section -->
-  <div class="container">
-    <h2>Welcome to CrumblyBliss!</h2>
-    <p>Explore our wonderful range of products. Whether you are looking for delicious cookies or handcrafted bracelets, we have something for everyone.</p>
+    <!-- Firebase SDK for app integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-    <div class="product-box">
-      <!-- Example Product 1 -->
-      <div class="product">
-        <img src="path_to_image1.jpg" alt="Bracelet">
-        <h3>Elegant Bracelet</h3>
-        <p>Handcrafted with love.</p>
-      </div>
+        // Firebase configuration (Replace with your project settings)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
 
-      <!-- Example Product 2 -->
-      <div class="product">
-        <img src="path_to_image2.jpg" alt="Cookie">
-        <h3>Chocolate Chip Cookie</h3>
-        <p>Freshly baked for you!</p>
-      </div>
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-      <!-- More products can be added here -->
-    </div>
-  </div>
+        // Function to load products
+        async function loadBracelets() {
+            const productList = document.getElementById("products-list");
+            productList.innerHTML = "<p>Loading bracelets...</p>";
 
-  <!-- Footer -->
-  <footer>
-    <p>&copy; 2025 CrumblyBliss. All Rights Reserved.</p>
-  </footer>
+            try {
+                const querySnapshot = await getDocs(collection(db, "bracelets"));
+                productList.innerHTML = "";
 
-  <!-- Firebase Script for Logout -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-  <script>
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-      authDomain: "survival-f35e2.firebaseapp.com",
-      projectId: "survival-f35e2",
-      storageBucket: "survival-f35e2.appspot.com",
-      messagingSenderId: "704462603548",
-      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-    };
+                if (querySnapshot.empty) {
+                    productList.innerHTML = "<p>No bracelets available.</p>";
+                    return;
+                }
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+                querySnapshot.forEach((doc) => {
+                    const product = doc.data();
+                    const productDiv = document.createElement("div");
+                    productDiv.classList.add("product");
 
-    // Logout function
-    function logout() {
-      auth.signOut().then(() => {
-        // Redirect to the login page after logout
-        window.location.href = "login.html";  // Redirects to login.html
-      }).catch((error) => {
-        console.error("Error logging out: ", error);
-      });
-    }
-  </script>
+                    productDiv.innerHTML = `
+                        <img src="${product.imageUrl}" alt="${product.name}">
+                        <h3>${product.name}</h3>
+                        <p>$${product.price.toFixed(2)}</p>
+                        <button onclick="addToCart('${doc.id}', '${product.name}', ${product.price}, '${product.imageUrl}')">Add to Cart</button>
+                    `;
+                    productList.appendChild(productDiv);
+                });
+            } catch (error) {
+                productList.innerHTML = "<p>Error loading products.</p>";
+                console.error("Error fetching products:", error);
+            }
+        }
 
+        // Function to add products to cart (localStorage)
+        window.addToCart = (id, name, price, imageUrl) => {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.push({ id, name, price, imageUrl });
+            localStorage.setItem("cart", JSON.stringify(cart));
+            alert(`${name} added to cart!`);
+        };
+
+        // Logout function
+        function logout() {
+            signOut(auth).then(() => {
+                // Redirect to the login page after logout
+                window.location.href = "login.html";  // Redirects to login.html
+            }).catch((error) => {
+                console.error("Error logging out: ", error);
+            });
+        }
+
+        // Load products on page load
+        window.onload = loadBracelets;
+    </script>
 </body>
 </html>
+
