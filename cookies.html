@@ -9,20 +9,19 @@
             font-family: 'Arial', sans-serif;
             background-color: #f1f1f1;
             color: #333;
-            text-align: center;
             margin: 0;
+            text-align: center;
         }
-        /* Navigation Bar */
         .navbar {
             background-color: #0a1d37;
             color: white;
             padding: 15px 0;
-            text-align: center;
             font-size: 18px;
             position: fixed;
             top: 0;
             width: 100%;
             z-index: 100;
+            text-align: center;
         }
         .navbar a {
             color: white;
@@ -44,28 +43,34 @@
         .navbar .auth-btn:hover {
             background-color: #0097a7;
         }
-        .content {
+        .container {
             padding-top: 70px; /* Adjust to prevent navbar from overlapping content */
         }
-        #cookiesList {
-            list-style-type: none;
-            padding: 0;
+        .product {
+            display: inline-block;
+            width: 200px;
+            margin: 20px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
         }
-        #cookiesList li {
-            background-color: #fff;
-            padding: 20px;
-            margin: 10px 0;
+        .product img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        .product button {
+            background-color: #00bcd4;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
             border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-        #cookiesList img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-        h3 {
-            margin: 10px 0;
+        .product button:hover {
+            background-color: #0097a7;
         }
     </style>
 </head>
@@ -79,12 +84,10 @@
         <button id="loginButton" class="auth-btn">Login</button>
     </div>
 
-    <!-- Content Section -->
-    <div class="content">
-        <h1>Our Delicious Cookies</h1>
-        <ul id="cookiesList">
-            <!-- Cookies will be displayed here -->
-        </ul>
+    <!-- Cookies Products Section -->
+    <div class="container">
+        <h1>Cookies</h1>
+        <div id="cookiesProducts"></div> <!-- Container to hold products -->
     </div>
 
     <script type="module">
@@ -106,6 +109,46 @@
         const auth = getAuth();
         const provider = new GoogleAuthProvider();
 
+        // Add to Cart functionality (without persistence)
+        window.addToCart = (product) => {
+            alert(`${product.name} added to cart!`);
+        };
+
+        // Fetch Cookies Products from Firestore
+        const fetchCookies = async () => {
+            const cookiesCollection = collection(db, "cookies");
+            const snapshot = await getDocs(cookiesCollection);
+            const cookies = snapshot.docs.map(doc => doc.data());
+
+            const cookiesContainer = document.getElementById("cookiesProducts");
+
+            cookies.forEach(product => {
+                const productDiv = document.createElement("div");
+                productDiv.classList.add("product");
+
+                productDiv.innerHTML = `
+                    <img src="${product.imageUrl}" alt="${product.name}">
+                    <h3>${product.name}</h3>
+                    <p>$${product.price}</p>
+                    <button onclick="addToCart(${JSON.stringify(product)})">Add to Cart</button>
+                `;
+
+                cookiesContainer.appendChild(productDiv);
+            });
+        };
+
+        // On authentication state change, update button text
+        onAuthStateChanged(auth, (user) => {
+            const loginButton = document.getElementById("loginButton");
+            if (user) {
+                loginButton.innerText = "Logout";
+                loginButton.onclick = logout;
+            } else {
+                loginButton.innerText = "Login";
+                loginButton.onclick = login;
+            }
+        });
+
         // Login function
         window.login = async () => {
             try {
@@ -124,40 +167,8 @@
             }
         };
 
-        // On authentication state change, update button text
-        onAuthStateChanged(auth, (user) => {
-            const loginButton = document.getElementById("loginButton");
-            if (user) {
-                loginButton.innerText = "Logout";
-                loginButton.onclick = logout;
-            } else {
-                loginButton.innerText = "Login";
-                loginButton.onclick = login;
-            }
-        });
-
-        window.loadCookies = async () => {
-            try {
-                const querySnapshot = await getDocs(collection(db, "cookies"));
-                const cookiesList = document.getElementById("cookiesList");
-
-                querySnapshot.forEach((doc) => {
-                    const cookie = doc.data();
-                    const listItem = document.createElement("li");
-
-                    listItem.innerHTML = `
-                        <img src="${cookie.imageUrl}" alt="${cookie.name}" />
-                        <h3>${cookie.name}</h3>
-                        <p>$${cookie.price.toFixed(2)}</p>
-                    `;
-                    cookiesList.appendChild(listItem);
-                });
-            } catch (error) {
-                console.error("Error fetching products:", error);
-            }
-        };
-
-        window.onload = loadCookies;
+        // Fetch cookies products on page load
+        fetchCookies();
     </script>
 </body>
 </html>
