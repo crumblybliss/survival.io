@@ -69,6 +69,44 @@
         button:hover {
             background: #0097a7;
         }
+        .category-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .category-buttons button {
+            background: #0097a7;
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            color: white;
+            border-radius: 5px;
+        }
+        .category-buttons button:hover {
+            background: #007f87;
+        }
+        .product-list {
+            margin-top: 20px;
+        }
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #ffffff;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .product-item button {
+            background: #ff3b30;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .product-item button:hover {
+            background: #cc2f27;
+        }
     </style>
 </head>
 <body>
@@ -85,6 +123,13 @@
     <div class="container">
         <h1>Admin Panel</h1>
         <div class="form-container">
+            <!-- Category Buttons (Bracelets or Cookies) -->
+            <div class="category-buttons">
+                <button id="braceletsBtn" onclick="setCategory('bracelets')">Add to Bracelets</button>
+                <button id="cookiesBtn" onclick="setCategory('cookies')">Add to Cookies</button>
+            </div>
+
+            <!-- Product Form -->
             <form id="productForm">
                 <input type="text" id="name" placeholder="Product Name" required>
                 <input type="number" id="price" placeholder="Price" required>
@@ -95,13 +140,16 @@
                 </select>
                 <button type="button" onclick="addProduct()">Add Product</button>
             </form>
+
+            <!-- Product List -->
+            <div class="product-list" id="productList"></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -116,6 +164,11 @@
         const db = getFirestore(app);
         const auth = getAuth();
         const provider = new GoogleAuthProvider();
+
+        // Set category based on button click
+        window.setCategory = (category) => {
+            document.getElementById("category").value = category;
+        };
 
         // Add Product to Firebase
         window.addProduct = async () => {
@@ -140,9 +193,48 @@
                     imageUrl
                 });
                 alert("Product added successfully!");
+                loadProducts(); // Reload product list
                 document.getElementById("productForm").reset();
             } catch (error) {
                 alert("Error adding product: " + error.message);
+                console.error("Error:", error);
+            }
+        };
+
+        // Load products from Firebase and display them
+        window.loadProducts = async () => {
+            const category = document.getElementById("category").value;
+            const querySnapshot = await getDocs(collection(db, category));
+            const productList = document.getElementById("productList");
+
+            productList.innerHTML = ""; // Clear the existing list
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const productDiv = document.createElement("div");
+                productDiv.classList.add("product-item");
+
+                productDiv.innerHTML = `
+                    <div>
+                        <strong>${data.name}</strong><br>
+                        Price: $${data.price}<br>
+                        <img src="${data.imageUrl}" alt="${data.name}" width="50">
+                    </div>
+                    <button onclick="deleteProduct('${doc.id}')">Delete</button>
+                `;
+                productList.appendChild(productDiv);
+            });
+        };
+
+        // Delete product from Firebase
+        window.deleteProduct = async (productId) => {
+            const productRef = doc(db, document.getElementById("category").value, productId);
+            try {
+                await deleteDoc(productRef);
+                alert("Product deleted successfully!");
+                loadProducts(); // Reload product list
+            } catch (error) {
+                alert("Error deleting product: " + error.message);
                 console.error("Error:", error);
             }
         };
@@ -167,6 +259,9 @@
                 console.error("Error signing out:", error);
             }
         };
+
+        // Initial load of products
+        loadProducts();
 
     </script>
 </body>
