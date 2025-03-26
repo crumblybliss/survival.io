@@ -154,15 +154,18 @@
             }
         }
 
-        // Function to create select dropdowns
+        // Function to create select dropdowns for color or size
         function createSelectElement(type, options) {
             const selectElement = document.createElement("select");
             selectElement.name = type;
+
+            // Placeholder option
             const placeholderOption = document.createElement("option");
             placeholderOption.value = "";
             placeholderOption.textContent = `Select ${type}`;
             selectElement.appendChild(placeholderOption);
 
+            // Populate the dropdown with color or size options
             options.forEach(option => {
                 const optionElement = document.createElement("option");
                 optionElement.value = option;
