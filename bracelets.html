@@ -58,6 +58,8 @@
         <button type="submit">Add Bracelet</button>
     </form>
 
+    <button id="addToCartButton">Add to Cart</button>
+
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
@@ -76,42 +78,42 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore(app);
 
-        // Handle form submission for adding a bracelet
-        document.getElementById('braceletForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            
+        // Handle Add to Cart button click
+        document.getElementById('addToCartButton').addEventListener('click', function() {
             const color1 = document.getElementById('color1').value.trim();
             const color2 = document.getElementById('color2').value.trim();
 
-            // Validate that colors are not empty
             if (!color1) {
-                alert("Please enter a color for Color 1.");
+                alert("Color 1 is required!");
                 return;
             }
 
-            // Collect the colors
+            // Collect the colors (one or two)
             const colors = color2 ? [color1, color2] : [color1];
-            
-            // Example data to save into Firestore
-            const newBracelet = {
+
+            // Example data to add to cart (replace with actual product details)
+            const cartItem = {
                 name: "Awesome Bracelet",  // Replace with actual name
                 price: 19.99,              // Replace with actual price
-                color: colors,             // Add colors as an array
+                color: colors,             // Store colors as an array (one or two)
                 size: "M",                 // Replace with actual size
                 imageUrl: "url-to-image"   // Replace with actual image URL
             };
 
-            // Firebase save code (use Firestore SDK)
-            db.collection('bracelets').add(newBracelet)
-                .then(() => {
-                    alert("Bracelet added successfully!");
-                    // Reset the form
-                    document.getElementById('braceletForm').reset();
-                })
-                .catch(error => {
-                    console.error("Error adding bracelet:", error);
-                    alert("There was an error adding the bracelet.");
-                });
+            // Add the cart item to Firebase
+            const userId = firebase.auth().currentUser.uid; // Assuming user is logged in
+            const cartRef = db.collection('carts').doc(userId);
+            
+            cartRef.update({
+                products: firebase.firestore.FieldValue.arrayUnion(cartItem)
+            })
+            .then(() => {
+                alert("Bracelet added to cart!");
+            })
+            .catch(error => {
+                console.error("Error adding item to cart:", error);
+                alert("There was an error adding the item to your cart.");
+            });
         });
     </script>
 </body>
