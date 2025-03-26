@@ -44,27 +44,35 @@
         button:hover {
             background-color: #0056b3;
         }
+        .color-selection {
+            display: none;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <h2>Choose your Bracelet Colors</h2>
-    <form id="braceletForm">
-        <label for="color1">Color 1:</label>
-        <input type="text" id="color1" name="color1" placeholder="Enter first color" required>
-        
-        <label for="color2">Color 2 (optional):</label>
-        <input type="text" id="color2" name="color2" placeholder="Enter second color (optional)">
-        
-        <button type="submit">Add Bracelet</button>
-    </form>
+    <h2>Choose your Bracelet</h2>
 
     <button id="addToCartButton">Add to Cart</button>
+
+    <!-- Color selection form will appear after clicking "Add to Cart" -->
+    <div id="colorSelection" class="color-selection">
+        <form id="braceletForm">
+            <label for="color1">Color 1:</label>
+            <input type="text" id="color1" name="color1" placeholder="Enter first color" required>
+            
+            <label for="color2">Color 2 (optional):</label>
+            <input type="text" id="color2" name="color2" placeholder="Enter second color (optional)">
+            
+            <button type="submit">Confirm and Add Bracelet</button>
+        </form>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
     <script>
-        // Firebase Configuration (from your Firebase project)
+        // Firebase Configuration (replace with your Firebase details)
         const firebaseConfig = {
             apiKey: "AIzaSyBsTrGTsmH5enA9hOCaAjk8JSP0NEmrE4gth",
             authDomain: "survival-f35e2.firebaseapp.com",
@@ -78,8 +86,17 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore(app);
 
-        // Handle Add to Cart button click
+        // Show color selection form after clicking "Add to Cart"
         document.getElementById('addToCartButton').addEventListener('click', function() {
+            // Hide the "Add to Cart" button and show the color selection form
+            document.getElementById('addToCartButton').style.display = 'none';
+            document.getElementById('colorSelection').style.display = 'block';
+        });
+
+        // Handle the form submission
+        document.getElementById('braceletForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
             const color1 = document.getElementById('color1').value.trim();
             const color2 = document.getElementById('color2').value.trim();
 
@@ -109,6 +126,11 @@
             })
             .then(() => {
                 alert("Bracelet added to cart!");
+                // Hide the color selection form and reset the page
+                document.getElementById('colorSelection').style.display = 'none';
+                document.getElementById('addToCartButton').style.display = 'block';
+                document.getElementById('color1').value = '';
+                document.getElementById('color2').value = '';
             })
             .catch(error => {
                 console.error("Error adding item to cart:", error);
