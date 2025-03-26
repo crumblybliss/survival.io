@@ -5,15 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart Page</title>
     <style>
-        /* Your custom CSS (Ensure it is set as required) */
+        /* Custom Design (Navy Blue) */
         body {
             background-color: #f3f3f3;
             font-family: Arial, sans-serif;
             color: #333;
+            margin: 0;
+            padding: 0;
         }
 
         header {
-            background-color: #003366;
+            background-color: #003366; /* Navy Blue */
             color: #fff;
             padding: 15px;
             text-align: center;
@@ -30,10 +32,11 @@
             border-radius: 5px;
             display: flex;
             justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .cart-item button {
-            background-color: #ff4d4d;
+            background-color: #ff4d4d; /* Red for Remove Button */
             border: none;
             color: white;
             padding: 10px;
@@ -44,6 +47,34 @@
         .cart-item button:hover {
             background-color: #ff1a1a;
         }
+
+        .home-button {
+            background-color: #003366; /* Navy Blue */
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: block;
+            width: 100px;
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        .home-button:hover {
+            background-color: #001f33;
+        }
+
+        footer {
+            text-align: center;
+            background-color: #003366; /* Navy Blue */
+            color: white;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+
     </style>
 </head>
 <body>
@@ -51,6 +82,9 @@
     <header>
         <h1>My Shopping Cart</h1>
     </header>
+
+    <!-- Home Button to go back to index.html -->
+    <a href="index.html" class="home-button">Home</a>
 
     <div class="cart-container" id="cartItems">
         <!-- Cart items will be dynamically loaded here -->
@@ -64,7 +98,7 @@
     <script type="module">
         // Firebase imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
         
         // Your Firebase config
@@ -87,6 +121,7 @@
             const user = auth.currentUser; // Get current user
             if (!user) {
                 alert("You need to be logged in to view the cart.");
+                window.location.href = "login.html"; // Redirect to login page if not logged in
                 return;
             }
             const cartItemsRef = collection(firestore, "carts", user.uid, "items"); // Path: 'carts/{userId}/items'
@@ -95,6 +130,11 @@
             
             const cartContainer = document.getElementById("cartItems");
             cartContainer.innerHTML = ''; // Clear existing cart items
+
+            if (cartItems.length === 0) {
+                cartContainer.innerHTML = '<p>Your cart is empty.</p>';
+                return;
+            }
 
             cartItems.forEach(item => {
                 const itemElement = document.createElement("div");
@@ -107,7 +147,7 @@
             });
         }
 
-        // Function to remove item from cart (FireStore example)
+        // Function to remove item from cart (Firestore example)
         async function removeFromCart(itemId) {
             const user = auth.currentUser; // Get current user
             if (!user) {
@@ -119,28 +159,26 @@
             loadCart(); // Reload the cart after removal
         }
 
-        // Function to login (For example purposes, you may want to add a proper login system)
-        async function login() {
+        // Logout function
+        async function logout() {
             try {
-                const userCredential = await auth.signInWithEmailAndPassword("user@example.com", "password"); // Replace with real login logic
-                loadCart();
+                await signOut(auth);
+                alert("You have been logged out.");
+                window.location.href = "index.html"; // Redirect to home page after logout
             } catch (error) {
-                console.error("Error logging in: ", error);
+                console.error("Error logging out: ", error);
             }
         }
 
-        // Function to logout
-        function logout() {
-            auth.signOut().then(() => {
-                alert("Logged out successfully");
-                window.location.reload();
-            }).catch((error) => {
-                console.error("Error logging out: ", error);
-            });
-        }
-
-        // Load cart items when page loads
-        loadCart();
+        // Listen for authentication state changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loadCart();
+            } else {
+                alert("You need to be logged in to view your cart.");
+                window.location.href = "login.html"; // Redirect to login page if user is not logged in
+            }
+        });
     </script>
 
 </body>
