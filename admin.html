@@ -76,7 +76,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, deleteDoc, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -130,10 +130,66 @@
                 productDiv.classList.add("product-item");
                 productDiv.innerHTML = `
                     <span>${product.name} - $${product.price}</span>
+                    <button onclick="editProduct('${category}', '${product.id}')">Edit</button>
                     <button onclick="deleteProduct('${category}', '${product.id}')">Delete</button>
                 `;
                 productListDiv.appendChild(productDiv);
             });
+        };
+
+        // Edit product
+        window.editProduct = async (category, productId) => {
+            const newName = prompt("Enter new product name:");
+            const newPrice = parseFloat(prompt("Enter new product price:"));
+            const newImageUrl = prompt("Enter new image URL:");
+            
+            if (newName && !isNaN(newPrice)) {
+                try {
+                    const productRef = doc(db, category.toLowerCase(), productId);
+                    await updateDoc(productRef, {
+                        name: newName,
+                        price: newPrice,
+                        imageUrl: newImageUrl || ""
+                    });
+                    alert('Product updated successfully');
+                    location.reload(); // Refresh to show updated products
+                } catch (error) {
+                    console.error('Error updating product: ', error);
+                    alert('Error updating product');
+                }
+            } else {
+                alert('Invalid input. Please try again.');
+            }
+        };
+
+        // Add new product
+        window.addProduct = async () => {
+            const name = document.getElementById("name").value;
+            const price = parseFloat(document.getElementById("price").value);
+            const category = document.getElementById("category").value;
+            let imageUrl = document.getElementById("imageUrl").value;
+            
+            if (!name || isNaN(price)) {
+                alert("Please enter a valid name and price.");
+                return;
+            }
+
+            if (!imageUrl) {
+                imageUrl = "https://via.placeholder.com/100"; // Default placeholder image
+            }
+
+            try {
+                await setDoc(doc(db, category.toLowerCase(), name), {
+                    name,
+                    price,
+                    imageUrl
+                });
+                alert("Product added successfully!");
+                document.getElementById("productForm").reset();
+            } catch (error) {
+                alert("Error adding product: " + error.message);
+                console.error("Error:", error);
+            }
         };
 
         // Delete product
@@ -173,7 +229,19 @@
 
     <div class="container">
         <h1>Admin Panel</h1>
+        <form id="productForm">
+            <input type="text" id="name" placeholder="Product Name" required>
+            <input type="number" id="price" placeholder="Price" required>
+            <input type="text" id="imageUrl" placeholder="Image URL (Optional)">
+            <select id="category">
+                <option value="bracelets">Bracelets</option>
+                <option value="cookies">Cookies</option>
+            </select>
+            <button type="button" onclick="addProduct()">Add Product</button>
+        </form>
+
         <div id="productList" class="product-list"></div>
     </div>
 </body>
 </html>
+
