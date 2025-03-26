@@ -51,6 +51,21 @@
             color: gray;
             margin-top: 20px;
         }
+        .auth-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .auth-buttons button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .auth-buttons button:hover {
+            background-color: #45a049;
+        }
     </style>
     <!-- Add Firebase SDK scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
@@ -62,6 +77,11 @@
         <h2>Your Shopping Cart</h2>
         <div id="cart-items"></div>
         <p id="empty-message" class="empty-cart">Your cart is empty.</p>
+    </div>
+
+    <div class="auth-buttons">
+        <button id="login-btn" onclick="signIn()">Sign In</button>
+        <button id="logout-btn" onclick="signOut()" style="display: none;">Sign Out</button>
     </div>
 
     <script>
@@ -87,6 +107,7 @@
             const emptyMessage = document.getElementById('empty-message');
 
             if (user) {
+                // User is logged in, load their cart from Firestore
                 const userDoc = await firestore.collection('users').doc(user.uid).get();
                 const cart = userDoc.exists ? userDoc.data().cart : [];
                 cartItemsContainer.innerHTML = '';
@@ -106,6 +127,10 @@
                         cartItemsContainer.appendChild(cartItem);
                     });
                 }
+            } else {
+                // User is not logged in, show login prompt
+                cartItemsContainer.innerHTML = '';
+                emptyMessage.style.display = 'none';
             }
         }
 
@@ -122,6 +147,46 @@
                 loadCart();
             }
         }
+
+        // Sign in with Firebase Authentication
+        function signIn() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    // User signed in successfully
+                    document.getElementById('login-btn').style.display = 'none';
+                    document.getElementById('logout-btn').style.display = 'inline-block';
+                    loadCart();
+                })
+                .catch((error) => {
+                    console.error('Error signing in: ', error);
+                });
+        }
+
+        // Sign out
+        function signOut() {
+            auth.signOut().then(() => {
+                // User signed out successfully
+                document.getElementById('login-btn').style.display = 'inline-block';
+                document.getElementById('logout-btn').style.display = 'none';
+                loadCart();
+            });
+        }
+
+        // Auth state change listener
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // If user is logged in, show the cart
+                document.getElementById('login-btn').style.display = 'none';
+                document.getElementById('logout-btn').style.display = 'inline-block';
+                loadCart();
+            } else {
+                // If user is logged out, prompt for login
+                document.getElementById('login-btn').style.display = 'inline-block';
+                document.getElementById('logout-btn').style.display = 'none';
+                loadCart();
+            }
+        });
 
         // Load cart when the page is ready
         document.addEventListener('DOMContentLoaded', loadCart);
