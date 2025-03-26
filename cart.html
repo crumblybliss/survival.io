@@ -52,6 +52,10 @@
             margin-top: 20px;
         }
     </style>
+    <!-- Add Firebase SDK scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 </head>
 <body>
     <div class="container">
@@ -61,37 +65,62 @@
     </div>
 
     <script>
-        // Load cart from localStorage and display items
-        function loadCart() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBv9Il87-eTEXJ1oCO54G_dUm7df3h9Y0Q",
+            authDomain: "crumblybliss.firebaseapp.com",
+            projectId: "crumblybliss",
+            storageBucket: "crumblybliss.appspot.com",
+            messagingSenderId: "111143105543",
+            appId: "1:111143105543:web:2f2de68bb63143160d7791"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const firestore = firebase.firestore();
+
+        // Load cart from Firestore
+        async function loadCart() {
+            const user = auth.currentUser;
             const cartItemsContainer = document.getElementById('cart-items');
             const emptyMessage = document.getElementById('empty-message');
-            cartItemsContainer.innerHTML = ''; // Clear previous cart items
 
-            if (cart.length === 0) {
-                emptyMessage.style.display = 'block'; // Show empty message
-            } else {
-                emptyMessage.style.display = 'none'; // Hide empty message
-                // Display each cart item
-                cart.forEach((item, index) => {
-                    const cartItem = document.createElement('div');
-                    cartItem.classList.add('cart-item');
-                    cartItem.innerHTML = `
-                        <img src="${item.image || 'placeholder.jpg'}" alt="${item.name}">
-                        <span>${item.name} - $${item.price}</span>
-                        <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
-                    `;
-                    cartItemsContainer.appendChild(cartItem);
-                });
+            if (user) {
+                const userDoc = await firestore.collection('users').doc(user.uid).get();
+                const cart = userDoc.exists ? userDoc.data().cart : [];
+                cartItemsContainer.innerHTML = '';
+                
+                if (cart.length === 0) {
+                    emptyMessage.style.display = 'block';
+                } else {
+                    emptyMessage.style.display = 'none';
+                    cart.forEach((item, index) => {
+                        const cartItem = document.createElement('div');
+                        cartItem.classList.add('cart-item');
+                        cartItem.innerHTML = `
+                            <img src="${item.image || 'placeholder.jpg'}" alt="${item.name}">
+                            <span>${item.name} - $${item.price}</span>
+                            <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
+                        `;
+                        cartItemsContainer.appendChild(cartItem);
+                    });
+                }
             }
         }
 
         // Remove item from the cart
-        function removeFromCart(index) {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            cart.splice(index, 1); // Remove the item at the given index
-            localStorage.setItem('cart', JSON.stringify(cart)); // Save updated cart
-            loadCart(); // Reload the cart display
+        async function removeFromCart(index) {
+            const user = auth.currentUser;
+            if (user) {
+                const userDoc = await firestore.collection('users').doc(user.uid).get();
+                const cart = userDoc.exists ? userDoc.data().cart : [];
+                cart.splice(index, 1);
+                await firestore.collection('users').doc(user.uid).update({
+                    cart: cart
+                });
+                loadCart();
+            }
         }
 
         // Load cart when the page is ready
