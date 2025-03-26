@@ -9,7 +9,8 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #0c1a33; /* Navy blue background */
+            color: white;
         }
 
         .container {
@@ -20,21 +21,41 @@
 
         h1 {
             text-align: center;
-            color: #333;
+            color: #fff;
+        }
+
+        nav {
+            background-color: #1e3a58; /* Dark navy blue for the navbar */
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            margin: 0 15px;
+            font-size: 1.2em;
+        }
+
+        nav a:hover {
+            background-color: #2a4f77;
         }
 
         .product-list {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-around;
+            margin-top: 20px;
         }
 
         .product {
             background-color: white;
+            color: #333;
             border: 1px solid #ddd;
-            padding: 20px;
+            padding: 15px;
             margin: 10px;
-            width: 250px;
+            width: 180px; /* Smaller product box */
             text-align: center;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -52,7 +73,7 @@
         }
 
         .product p {
-            font-size: 1.1em;
+            font-size: 1em;
             color: #888;
         }
 
@@ -80,6 +101,11 @@
     </style>
 </head>
 <body>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/cart">Cart</a>
+    </nav>
+
     <div class="container">
         <h1>Bracelets</h1>
         <p>Explore our collection of amazing bracelets!</p>
@@ -88,7 +114,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         // Firebase configuration (Replace with your project settings)
         const firebaseConfig = {
@@ -103,7 +129,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Function to load products
+        // Function to load bracelets
         async function loadBracelets() {
             const productList = document.getElementById("products-list");
             productList.innerHTML = "<p>Loading bracelets...</p>";
@@ -117,19 +143,23 @@
                     return;
                 }
 
-                querySnapshot.forEach((doc) => {
-                    const product = doc.data();
+                querySnapshot.forEach(async (docSnapshot) => {
+                    const productData = docSnapshot.data();
+                    const braceletRef = doc(db, "bracelets", docSnapshot.id, "bracelet_1", "sizes_colors");
+                    const sizesColorsSnapshot = await getDoc(braceletRef);
+                    const sizesColors = sizesColorsSnapshot.data();
+
                     const productDiv = document.createElement("div");
                     productDiv.classList.add("product");
 
                     // Create the select elements for color and size
-                    const colorSelect = createSelectElement('color', product.colors || []);
-                    const sizeSelect = createSelectElement('size', product.sizes || []);
+                    const colorSelect = createSelectElement('color', sizesColors.colors || []);
+                    const sizeSelect = createSelectElement('size', sizesColors.sizes || []);
 
                     productDiv.innerHTML = `
-                        <img src="${product.imageUrl}" alt="${product.name}">
-                        <h3>${product.name}</h3>
-                        <p>$${product.price.toFixed(2)}</p>
+                        <img src="${productData.imageUrl}" alt="${productData.name}">
+                        <h3>${productData.name}</h3>
+                        <p>$${productData.price.toFixed(2)}</p>
                     `;
 
                     productDiv.appendChild(colorSelect);
@@ -137,7 +167,7 @@
 
                     const addToCartButton = document.createElement("button");
                     addToCartButton.textContent = "Add to Cart";
-                    addToCartButton.onclick = () => addToCart(doc.id, product.name, product.price, product.imageUrl, colorSelect.value, sizeSelect.value);
+                    addToCartButton.onclick = () => addToCart(docSnapshot.id, productData.name, productData.price, productData.imageUrl, colorSelect.value, sizeSelect.value);
                     productDiv.appendChild(addToCartButton);
 
                     productList.appendChild(productDiv);
@@ -180,3 +210,4 @@
     </script>
 </body>
 </html>
+
