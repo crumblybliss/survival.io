@@ -3,36 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Page</title>
+    <title>Admin Panel - CrumblyBliss</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
         }
-        .product {
-            border: 1px solid #ddd;
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        input, button, select {
+            width: 100%;
             padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: navy;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: darkblue;
+        }
+        .product-list {
+            margin-top: 20px;
+        }
+        .product-item {
+            background: #fff;
+            padding: 15px;
             margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .delete-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .delete-btn:hover {
+            background: darkred;
         }
     </style>
 </head>
 <body>
-    <h1>Admin Panel</h1>
-    <h2>Add New Product</h2>
-    <form id="product-form">
-        <input type="text" id="name" placeholder="Product Name" required>
-        <input type="number" id="price" placeholder="Price" required>
-        <input type="text" id="colors" placeholder="Colors (comma separated)" required>
-        <button type="submit">Add Product</button>
-    </form>
-    <h2>Existing Products</h2>
-    <div id="product-list"></div>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-    
+    <div class="container">
+        <h2>Admin Panel</h2>
+        <input type="text" id="productName" placeholder="Product Name">
+        <input type="number" id="productPrice" placeholder="Price">
+        <select id="productColor">
+            <option value="Red">Red</option>
+            <option value="Blue">Blue</option>
+            <option value="Green">Green</option>
+        </select>
+        <button onclick="addProduct()">Add Product</button>
+        <div class="product-list" id="productList"></div>
+    </div>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -42,47 +85,41 @@
             messagingSenderId: "704462603548",
             appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
-        function loadProducts() {
-            db.collection("products").get().then((querySnapshot) => {
-                let productList = document.getElementById("product-list");
-                productList.innerHTML = "";
-                querySnapshot.forEach((doc) => {
-                    let data = doc.data();
-                    productList.innerHTML += `
-                        <div class="product">
-                            <h2>${data.name}</h2>
-                            <p>Price: $${data.price}</p>
-                            <p>Colors: ${data.colors ? data.colors.join(", ") : "N/A"}</p>
-                            <button onclick="deleteProduct('${doc.id}')">Delete</button>
-                        </div>
-                    `;
-                });
-            });
-        }
-
-        document.getElementById("product-form").addEventListener("submit", function(event) {
-            event.preventDefault();
-            const name = document.getElementById("name").value;
-            const price = parseFloat(document.getElementById("price").value);
-            const colors = document.getElementById("colors").value.split(",").map(c => c.trim());
-
-            db.collection("products").add({ name, price, colors }).then(() => {
+        
+        function addProduct() {
+            const name = document.getElementById("productName").value;
+            const price = document.getElementById("productPrice").value;
+            const color = document.getElementById("productColor").value;
+            
+            db.collection("products").add({ name, price, color }).then(() => {
                 alert("Product added!");
                 loadProducts();
             });
-        });
-
+        }
+        
+        function loadProducts() {
+            const productList = document.getElementById("productList");
+            productList.innerHTML = "";
+            db.collection("products").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const product = doc.data();
+                    const div = document.createElement("div");
+                    div.className = "product-item";
+                    div.innerHTML = `${product.name} - $${product.price} - ${product.color} <button class='delete-btn' onclick='deleteProduct("${doc.id}")'>Delete</button>`;
+                    productList.appendChild(div);
+                });
+            });
+        }
+        
         function deleteProduct(id) {
             db.collection("products").doc(id).delete().then(() => {
                 alert("Product deleted!");
                 loadProducts();
             });
         }
-
+        
         loadProducts();
     </script>
 </body>
