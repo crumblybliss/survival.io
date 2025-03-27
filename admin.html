@@ -73,19 +73,20 @@
     </div>
 
     <script type="module">
-        // Firebase Config (DO NOT HARD-CODE IN PRODUCTION)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-
+        // Firebase Config
         const firebaseConfig = {
-            apiKey: "YOUR_FIREBASE_API_KEY",
+            apiKey: "AIzaSyBv9Il87-eTEXJ1oCO54G_dUm7df3h9Y0Q",
             authDomain: "survival-f35e2.firebaseapp.com",
             projectId: "survival-f35e2",
             storageBucket: "survival-f35e2.appspot.com",
             messagingSenderId: "704462603548",
             appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
         };
+
+        // Initialize Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
