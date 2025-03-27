@@ -34,6 +34,12 @@
             height: 50px;
             object-fit: cover;
             border-radius: 5px;
+            margin-right: 10px;
+        }
+        .item-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
         }
         .remove-btn {
             background: red;
@@ -51,129 +57,50 @@
             color: gray;
             margin-top: 20px;
         }
-        .auth-buttons {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .auth-buttons button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .auth-buttons button:hover {
-            background-color: #45a049;
-        }
     </style>
-
-    <!-- Firebase modular SDK v9 -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBv9Il87-eTEXJ1oCO54G_dUm7df3h9Y0Q",
-            authDomain: "crumblybliss.firebaseapp.com",
-            projectId: "crumblybliss",
-            storageBucket: "crumblybliss.appspot.com",
-            messagingSenderId: "111143105543",
-            appId: "1:111143105543:web:2f2de68bb63143160d7791"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const firestore = getFirestore(app);
-
-        async function loadCart() {
-            const user = auth.currentUser;
-            const cartItemsContainer = document.getElementById('cart-items');
-            const emptyMessage = document.getElementById('empty-message');
-
-            if (user) {
-                const userDocRef = doc(firestore, "users", user.uid);
-                const userDocSnap = await getDoc(userDocRef);
-
-                if (userDocSnap.exists()) {
-                    const cart = userDocSnap.data().cart || [];
-                    cartItemsContainer.innerHTML = '';
-                    if (cart.length === 0) {
-                        emptyMessage.style.display = 'block';
-                    } else {
-                        emptyMessage.style.display = 'none';
-                        cart.forEach((item, index) => {
-                            const cartItem = document.createElement('div');
-                            cartItem.classList.add('cart-item');
-                            cartItem.innerHTML = `
-                                <img src="${item.image || 'placeholder.jpg'}" alt="${item.name}">
-                                <span>${item.name} - $${item.price}</span>
-                                <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
-                            `;
-                            cartItemsContainer.appendChild(cartItem);
-                        });
-                    }
-                } else {
-                    console.log("No such document!");
-                }
-            } else {
-                cartItemsContainer.innerHTML = '';
-                emptyMessage.style.display = 'none';
-            }
-        }
-
-        async function removeFromCart(index) {
-            const user = auth.currentUser;
-            if (user) {
-                const userDocRef = doc(firestore, "users", user.uid);
-                const userDocSnap = await getDoc(userDocRef);
-                const cart = userDocSnap.exists() ? userDocSnap.data().cart : [];
-                cart.splice(index, 1);
-                await updateDoc(userDocRef, { cart: cart });
-                loadCart();
-            }
-        }
-
-        function signIn() {
-            const provider = new GoogleAuthProvider();
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    console.log(result);
-                    loadCart();
-                })
-                .catch((error) => {
-                    console.error("Error signing in: ", error);
-                });
-        }
-
-        function signOut() {
-            signOut(auth)
-                .then(() => {
-                    console.log("User signed out");
-                    loadCart();
-                })
-                .catch((error) => {
-                    console.error("Error signing out: ", error);
-                });
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            loadCart();
-        });
-    </script>
 </head>
 <body>
     <div class="container">
         <h2>Your Shopping Cart</h2>
         <div id="cart-items"></div>
-        <div class="empty-cart" id="empty-message" style="display: none;">
-            Your cart is empty. Please sign in to see your cart.
-        </div>
-        <div class="auth-buttons">
-            <button id="login-btn" onclick="signIn()">Sign In</button>
-            <button id="logout-btn" onclick="signOut()">Sign Out</button>
-        </div>
+        <p id="empty-message" class="empty-cart">Your cart is empty.</p>
     </div>
+
+    <script>
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartItemsContainer = document.getElementById('cart-items');
+            const emptyMessage = document.getElementById('empty-message');
+            cartItemsContainer.innerHTML = '';
+
+            if (cart.length === 0) {
+                emptyMessage.style.display = 'block';
+                return;
+            }
+            emptyMessage.style.display = 'none';
+
+            cart.forEach((item, index) => {
+                const cartItem = document.createElement('div');
+                cartItem.classList.add('cart-item');
+                cartItem.innerHTML = `
+                    <div class="item-info">
+                        <img src="${item.image ? item.image : 'placeholder.jpg'}" alt="${item.name}">
+                        <span>${item.name} - $${item.price.toFixed(2)}</span>
+                    </div>
+                    <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
+                `;
+                cartItemsContainer.appendChild(cartItem);
+            });
+        }
+
+        function removeFromCart(index) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            loadCart();
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCart);
+    </script>
 </body>
 </html>
