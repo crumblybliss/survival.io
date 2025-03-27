@@ -53,178 +53,72 @@
         button:hover {
             background: #0097a7;
         }
-        .product-list {
-            text-align: left;
-            margin-top: 20px;
-        }
-        .product-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .product-item button {
-            background-color: #e57373;
-        }
-        .login-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
     </style>
-    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, deleteDoc, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, setDoc, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
-
+        const firebaseConfig = { /* Your Firebase Config */ };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth();
-        const provider = new GoogleAuthProvider();
 
-        window.login = async () => {
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                console.error("Error signing in:", error);
-            }
-        };
-
-        window.logout = async () => {
-            try {
-                await signOut(auth);
-            } catch (error) {
-                console.error("Error signing out:", error);
-            }
-        };
-
-        // Fetch products for both cookies and bracelets
-        const fetchProducts = async () => {
-            const cookiesRef = collection(db, 'cookies');
-            const braceletsRef = collection(db, 'bracelets');
-            const cookiesSnapshot = await getDocs(cookiesRef);
-            const braceletsSnapshot = await getDocs(braceletsRef);
-
-            let cookiesProducts = cookiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            let braceletsProducts = braceletsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-            displayProducts(cookiesProducts, 'Cookies');
-            displayProducts(braceletsProducts, 'Bracelets');
-        };
-
-        // Display products in the admin panel
-        const displayProducts = (products, category) => {
-            const productListDiv = document.getElementById("productList");
-            products.forEach(product => {
-                const productDiv = document.createElement("div");
-                productDiv.classList.add("product-item");
-                productDiv.innerHTML = `
-                    <span>${product.name} - $${product.price}</span>
-                    <button onclick="editProduct('${category}', '${product.id}')">Edit</button>
-                    <button onclick="deleteProduct('${category}', '${product.id}')">Delete</button>
-                `;
-                productListDiv.appendChild(productDiv);
-            });
-        };
-
-        // Edit product
-        window.editProduct = async (category, productId) => {
-            const newName = prompt("Enter new product name:");
-            const newPrice = parseFloat(prompt("Enter new product price:"));
-            const newImageUrl = prompt("Enter new image URL:");
-            
-            if (newName && !isNaN(newPrice)) {
-                try {
-                    const productRef = doc(db, category.toLowerCase(), productId);
-                    await updateDoc(productRef, {
-                        name: newName,
-                        price: newPrice,
-                        imageUrl: newImageUrl || ""
-                    });
-                    alert('Product updated successfully');
-                    location.reload(); // Refresh to show updated products
-                } catch (error) {
-                    console.error('Error updating product: ', error);
-                    alert('Error updating product');
+        document.addEventListener("DOMContentLoaded", () => {
+            onAuthStateChanged(auth, (user) => {
+                const loginButton = document.getElementById("loginButton");
+                if (user) {
+                    loginButton.innerText = "Logout";
+                    loginButton.onclick = () => signOut(auth);
+                    fetchProducts();
+                } else {
+                    loginButton.innerText = "Login";
+                    loginButton.onclick = () => window.location.href = "login.html";
                 }
-            } else {
-                alert('Invalid input. Please try again.');
-            }
-        };
+            });
+        });
 
-        // Add new product
+        async function fetchProducts() {
+            const productList = document.getElementById("productList");
+            productList.innerHTML = "";
+            const categories = ["cookies", "bracelets"];
+            for (const category of categories) {
+                const querySnapshot = await getDocs(collection(db, category));
+                querySnapshot.forEach((doc) => {
+                    const product = doc.data();
+                    const productDiv = document.createElement("div");
+                    productDiv.innerHTML = `
+                        <p>${product.name} - $${product.price} <br> Colors: ${product.colors?.join(", ") || "None"}</p>
+                        <button onclick="editProduct('${category}', '${doc.id}')">Edit</button>
+                        <button onclick="deleteProduct('${category}', '${doc.id}')">Delete</button>
+                    `;
+                    productList.appendChild(productDiv);
+                });
+            }
+        }
+
         window.addProduct = async () => {
             const name = document.getElementById("name").value;
             const price = parseFloat(document.getElementById("price").value);
             const category = document.getElementById("category").value;
-            let imageUrl = document.getElementById("imageUrl").value;
-            
+            const colors = document.getElementById("colors").value.split(",").map(c => c.trim());
             if (!name || isNaN(price)) {
-                alert("Please enter a valid name and price.");
+                alert("Invalid input");
                 return;
             }
-
-            if (!imageUrl) {
-                imageUrl = "https://via.placeholder.com/100"; // Default placeholder image
-            }
-
-            try {
-                await setDoc(doc(db, category.toLowerCase(), name), {
-                    name,
-                    price,
-                    imageUrl
-                });
-                alert("Product added successfully!");
-                document.getElementById("productForm").reset();
-            } catch (error) {
-                alert("Error adding product: " + error.message);
-                console.error("Error:", error);
-            }
+            await setDoc(doc(db, category, name), { name, price, colors });
+            alert("Product added");
+            fetchProducts();
         };
-
-        // Delete product
-        window.deleteProduct = async (category, productId) => {
-            try {
-                const productRef = doc(db, category.toLowerCase(), productId);
-                await deleteDoc(productRef);
-                alert('Product deleted successfully');
-                location.reload(); // Refresh to show updated products
-            } catch (error) {
-                console.error('Error deleting product: ', error);
-                alert('Error deleting product');
-            }
-        };
-
-        onAuthStateChanged(auth, (user) => {
-            const loginButton = document.getElementById("loginButton");
-            if (user) {
-                loginButton.innerText = "Logout";
-                loginButton.onclick = logout;
-                fetchProducts(); // Load products when admin is logged in
-            } else {
-                loginButton.innerText = "Login";
-                loginButton.onclick = login;
-            }
-        });
     </script>
 </head>
 <body>
     <div class="nav-bar">
         <a href="index.html">Home</a>
-        <a href="bracelets.html">Bracelets</a>
         <a href="cookies.html">Cookies</a>
+        <a href="bracelets.html">Bracelets</a>
         <a href="cart.html">Cart</a>
-        <a href="admin.html" id="loginButton">Login</a>
+        <button id="loginButton">Login</button>
     </div>
 
     <div class="container">
@@ -232,16 +126,14 @@
         <form id="productForm">
             <input type="text" id="name" placeholder="Product Name" required>
             <input type="number" id="price" placeholder="Price" required>
-            <input type="text" id="imageUrl" placeholder="Image URL (Optional)">
+            <input type="text" id="colors" placeholder="Colors (comma separated)">
             <select id="category">
                 <option value="bracelets">Bracelets</option>
                 <option value="cookies">Cookies</option>
             </select>
             <button type="button" onclick="addProduct()">Add Product</button>
         </form>
-
-        <div id="productList" class="product-list"></div>
+        <div id="productList"></div>
     </div>
 </body>
 </html>
-
