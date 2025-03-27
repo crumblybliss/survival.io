@@ -50,10 +50,6 @@
         button:hover {
             background: #0097a7;
         }
-        .product-list {
-            text-align: left;
-            margin-top: 20px;
-        }
         .product-item {
             display: flex;
             justify-content: space-between;
@@ -66,17 +62,8 @@
             object-fit: cover;
             border-radius: 5px;
         }
-        .login-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
     </style>
-    <script>
-        function redirectToLogin() {
-            window.location.href = 'login.html';
-        }
-    </script>
+    <script type="module" src="admin.js"></script>
 </head>
 <body>
     <div class="nav-bar">
@@ -84,7 +71,7 @@
         <a href="bracelets.html">Bracelets</a>
         <a href="cookies.html">Cookies</a>
         <a href="cart.html">Cart</a>
-        <button onclick="redirectToLogin()">Login</button>
+        <a href="login.html">Login</a>
     </div>
 
     <div class="container">
@@ -92,15 +79,16 @@
         <form id="productForm">
             <input type="text" id="name" placeholder="Product Name" required>
             <input type="number" id="price" placeholder="Price" required>
-            <input type="text" id="imageUrl" placeholder="Image URL" required>
+            <input type="text" id="imageUrl" placeholder="Image URL (Optional)">
+            <input type="text" id="colors" placeholder="Colors (comma-separated)">
             <select id="category">
                 <option value="bracelets">Bracelets</option>
                 <option value="cookies">Cookies</option>
             </select>
-            <input type="text" id="colors" placeholder="Colors (comma-separated)" required>
             <button type="button" onclick="addProduct()">Add Product</button>
         </form>
-        <div id="productList" class="product-list"></div>
+
+        <div id="productList"></div>
     </div>
 </body>
 </html>
