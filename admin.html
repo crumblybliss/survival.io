@@ -45,10 +45,11 @@
             margin-top: 20px;
         }
         .product-item {
-            padding: 10px;
-            background: #eee;
-            margin: 5px 0;
-            border-radius: 5px;
+            padding: 15px;
+            background: #f4f4f4;
+            margin: 10px 0;
+            border-radius: 10px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -69,7 +70,7 @@
 
     <div class="container product-list">
         <h2>Existing Products</h2>
-        <div id="products"></div>
+        <div id="products">Loading products...</div>
     </div>
 
     <script type="module">
@@ -106,8 +107,9 @@
             const category = document.getElementById("productCategory").value;
             const colors = document.getElementById("productColors").value.split(",").map(color => color.trim());
 
-            if (!name || !price) {
-                alert("Please fill in all fields.");
+            // Enhanced Validation
+            if (!name || !price || isNaN(price)) {
+                alert("Please fill in all fields with valid data.");
                 return;
             }
 
@@ -131,20 +133,29 @@
 
         // Load Products
         async function loadProducts() {
-            document.getElementById("products").innerHTML = "";
-            
+            document.getElementById("products").innerHTML = "Loading products...";
+
             const categories = ["bracelets", "cookies"];
+            let productsLoaded = false;
+
             for (const category of categories) {
                 const querySnapshot = await getDocs(collection(db, category));
-                querySnapshot.forEach(doc => {
-                    const product = doc.data();
-                    document.getElementById("products").innerHTML += `
-                        <div class="product-item">
-                            <strong>${product.name}</strong> - $${product.price.toFixed(2)}
-                            <br>Colors: ${product.colors ? product.colors.join(", ") : "N/A"}
-                        </div>
-                    `;
-                });
+                if (!querySnapshot.empty) {
+                    productsLoaded = true;
+                    querySnapshot.forEach(doc => {
+                        const product = doc.data();
+                        document.getElementById("products").innerHTML += `
+                            <div class="product-item">
+                                <strong>${product.name}</strong> - $${product.price.toFixed(2)}
+                                <br>Colors: ${product.colors ? product.colors.join(", ") : "N/A"}
+                            </div>
+                        `;
+                    });
+                }
+            }
+
+            if (!productsLoaded) {
+                document.getElementById("products").innerHTML = "No products available.";
             }
         }
 
