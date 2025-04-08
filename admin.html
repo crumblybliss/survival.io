@@ -36,7 +36,6 @@
       } else {
         console.log("User is not authenticated.");
         alert("Please login to access the admin panel.");
-        // Redirect to login or show login form
       }
     });
 
@@ -48,7 +47,6 @@
           console.log("User is an admin.");
         } else {
           alert("You are not authorized to access the admin panel.");
-          // Redirect to home or show an access denied message
         }
       }
     }
@@ -78,16 +76,22 @@
           colors
         });
         alert("Product added!");
-        loadProducts(category);
+        loadProducts();
       } catch (error) {
         console.error("Error adding product:", error);
         alert("Error adding product.");
       }
     };
 
-    // Load products based on the category
-    async function loadProducts(category) {
-      const productsContainer = document.getElementById("products");
+    // Load cookies and bracelets separately
+    async function loadProducts() {
+      loadCategoryProducts('cookies');
+      loadCategoryProducts('bracelets');
+    }
+
+    // Load products for a specific category
+    async function loadCategoryProducts(category) {
+      const productsContainer = document.getElementById(category + "Products");
       productsContainer.innerHTML = "<p>Loading...</p>";
 
       try {
@@ -128,7 +132,7 @@
         document.getElementById("productName").value = data.name;
         document.getElementById("productPrice").value = data.price;
         document.getElementById("productCategory").value = data.category;
-        document.getElementById("productColors").value = Array.isArray(data.colors) ? data.colors.join(', ') : '';  // Ensure colors is treated as an array
+        document.getElementById("productColors").value = Array.isArray(data.colors) ? data.colors.join(', ') : '';
 
         // Change the add button to update
         const button = document.querySelector("button");
@@ -158,7 +162,7 @@
           colors
         });
         alert("Product updated!");
-        loadProducts(category);
+        loadProducts();
       } catch (error) {
         console.error("Error updating product:", error);
         alert("Error updating product.");
@@ -167,8 +171,7 @@
 
     // Load products when the page loads (for both categories)
     window.addEventListener("DOMContentLoaded", () => {
-      loadProducts('cookies');
-      loadProducts('bracelets');
+      loadProducts();
     });
   </script>
 
@@ -224,6 +227,10 @@
       margin: 5px 0;
       border-radius: 5px;
     }
+
+    .category-section {
+      margin-top: 30px;
+    }
   </style>
 </head>
 
@@ -241,10 +248,16 @@
     <button onclick="addProduct()">Add Product</button>
   </div>
 
-  <div class="container product-list">
-    <h2>Existing Products (Cookies and Bracelets)</h2>
-    <div id="products"></div>
+  <div class="container category-section">
+    <h2>Existing Products - Cookies</h2>
+    <div id="cookiesProducts"></div>
   </div>
+
+  <div class="container category-section">
+    <h2>Existing Products - Bracelets</h2>
+    <div id="braceletsProducts"></div>
+  </div>
+
 </body>
 
 </html>
