@@ -53,13 +53,16 @@
         .container {
             padding-top: 70px;
             /* Adjust to prevent navbar from overlapping content */
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .product {
             display: inline-block;
-            width: 200px;
+            width: 250px;
             margin: 20px;
-            padding: 10px;
+            padding: 20px;
             background: #fff;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -68,7 +71,27 @@
 
         .product img {
             width: 100%;
+            height: 200px;
+            object-fit: cover;
             border-radius: 10px;
+        }
+
+        .product h3 {
+            margin: 15px 0;
+            font-size: 18px;
+        }
+
+        .product p {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .product select {
+            padding: 5px;
+            margin: 10px 0;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
 
         .product button {
@@ -84,6 +107,7 @@
         .product button:hover {
             background-color: #0097a7;
         }
+
     </style>
 </head>
 
@@ -122,7 +146,7 @@
         const auth = getAuth();
 
         // Add to Cart functionality (saves to Firestore)
-        window.addToCart = async (product) => {
+        window.addToCart = async (product, size) => {
             const user = auth.currentUser;
             if (!user) {
                 alert("You need to be logged in to add products to your cart.");
@@ -135,20 +159,20 @@
 
                 let cart = cartDoc.exists() ? cartDoc.data().items : [];
 
-                // Check if the product is already in the cart
-                const existingProductIndex = cart.findIndex(item => item.id === product.id);
+                // Check if the product with the selected size is already in the cart
+                const existingProductIndex = cart.findIndex(item => item.id === product.id && item.size === size);
                 if (existingProductIndex > -1) {
                     // Update the quantity if the product already exists
                     cart[existingProductIndex].quantity += 1;
                 } else {
-                    // Add new product to the cart
-                    cart.push({ ...product, quantity: 1 });
+                    // Add new product to the cart with the selected size
+                    cart.push({ ...product, size, quantity: 1 });
                 }
 
                 // Save updated cart to Firestore
                 await setDoc(cartRef, { items: cart });
 
-                alert(`${product.name} added to your cart!`);
+                alert(`${product.name} in ${size} added to your cart!`);
             } catch (error) {
                 console.error("Error adding to cart:", error);
                 alert("There was an error adding the product to your cart.");
@@ -170,11 +194,20 @@
                 // Check if the image URL is valid, else use a default image
                 const imageUrl = product.imageUrl || 'default-image.jpg';
 
+                // Create size selector (assuming sizes are in product.sizes)
+                const sizeOptions = product.sizes.map(size => {
+                    return `<option value="${size}">${size}</option>`;
+                }).join("");
+
                 productDiv.innerHTML = `
                     <img src="${imageUrl}" alt="${product.name}">
                     <h3>${product.name}</h3>
                     <p>$${product.price}</p>
-                    <button onclick="addToCart(${JSON.stringify(product)})">Add to Cart</button>
+                    <select id="sizeSelect${product.id}">
+                        <option value="" disabled selected>Select Size</option>
+                        ${sizeOptions}
+                    </select>
+                    <button onclick="addToCart(${JSON.stringify(product)}, document.getElementById('sizeSelect${product.id}').value)">Add to Cart</button>
                 `;
 
                 cookiesContainer.appendChild(productDiv);
@@ -208,4 +241,3 @@
 </body>
 
 </html>
-
