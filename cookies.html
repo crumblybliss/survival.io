@@ -200,21 +200,25 @@
                 // Check if the image URL is valid, else use a default image
                 const imageUrl = product.imageUrl || 'default-image.jpg';
 
-                // Create size selector (assuming sizes are in product.sizes)
-                const sizeOptions = product.sizes.map(size => {
-                    return `<option value="${size.size}">${size.size} - $${size.price}</option>`;
-                }).join("");
+                // Check that sizes exist before creating the dropdown
+                if (!Array.isArray(product.sizes) || product.sizes.length === 0) {
+                    productDiv.innerHTML = `<p>No sizes available for ${product.name}</p>`;
+                } else {
+                    const sizeOptions = product.sizes.map(size => {
+                        return `<option value="${size.size}">${size.size} - $${size.price}</option>`;
+                    }).join("");
 
-                productDiv.innerHTML = `
-                    <img src="${imageUrl}" alt="${product.name}">
-                    <h3>${product.name}</h3>
-                    <p>Select Size and Price</p>
-                    <select id="sizeSelect${product.id}">
-                        <option value="" disabled selected>Select Size</option>
-                        ${sizeOptions}
-                    </select>
-                    <button onclick="addToCart(${JSON.stringify(product)}, document.getElementById('sizeSelect${product.id}').value)">Add to Cart</button>
-                `;
+                    productDiv.innerHTML = `
+                        <img src="${imageUrl}" alt="${product.name}">
+                        <h3>${product.name}</h3>
+                        <p>Select Size and Price</p>
+                        <select id="sizeSelect${product.id}">
+                            <option value="" disabled selected>Select Size</option>
+                            ${sizeOptions}
+                        </select>
+                        <button onclick="addToCart(${JSON.stringify(product)}, document.getElementById('sizeSelect${product.id}').value)">Add to Cart</button>
+                    `;
+                }
 
                 cookiesContainer.appendChild(productDiv);
             });
@@ -247,3 +251,4 @@
 </body>
 
 </html>
+
