@@ -24,13 +24,10 @@
     let editingProductId = null; // Store the ID of the product being edited
 
     async function loadProducts(category) {
-      console.log(`Loading products for category: ${category}`); // Log category
-
       const productsContainer = document.getElementById("products");
       productsContainer.innerHTML = "<p>Loading...</p>";
 
       const collectionName = category === "cookies" ? "cookies" : "bracelets"; // Set collection based on category
-      console.log(`Fetching products from Firestore collection: ${collectionName}`); // Log collection name
 
       try {
         const querySnapshot = await getDocs(collection(db, collectionName));
@@ -178,6 +175,8 @@
 
 <body>
   <h1>Admin Panel</h1>
+
+  <!-- Category selection -->
   <div class="container">
     <h2>Select Category</h2>
     <select id="categorySelect">
@@ -186,6 +185,7 @@
     </select>
   </div>
 
+  <!-- Product form for adding and editing products -->
   <div class="container">
     <h2>Product Form</h2>
     <input type="text" id="productName" placeholder="Product Name">
@@ -199,6 +199,7 @@
     <button onclick="clearForm()">Clear Form</button>
   </div>
 
+  <!-- List of products -->
   <div class="container product-list">
     <h2>Existing Products</h2>
     <div id="products"></div>
