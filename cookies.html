@@ -146,7 +146,7 @@
         const auth = getAuth();
 
         // Add to Cart functionality (saves to Firestore)
-        window.addToCart = async (product, size) => {
+        window.addToCart = async (product, selectedSize) => {
             const user = auth.currentUser;
             if (!user) {
                 alert("You need to be logged in to add products to your cart.");
@@ -154,25 +154,31 @@
             }
 
             try {
+                const sizeInfo = product.sizes.find(size => size.size === selectedSize);
+                if (!sizeInfo) {
+                    alert("Please select a valid size.");
+                    return;
+                }
+
                 const cartRef = doc(db, "carts", user.uid); // Cart collection
                 const cartDoc = await getDoc(cartRef);
 
                 let cart = cartDoc.exists() ? cartDoc.data().items : [];
 
                 // Check if the product with the selected size is already in the cart
-                const existingProductIndex = cart.findIndex(item => item.id === product.id && item.size === size);
+                const existingProductIndex = cart.findIndex(item => item.id === product.id && item.size === selectedSize);
                 if (existingProductIndex > -1) {
                     // Update the quantity if the product already exists
                     cart[existingProductIndex].quantity += 1;
                 } else {
-                    // Add new product to the cart with the selected size
-                    cart.push({ ...product, size, quantity: 1 });
+                    // Add new product to the cart with the selected size and price
+                    cart.push({ ...product, size: selectedSize, price: sizeInfo.price, quantity: 1 });
                 }
 
                 // Save updated cart to Firestore
                 await setDoc(cartRef, { items: cart });
 
-                alert(`${product.name} in ${size} added to your cart!`);
+                alert(`${product.name} in ${selectedSize} added to your cart for $${sizeInfo.price}!`);
             } catch (error) {
                 console.error("Error adding to cart:", error);
                 alert("There was an error adding the product to your cart.");
@@ -196,13 +202,13 @@
 
                 // Create size selector (assuming sizes are in product.sizes)
                 const sizeOptions = product.sizes.map(size => {
-                    return `<option value="${size}">${size}</option>`;
+                    return `<option value="${size.size}">${size.size} - $${size.price}</option>`;
                 }).join("");
 
                 productDiv.innerHTML = `
                     <img src="${imageUrl}" alt="${product.name}">
                     <h3>${product.name}</h3>
-                    <p>$${product.price}</p>
+                    <p>Select Size and Price</p>
                     <select id="sizeSelect${product.id}">
                         <option value="" disabled selected>Select Size</option>
                         ${sizeOptions}
