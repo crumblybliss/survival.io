@@ -62,6 +62,7 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       width: 250px;
       text-align: center;
+      position: relative;
     }
 
     .product-card img {
@@ -69,6 +70,18 @@
       height: 180px;
       object-fit: cover;
       border-radius: 10px;
+    }
+
+    .product-card .actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .product-card .actions button {
+      padding: 6px 10px;
+      font-size: 0.9em;
+      border-radius: 5px;
     }
   </style>
 </head>
@@ -82,7 +95,7 @@
   </div>
 
   <div class="container">
-    <h2>Add New Product</h2>
+    <h2>Add or Edit Product</h2>
 
     <input type="text" id="productName" placeholder="Product Name" />
     <input type="text" id="productCategory" placeholder="Category (cookies, bracelets)" />
@@ -102,7 +115,15 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      doc,
+      deleteDoc,
+      updateDoc
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -117,6 +138,7 @@
     const db = getFirestore(app);
 
     let sizes = [];
+    let editingProduct = null;
 
     window.addSize = () => {
       const size = document.getElementById("sizeInput").value;
@@ -150,17 +172,46 @@
       };
 
       try {
-        await addDoc(collection(db, category), product);
-        alert("Product added!");
-        sizes = [];
-        document.getElementById("productName").value = "";
-        document.getElementById("productCategory").value = "";
-        document.getElementById("productImage").value = "";
-        document.getElementById("sizesList").innerText = "";
+        if (editingProduct) {
+          const ref = doc(db, category, editingProduct.id);
+          await updateDoc(ref, product);
+          alert("Product updated!");
+        } else {
+          await addDoc(collection(db, category), product);
+          alert("Product added!");
+        }
+
+        clearForm();
         loadProducts();
       } catch (error) {
-        console.error("Error adding product:", error);
-        alert("Error adding product.");
+        console.error("Error:", error);
+        alert("Error saving product.");
+      }
+    };
+
+    const clearForm = () => {
+      editingProduct = null;
+      sizes = [];
+      document.getElementById("productName").value = "";
+      document.getElementById("productCategory").value = "";
+      document.getElementById("productImage").value = "";
+      document.getElementById("sizesList").innerText = "";
+    };
+
+    window.editProduct = (product) => {
+      editingProduct = product;
+      document.getElementById("productName").value = product.name;
+      document.getElementById("productCategory").value = product.category;
+      document.getElementById("productImage").value = product.imageUrl;
+      sizes = product.sizes || [];
+      document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.deleteProduct = async (category, id) => {
+      if (confirm("Delete this product?")) {
+        await deleteDoc(doc(db, category, id));
+        loadProducts();
       }
     };
 
@@ -172,8 +223,8 @@
 
       for (const col of allCollections) {
         const snapshot = await getDocs(collection(db, col));
-        snapshot.forEach(doc => {
-          const data = doc.data();
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
           const img = data.imageUrl && data.imageUrl.trim() !== "" ? data.imageUrl : "difficult.jpg";
 
           const card = document.createElement("div");
@@ -182,7 +233,11 @@
             <img src="${img}" alt="${data.name}" />
             <h3>${data.name}</h3>
             <p>Category: ${data.category}</p>
-            <p>${data.sizes.map(s => `${s.size}: $${s.price}`).join("<br>")}</p>
+            <p>${(data.sizes || []).map(s => `${s.size}: $${s.price}`).join("<br>")}</p>
+            <div class="actions">
+              <button onclick='editProduct(${JSON.stringify({ ...data, id: docSnap.id })})'>Edit</button>
+              <button onclick='deleteProduct("${col}", "${docSnap.id}")'>Delete</button>
+            </div>
           `;
           productList.appendChild(card);
         });
@@ -194,4 +249,3 @@
 
 </body>
 </html>
-
