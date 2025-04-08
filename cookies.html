@@ -105,8 +105,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -120,11 +120,39 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth();
-        const provider = new GoogleAuthProvider();
 
-        // Add to Cart functionality (without persistence)
-        window.addToCart = (product) => {
-            alert(`${product.name} added to cart!`);
+        // Add to Cart functionality (saves to Firestore)
+        window.addToCart = async (product) => {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("You need to be logged in to add products to your cart.");
+                return;
+            }
+
+            try {
+                const cartRef = doc(db, "carts", user.uid); // Cart collection
+                const cartDoc = await getDoc(cartRef);
+
+                let cart = cartDoc.exists() ? cartDoc.data().items : [];
+
+                // Check if the product is already in the cart
+                const existingProductIndex = cart.findIndex(item => item.id === product.id);
+                if (existingProductIndex > -1) {
+                    // Update the quantity if the product already exists
+                    cart[existingProductIndex].quantity += 1;
+                } else {
+                    // Add new product to the cart
+                    cart.push({ ...product, quantity: 1 });
+                }
+
+                // Save updated cart to Firestore
+                await setDoc(cartRef, { items: cart });
+
+                alert(`${product.name} added to your cart!`);
+            } catch (error) {
+                console.error("Error adding to cart:", error);
+                alert("There was an error adding the product to your cart.");
+            }
         };
 
         // Fetch Cookies Products from Firestore
@@ -140,7 +168,7 @@
                 productDiv.classList.add("product");
 
                 // Check if the image URL is valid, else use a default image
-                const imageUrl = product.imageUrl || 'default-image.jpg'; // Provide a fallback image URL if undefined
+                const imageUrl = product.imageUrl || 'default-image.jpg';
 
                 productDiv.innerHTML = `
                     <img src="${imageUrl}" alt="${product.name}">
@@ -165,11 +193,6 @@
             }
         });
 
-        // Login function (Redirect to login page)
-        window.login = () => {
-            window.location.href = "login.html"; // Redirect to login.html
-        };
-
         // Logout function
         window.logout = async () => {
             try {
@@ -185,3 +208,4 @@
 </body>
 
 </html>
+
