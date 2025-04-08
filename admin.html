@@ -2,384 +2,214 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Panel - CrumblyBliss</title>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-      authDomain: "survival-f35e2.firebaseapp.com",
-      projectId: "survival-f35e2",
-      storageBucket: "survival-f35e2.appspot.com",
-      messagingSenderId: "704462603548",
-      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth();
-
-    let currentUser = null;
-
-    // Check if the user is authenticated and has an admin role
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        console.log("User is authenticated:", user.uid);
-        checkAdminRole();
-      } else {
-        console.log("User is not authenticated.");
-        alert("Please login to access the admin panel.");
-      }
-    });
-
-    async function checkAdminRole() {
-      if (currentUser) {
-        const userDocRef = doc(db, "users", currentUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists() && userDoc.data().role === "admin") {
-          console.log("User is an admin.");
-        } else {
-          alert("You are not authorized to access the admin panel.");
-        }
-      }
-    }
-
-    // Add a new product
-    window.addProduct = async function () {
-      if (!currentUser) {
-        alert("Please login to add products.");
-        return;
-      }
-
-      const name = document.getElementById("productName").value.trim();
-      const price = parseFloat(document.getElementById("productPrice").value);
-      const category = document.getElementById("productCategory").value;
-      const colors = document.getElementById("productColors").value.split(',').map(c => c.trim());
-      const sizeInputs = document.querySelectorAll('.size-row');
-      const sizes = [];
-
-      sizeInputs.forEach((input) => {
-        const size = input.querySelector('.size').value;
-        const sizePrice = parseFloat(input.querySelector('.price').value);
-        if (size && !isNaN(sizePrice)) {
-          sizes.push({ size, price: sizePrice });
-        }
-      });
-
-      if (!name || isNaN(price)) {
-        alert("Please enter a valid name and price.");
-        return;
-      }
-
-      try {
-        await addDoc(collection(db, category), {
-          name,
-          price,
-          category,
-          colors,
-          sizes
-        });
-        alert("Product added!");
-        loadProducts();
-      } catch (error) {
-        console.error("Error adding product:", error);
-        alert("Error adding product.");
-      }
-    };
-
-    // Load cookies and bracelets separately
-    async function loadProducts() {
-      loadCategoryProducts('cookies');
-      loadCategoryProducts('bracelets');
-    }
-
-    // Load products for a specific category
-    async function loadCategoryProducts(category) {
-      const productsContainer = document.getElementById(category + "Products");
-      productsContainer.innerHTML = "<p>Loading...</p>";
-
-      try {
-        const querySnapshot = await getDocs(collection(db, category));
-        productsContainer.innerHTML = "";
-
-        if (querySnapshot.empty) {
-          productsContainer.innerHTML = "<p>No products found.</p>";
-          return;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Edit Products</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f1f1f1;
+            margin: 0;
+            padding: 20px;
         }
 
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const item = document.createElement("div");
-          item.className = "product-item";
-          item.innerHTML = `
-            <strong>${data.name}</strong> - $${data.price} (${data.category})<br>
-            Colors: ${Array.isArray(data.colors) ? data.colors.join(', ') : 'N/A'}<br>
-            Sizes: ${Array.isArray(data.sizes) ? data.sizes.map(sizeObj => `${sizeObj.size}: $${sizeObj.price}`).join(', ') : 'N/A'}<br>
-            <button onclick="editProduct('${doc.id}', '${category}')">Edit</button>
-            <button class="delete-button" onclick="deleteProduct('${doc.id}', '${category}')">Delete</button>
-          `;
-          productsContainer.appendChild(item);
-        });
-      } catch (error) {
-        console.error("Error loading products:", error);
-        productsContainer.innerHTML = "<p>Error loading products.</p>";
-      }
-    }
-
-    // Edit product
-    window.editProduct = async function (productId, category) {
-      // Get the product data
-      const productRef = doc(db, category, productId);
-      const productDoc = await getDoc(productRef);
-      if (productDoc.exists()) {
-        const data = productDoc.data();
-
-        // Populate the form with the product data for editing
-        document.getElementById("productName").value = data.name;
-        document.getElementById("productPrice").value = data.price;
-        document.getElementById("productCategory").value = data.category;
-        document.getElementById("productColors").value = Array.isArray(data.colors) ? data.colors.join(', ') : '';
-        document.getElementById("productSizes").value = Array.isArray(data.sizes) ? data.sizes.map(sizeObj => `${sizeObj.size}: $${sizeObj.price}`).join(', ') : '';
-
-        // Populate the sizes and prices
-        const sizeInputsContainer = document.getElementById('sizeInputs');
-        sizeInputsContainer.innerHTML = ''; // Clear previous inputs
-
-        data.sizes.forEach(sizeObj => {
-          const sizeRow = document.createElement('div');
-          sizeRow.classList.add('size-row');
-          sizeRow.innerHTML = `
-            <input type="text" class="size" value="${sizeObj.size}" placeholder="Size" required>
-            <input type="number" class="price" value="${sizeObj.price}" placeholder="Price" required>
-            <button type="button" class="removeSizeBtn">Remove</button>
-          `;
-          sizeInputsContainer.appendChild(sizeRow);
-
-          sizeRow.querySelector('.removeSizeBtn').addEventListener('click', () => {
-            sizeInputsContainer.removeChild(sizeRow);
-          });
-        });
-
-        // Change the add button to update
-        const button = document.querySelector("button");
-        button.textContent = "Update Product";
-        button.onclick = function () {
-          updateProduct(productId, category);
-        };
-      }
-    };
-
-    // Update product
-    window.updateProduct = async function (productId, category) {
-      const name = document.getElementById("productName").value.trim();
-      const price = parseFloat(document.getElementById("productPrice").value);
-      const colors = document.getElementById("productColors").value.split(',').map(c => c.trim());
-      const sizeInputs = document.querySelectorAll('.size-row');
-      const sizes = [];
-
-      sizeInputs.forEach((input) => {
-        const size = input.querySelector('.size').value;
-        const sizePrice = parseFloat(input.querySelector('.price').value);
-        if (size && !isNaN(sizePrice)) {
-          sizes.push({ size, price: sizePrice });
+        .navbar {
+            background-color: #0a1d37;
+            color: white;
+            padding: 15px 0;
+            font-size: 18px;
+            text-align: center;
         }
-      });
 
-      if (!name || isNaN(price)) {
-        alert("Please enter a valid name and price.");
-        return;
-      }
+        .navbar a {
+            color: white;
+            margin: 0 20px;
+            text-decoration: none;
+            font-weight: bold;
+        }
 
-      try {
-        const productRef = doc(db, category, productId);
-        await updateDoc(productRef, {
-          name,
-          price,
-          colors,
-          sizes
-        });
-        alert("Product updated!");
-        loadProducts();
-      } catch (error) {
-        console.error("Error updating product:", error);
-        alert("Error updating product.");
-      }
-    };
+        .navbar a:hover {
+            text-decoration: underline;
+        }
 
-    // Delete product
-    window.deleteProduct = async function (productId, category) {
-      try {
-        const productRef = doc(db, category, productId);
-        await deleteDoc(productRef);
-        alert("Product deleted!");
-        loadProducts();
-      } catch (error) {
-        console.error("Error deleting product:", error);
-        alert("Error deleting product.");
-      }
-    };
+        .product-list {
+            margin-top: 30px;
+        }
 
-    // Load products when the page loads (for both categories)
-    window.addEventListener("DOMContentLoaded", () => {
-      loadProducts();
-    });
+        .product-card {
+            background: #fff;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: inline-block;
+            width: 200px;
+        }
 
-    // Add new size input
-    window.addSizeInput = function () {
-      const sizeInputsContainer = document.getElementById('sizeInputs');
-      const sizeRow = document.createElement('div');
-      sizeRow.classList.add('size-row');
-      sizeRow.innerHTML = `
-        <input type="text" class="size" placeholder="Size" required>
-        <input type="number" class="price" placeholder="Price" required>
-        <button type="button" class="removeSizeBtn">Remove</button>
-      `;
-      sizeInputsContainer.appendChild(sizeRow);
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
 
-      sizeRow.querySelector('.removeSizeBtn').addEventListener('click', () => {
-        sizeInputsContainer.removeChild(sizeRow);
-      });
-    };
-  </script>
+        .product-card h3 {
+            margin: 10px 0;
+            font-size: 18px;
+        }
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f8f8;
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-    }
+        .edit-form {
+            display: none;
+            margin: 20px;
+            padding: 20px;
+            background: #eee;
+            border-radius: 10px;
+        }
 
-    h1 {
-      color: #003366;
-      font-size: 36px;
-    }
+        .edit-form input {
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%;
+        }
 
-    .container {
-      width: 60%;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    }
+        .edit-form button {
+            background-color: #00bcd4;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+        }
 
-    input,
-    select,
-    button {
-      width: 100%;
-      margin: 10px 0;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
-    }
+        .edit-form button:hover {
+            background-color: #0097a7;
+        }
 
-    button {
-      background-color: #003366;
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #002244;
-    }
-
-    .product-list {
-      margin-top: 20px;
-    }
-
-    .product-item {
-      padding: 15px;
-      background: #eee;
-      margin: 10px 0;
-      border-radius: 8px;
-      font-size: 18px;
-    }
-
-    .category-section {
-      margin-top: 30px;
-    }
-
-    .delete-button {
-      background-color: red;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
-      padding: 12px;
-      border-radius: 8px;
-      transition: background-color 0.3s ease;
-    }
-
-    .delete-button:hover {
-      background-color: darkred;
-    }
-
-    .size-row {
-      display: flex;
-      margin-bottom: 10px;
-    }
-
-    .size-row input {
-      width: 45%;
-      margin-right: 10px;
-    }
-
-    .removeSizeBtn {
-      background-color: #ff4747;
-      color: white;
-      font-size: 14px;
-      cursor: pointer;
-      padding: 5px;
-      border-radius: 8px;
-    }
-
-    .removeSizeBtn:hover {
-      background-color: darkred;
-    }
-  </style>
+    </style>
 </head>
 
 <body>
-  <h1>Admin Panel</h1>
-  <div class="container">
-    <h2>Add Product</h2>
-    <input type="text" id="productName" placeholder="Product Name">
-    <input type="number" id="productPrice" placeholder="Price">
-    <select id="productCategory">
-      <option value="bracelets">Bracelet</option>
-      <option value="cookies">Cookie</option>
-    </select>
-    <input type="text" id="productColors" placeholder="Available Colors (comma-separated)">
-    <div id="sizeInputs"></div>
-    <button onclick="addProduct()">Add Product</button>
-    <button type="button" onclick="addSizeInput()">Add Size & Price</button>
-  </div>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="bracelets.html">Bracelets</a>
+        <a href="cookies.html">Cookies</a>
+        <a href="admin.html">Admin Panel</a>
+    </div>
 
-  <div class="container category-section">
-    <h2>Existing Products - Cookies</h2>
-    <div id="cookiesProducts"></div>
-  </div>
+    <!-- Product List -->
+    <div class="product-list" id="product-list">
+        <h2>Manage Products</h2>
+        <!-- List of Products will be dynamically loaded here -->
+    </div>
 
-  <div class="container category-section">
-    <h2>Existing Products - Bracelets</h2>
-    <div id="braceletsProducts"></div>
-  </div>
+    <!-- Edit Product Form -->
+    <div class="edit-form" id="edit-form">
+        <h3>Edit Product</h3>
+        <label for="edit-name">Name:</label>
+        <input id="edit-name" type="text" required><br><br>
 
+        <label for="edit-size">Size:</label>
+        <input id="edit-size" type="text" required><br><br>
+
+        <label for="edit-price">Price ($):</label>
+        <input id="edit-price" type="number" step="0.01" required><br><br>
+
+        <button onclick="saveProduct()">Save</button>
+    </div>
+
+    <!-- Firebase SDK for app integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Store the product being edited
+        let productToEdit = null;
+
+        // Fetch products from Firestore
+        const fetchProducts = async () => {
+            const productsCollection = collection(db, "cookies");
+            const snapshot = await getDocs(productsCollection);
+            const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            const productListDiv = document.getElementById("product-list");
+            productListDiv.innerHTML = ''; // Clear the list before loading new data
+
+            products.forEach(product => {
+                const productDiv = document.createElement("div");
+                productDiv.classList.add("product-card");
+
+                const imageUrl = product.imageUrl || 'default-image.jpg';
+                const sizeOptions = product.sizes.map(size => `<p>Size: ${size.size} - $${size.price}</p>`).join("");
+
+                productDiv.innerHTML = `
+                    <img src="${imageUrl}" alt="${product.name}">
+                    <h3>${product.name}</h3>
+                    <p>${sizeOptions}</p>
+                    <button onclick="editProduct(${JSON.stringify(product)})">Edit</button>
+                `;
+
+                productListDiv.appendChild(productDiv);
+            });
+        };
+
+        // Open the edit form
+        window.editProduct = (product) => {
+            productToEdit = product;
+
+            // Set product data to the form fields
+            document.getElementById("edit-name").value = product.name;
+            document.getElementById("edit-size").value = product.sizes[0].size;
+            document.getElementById("edit-price").value = product.sizes[0].price;
+
+            // Show the form
+            document.getElementById("edit-form").style.display = "block";
+        };
+
+        // Save the edited product
+        window.saveProduct = async () => {
+            if (!productToEdit) {
+                alert("No product selected for editing.");
+                return;
+            }
+
+            const newName = document.getElementById("edit-name").value;
+            const newSize = document.getElementById("edit-size").value;
+            const newPrice = parseFloat(document.getElementById("edit-price").value);
+
+            const updatedProduct = {
+                ...productToEdit,
+                name: newName,
+                sizes: [{ size: newSize, price: newPrice }]
+            };
+
+            try {
+                const docRef = doc(db, "cookies", productToEdit.id);
+                await setDoc(docRef, updatedProduct);
+                alert("Product updated successfully!");
+                location.reload(); // Reload the page to reflect changes
+            } catch (error) {
+                console.error("Error updating product:", error);
+                alert("Failed to update product.");
+            }
+        };
+
+        // Fetch the products when the page loads
+        fetchProducts();
+    </script>
 </body>
 
 </html>
-
