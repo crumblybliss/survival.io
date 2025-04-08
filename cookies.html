@@ -52,6 +52,7 @@
 
         .container {
             padding-top: 70px;
+            /* Adjust to prevent navbar from overlapping content */
         }
 
         .product {
@@ -102,7 +103,6 @@
         <div id="cookiesProducts"></div> <!-- Container to hold products -->
     </div>
 
-    <!-- Firebase and JavaScript -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
@@ -122,11 +122,8 @@
         const auth = getAuth();
         const provider = new GoogleAuthProvider();
 
-        // Add to Cart functionality (with persistence in localStorage)
+        // Add to Cart functionality (without persistence)
         window.addToCart = (product) => {
-            let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            cart.push(product);
-            localStorage.setItem("cart", JSON.stringify(cart));
             alert(`${product.name} added to cart!`);
         };
 
@@ -142,8 +139,11 @@
                 const productDiv = document.createElement("div");
                 productDiv.classList.add("product");
 
+                // Check if the image URL is valid, else use a default image
+                const imageUrl = product.imageUrl || 'default-image.jpg'; // Provide a fallback image URL if undefined
+
                 productDiv.innerHTML = `
-                    <img src="${product.imageUrl}" alt="${product.name}">
+                    <img src="${imageUrl}" alt="${product.name}">
                     <h3>${product.name}</h3>
                     <p>$${product.price}</p>
                     <button onclick="addToCart(${JSON.stringify(product)})">Add to Cart</button>
@@ -182,8 +182,6 @@
         // Fetch cookies products on page load
         fetchCookies();
     </script>
-
 </body>
 
 </html>
-
