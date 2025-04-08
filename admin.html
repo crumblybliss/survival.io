@@ -8,7 +8,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -21,27 +20,8 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    let currentUser = null;
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        loadProducts(); // Load products only if the user is logged in
-      } else {
-        currentUser = null;
-        alert("You need to be signed in as an admin to access this page.");
-        window.location.href = "/login"; // Redirect to login page
-      }
-    });
 
     window.addProduct = async function () {
-      if (!currentUser) {
-        alert("You must be logged in as an admin.");
-        return;
-      }
-
       const name = document.getElementById("productName").value.trim();
       const price = parseFloat(document.getElementById("productPrice").value);
       const category = document.getElementById("productCategory").value;
@@ -52,27 +32,30 @@
         return;
       }
 
+      const collectionName = category === "cookies" ? "cookies" : "bracelets";
+
       try {
-        await addDoc(collection(db, "products"), {
+        await addDoc(collection(db, collectionName), {
           name,
           price,
           category,
           colors
         });
         alert("Product added!");
-        loadProducts();
+        loadProducts(category); // Load products for the selected category after adding
       } catch (error) {
         console.error("Error adding product:", error);
         alert("Error adding product.");
       }
     };
 
-    async function loadProducts() {
+    async function loadProducts(category) {
       const productsContainer = document.getElementById("products");
       productsContainer.innerHTML = "<p>Loading...</p>";
 
+      const collectionName = category === "cookies" ? "cookies" : "bracelets";
       try {
-        const querySnapshot = await getDocs(collection(db, "products"));
+        const querySnapshot = await getDocs(collection(db, collectionName));
         productsContainer.innerHTML = "";
 
         if (querySnapshot.empty) {
@@ -84,7 +67,18 @@
           const data = doc.data();
           const item = document.createElement("div");
           item.className = "product-item";
-          item.textContent = `${data.name} - $${data.price} (${data.category}) [Colors: ${data.colors?.join(', ') ?? 'N/A'}]`;
+          item.textContent = `${data.name} - $${data.price} [Available Colors: ${data.colors?.join(', ') ?? 'N/A'}]`;
+
+          const deleteButton = document.createElement("button");
+          deleteButton.textContent = "Delete";
+          deleteButton.onclick = () => deleteProduct(doc.id, category);
+
+          const editButton = document.createElement("button");
+          editButton.textContent = "Edit";
+          editButton.onclick = () => editProduct(doc.id);
+
+          item.appendChild(deleteButton);
+          item.appendChild(editButton);
           productsContainer.appendChild(item);
         });
 
@@ -94,8 +88,28 @@
       }
     }
 
-    // Load products when the page loads
-    window.addEventListener("DOMContentLoaded", loadProducts);
+    // Function to delete a product
+    async function deleteProduct(productId, category) {
+      try {
+        const productRef = doc(db, category, productId);
+        await deleteDoc(productRef);
+        alert("Product deleted!");
+        loadProducts(category); // Refresh the product list
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        alert("Error deleting product.");
+      }
+    }
+
+    // Function to edit a product (you can extend this as per your requirements)
+    function editProduct(productId) {
+      alert(`Edit product with ID: ${productId}`);
+      // Implement product editing functionality as needed
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadProducts("cookies"); // Default load cookies on page load
+    });
   </script>
 
   <style>
@@ -148,11 +162,15 @@
       margin: 5px 0;
       border-radius: 5px;
     }
+
+    .product-item button {
+      margin-left: 10px;
+    }
   </style>
 </head>
 
 <body>
-  <h1>Admin Panel</h1>
+  <h1>Admin Panel - CrumblyBliss</h1>
   <div class="container">
     <h2>Add Product</h2>
     <input type="text" id="productName" placeholder="Product Name">
@@ -167,6 +185,10 @@
 
   <div class="container product-list">
     <h2>Existing Products</h2>
+    <select id="categorySelect" onchange="loadProducts(this.value)">
+      <option value="cookies">Cookies</option>
+      <option value="bracelets">Bracelets</option>
+    </select>
     <div id="products"></div>
   </div>
 </body>
