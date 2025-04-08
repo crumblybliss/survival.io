@@ -78,15 +78,45 @@
           colors
         });
         alert("Product added!");
-        loadProducts('cookies');  // Load cookies after adding
-        loadProducts('bracelets'); // Load bracelets after adding
+        loadProducts(category);
       } catch (error) {
         console.error("Error adding product:", error);
         alert("Error adding product.");
       }
     };
 
-    // Edit a product
+    // Load products based on the category
+    async function loadProducts(category) {
+      const productsContainer = document.getElementById("products");
+      productsContainer.innerHTML = "<p>Loading...</p>";
+
+      try {
+        const querySnapshot = await getDocs(collection(db, category));
+        productsContainer.innerHTML = "";
+
+        if (querySnapshot.empty) {
+          productsContainer.innerHTML = "<p>No products found.</p>";
+          return;
+        }
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const item = document.createElement("div");
+          item.className = "product-item";
+          item.innerHTML = `
+            <strong>${data.name}</strong> - $${data.price} (${data.category})<br>
+            Colors: ${Array.isArray(data.colors) ? data.colors.join(', ') : 'N/A'}<br>
+            <button onclick="editProduct('${doc.id}', '${category}')">Edit</button>
+          `;
+          productsContainer.appendChild(item);
+        });
+      } catch (error) {
+        console.error("Error loading products:", error);
+        productsContainer.innerHTML = "<p>Error loading products.</p>";
+      }
+    }
+
+    // Edit product
     window.editProduct = async function (productId, category) {
       // Get the product data
       const productRef = doc(db, category, productId);
@@ -98,7 +128,7 @@
         document.getElementById("productName").value = data.name;
         document.getElementById("productPrice").value = data.price;
         document.getElementById("productCategory").value = data.category;
-        document.getElementById("productColors").value = data.colors.join(', ');
+        document.getElementById("productColors").value = Array.isArray(data.colors) ? data.colors.join(', ') : '';  // Ensure colors is treated as an array
 
         // Change the add button to update
         const button = document.querySelector("button");
@@ -109,11 +139,10 @@
       }
     };
 
-    // Update a product
-    async function updateProduct(productId, category) {
+    // Update product
+    window.updateProduct = async function (productId, category) {
       const name = document.getElementById("productName").value.trim();
       const price = parseFloat(document.getElementById("productPrice").value);
-      const categorySelected = document.getElementById("productCategory").value;
       const colors = document.getElementById("productColors").value.split(',').map(c => c.trim());
 
       if (!name || isNaN(price)) {
@@ -126,66 +155,15 @@
         await updateDoc(productRef, {
           name,
           price,
-          category: categorySelected,
           colors
         });
-
         alert("Product updated!");
-        loadProducts(categorySelected);
-
-        // Reset the form
-        const button = document.querySelector("button");
-        button.textContent = "Add Product";
-        button.onclick = addProduct;
+        loadProducts(category);
       } catch (error) {
         console.error("Error updating product:", error);
         alert("Error updating product.");
       }
-    }
-
-    // Load products based on the category
-    async function loadProducts(category) {
-      const productsContainer = document.getElementById("products");
-      let categoryHeader = document.getElementById(`${category}-header`);
-
-      if (!categoryHeader) {
-        // Create header for category if not already created
-        categoryHeader = document.createElement("h2");
-        categoryHeader.id = `${category}-header`;
-        categoryHeader.textContent = `${category.charAt(0).toUpperCase() + category.slice(1)} Products`;
-        productsContainer.appendChild(categoryHeader);
-      }
-
-      const categoryContainer = document.createElement("div");
-      categoryContainer.id = `${category}-products`;
-      productsContainer.appendChild(categoryContainer);
-      
-      categoryContainer.innerHTML = "<p>Loading...</p>";
-
-      try {
-        const querySnapshot = await getDocs(collection(db, category));
-        categoryContainer.innerHTML = "";
-
-        if (querySnapshot.empty) {
-          categoryContainer.innerHTML = "<p>No products found.</p>";
-          return;
-        }
-
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const item = document.createElement("div");
-          item.className = "product-item";
-          item.innerHTML = `
-            ${data.name} - $${data.price} (${data.category}) [Colors: ${data.colors?.join(', ') ?? 'N/A'}]
-            <button onclick="editProduct('${doc.id}', '${category}')">Edit</button>
-          `;
-          categoryContainer.appendChild(item);
-        });
-      } catch (error) {
-        console.error("Error loading products:", error);
-        categoryContainer.innerHTML = "<p>Error loading products.</p>";
-      }
-    }
+    };
 
     // Load products when the page loads (for both categories)
     window.addEventListener("DOMContentLoaded", () => {
@@ -246,17 +224,13 @@
       margin: 5px 0;
       border-radius: 5px;
     }
-
-    #products {
-      margin-top: 20px;
-    }
   </style>
 </head>
 
 <body>
   <h1>Admin Panel</h1>
   <div class="container">
-    <h2>Add/Update Product</h2>
+    <h2>Add Product</h2>
     <input type="text" id="productName" placeholder="Product Name">
     <input type="number" id="productPrice" placeholder="Price">
     <select id="productCategory">
@@ -268,9 +242,9 @@
   </div>
 
   <div class="container product-list">
+    <h2>Existing Products (Cookies and Bracelets)</h2>
     <div id="products"></div>
   </div>
 </body>
 
 </html>
-
