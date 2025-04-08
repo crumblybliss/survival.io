@@ -124,8 +124,13 @@
                     const colors = Array.isArray(product.colors) ? product.colors : [];
                     const sizes = Array.isArray(product.sizes) ? product.sizes : [];
 
-                    const colorOptions = colors.map(color => `<option value="${color}">${color}</option>`).join("");
-                    const sizeOptions = sizes.map(size => `<option value="${size}">${size}</option>`).join("");
+                    const colorOptions = colors.length > 0 
+                        ? colors.map(color => `<option value="${color}">${color}</option>`).join("")
+                        : "<option>No colors available</option>";
+
+                    const sizeOptions = sizes.length > 0 
+                        ? sizes.map(size => `<option value="${size}">${size}</option>`).join("")
+                        : "<option>No sizes available</option>";
 
                     productDiv.innerHTML = `
                         <img src="${product.imageUrl}" alt="${product.name}">
@@ -148,6 +153,11 @@
             const color = document.getElementById(`color-${id}`).value;
             const size = document.getElementById(`size-${id}`).value;
 
+            if (!color || !size) {
+                alert("Please select both color and size.");
+                return;
+            }
+
             let cart = JSON.parse(localStorage.getItem("cart")) || [];
             cart.push({ id, name, price, imageUrl, color, size });
             localStorage.setItem("cart", JSON.stringify(cart));
@@ -159,3 +169,4 @@
     </script>
 </body>
 </html>
+
