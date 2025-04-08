@@ -62,7 +62,16 @@
       const price = parseFloat(document.getElementById("productPrice").value);
       const category = document.getElementById("productCategory").value;
       const colors = document.getElementById("productColors").value.split(',').map(c => c.trim());
-      const sizes = document.getElementById("productSizes").value.split(',').map(s => s.trim());
+      const sizeInputs = document.querySelectorAll('.size-row');
+      const sizes = [];
+
+      sizeInputs.forEach((input) => {
+        const size = input.querySelector('.size').value;
+        const sizePrice = parseFloat(input.querySelector('.price').value);
+        if (size && !isNaN(sizePrice)) {
+          sizes.push({ size, price: sizePrice });
+        }
+      });
 
       if (!name || isNaN(price)) {
         alert("Please enter a valid name and price.");
@@ -112,7 +121,7 @@
           item.innerHTML = `
             <strong>${data.name}</strong> - $${data.price} (${data.category})<br>
             Colors: ${Array.isArray(data.colors) ? data.colors.join(', ') : 'N/A'}<br>
-            Sizes: ${Array.isArray(data.sizes) ? data.sizes.join(', ') : 'N/A'}<br>
+            Sizes: ${Array.isArray(data.sizes) ? data.sizes.map(sizeObj => `${sizeObj.size}: $${sizeObj.price}`).join(', ') : 'N/A'}<br>
             <button onclick="editProduct('${doc.id}', '${category}')">Edit</button>
             <button class="delete-button" onclick="deleteProduct('${doc.id}', '${category}')">Delete</button>
           `;
@@ -137,7 +146,26 @@
         document.getElementById("productPrice").value = data.price;
         document.getElementById("productCategory").value = data.category;
         document.getElementById("productColors").value = Array.isArray(data.colors) ? data.colors.join(', ') : '';
-        document.getElementById("productSizes").value = Array.isArray(data.sizes) ? data.sizes.join(', ') : '';
+        document.getElementById("productSizes").value = Array.isArray(data.sizes) ? data.sizes.map(sizeObj => `${sizeObj.size}: $${sizeObj.price}`).join(', ') : '';
+
+        // Populate the sizes and prices
+        const sizeInputsContainer = document.getElementById('sizeInputs');
+        sizeInputsContainer.innerHTML = ''; // Clear previous inputs
+
+        data.sizes.forEach(sizeObj => {
+          const sizeRow = document.createElement('div');
+          sizeRow.classList.add('size-row');
+          sizeRow.innerHTML = `
+            <input type="text" class="size" value="${sizeObj.size}" placeholder="Size" required>
+            <input type="number" class="price" value="${sizeObj.price}" placeholder="Price" required>
+            <button type="button" class="removeSizeBtn">Remove</button>
+          `;
+          sizeInputsContainer.appendChild(sizeRow);
+
+          sizeRow.querySelector('.removeSizeBtn').addEventListener('click', () => {
+            sizeInputsContainer.removeChild(sizeRow);
+          });
+        });
 
         // Change the add button to update
         const button = document.querySelector("button");
@@ -153,7 +181,16 @@
       const name = document.getElementById("productName").value.trim();
       const price = parseFloat(document.getElementById("productPrice").value);
       const colors = document.getElementById("productColors").value.split(',').map(c => c.trim());
-      const sizes = document.getElementById("productSizes").value.split(',').map(s => s.trim());
+      const sizeInputs = document.querySelectorAll('.size-row');
+      const sizes = [];
+
+      sizeInputs.forEach((input) => {
+        const size = input.querySelector('.size').value;
+        const sizePrice = parseFloat(input.querySelector('.price').value);
+        if (size && !isNaN(sizePrice)) {
+          sizes.push({ size, price: sizePrice });
+        }
+      });
 
       if (!name || isNaN(price)) {
         alert("Please enter a valid name and price.");
@@ -193,6 +230,23 @@
     window.addEventListener("DOMContentLoaded", () => {
       loadProducts();
     });
+
+    // Add new size input
+    window.addSizeInput = function () {
+      const sizeInputsContainer = document.getElementById('sizeInputs');
+      const sizeRow = document.createElement('div');
+      sizeRow.classList.add('size-row');
+      sizeRow.innerHTML = `
+        <input type="text" class="size" placeholder="Size" required>
+        <input type="number" class="price" placeholder="Price" required>
+        <button type="button" class="removeSizeBtn">Remove</button>
+      `;
+      sizeInputsContainer.appendChild(sizeRow);
+
+      sizeRow.querySelector('.removeSizeBtn').addEventListener('click', () => {
+        sizeInputsContainer.removeChild(sizeRow);
+      });
+    };
   </script>
 
   <style>
@@ -273,6 +327,29 @@
     .delete-button:hover {
       background-color: darkred;
     }
+
+    .size-row {
+      display: flex;
+      margin-bottom: 10px;
+    }
+
+    .size-row input {
+      width: 45%;
+      margin-right: 10px;
+    }
+
+    .removeSizeBtn {
+      background-color: #ff4747;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 8px;
+    }
+
+    .removeSizeBtn:hover {
+      background-color: darkred;
+    }
   </style>
 </head>
 
@@ -287,8 +364,9 @@
       <option value="cookies">Cookie</option>
     </select>
     <input type="text" id="productColors" placeholder="Available Colors (comma-separated)">
-    <input type="text" id="productSizes" placeholder="Available Sizes (comma-separated)">
+    <div id="sizeInputs"></div>
     <button onclick="addProduct()">Add Product</button>
+    <button type="button" onclick="addSizeInput()">Add Size & Price</button>
   </div>
 
   <div class="container category-section">
@@ -304,3 +382,4 @@
 </body>
 
 </html>
+
