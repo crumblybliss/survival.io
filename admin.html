@@ -7,7 +7,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -21,8 +21,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let editingProductId = null; // Store the ID of the product being edited
-
+    // Load products based on the category (cookies or bracelets)
     async function loadProducts(category) {
       const productsContainer = document.getElementById("products");
       productsContainer.innerHTML = "<p>Loading...</p>";
@@ -40,10 +39,11 @@
 
         querySnapshot.forEach((doc) => {
           const data = doc.data();
+          const colors = data.colors && Array.isArray(data.colors) ? data.colors.join(', ') : 'N/A'; // Handle undefined or non-array colors
           const item = document.createElement("div");
           item.className = "product-item";
-          item.innerHTML = `${data.name} - $${data.price} [Available Colors: ${data.colors?.join(', ') ?? 'N/A'}] 
-            <button onclick="editProduct('${doc.id}', '${data.name}', ${data.price}, '${data.colors.join(", ")}')">Edit</button>`;
+          item.innerHTML = `${data.name} - $${data.price} [Available Colors: ${colors}] 
+            <button onclick="editProduct('${doc.id}', '${data.name}', ${data.price}, '${data.colors ? data.colors.join(", ") : ""}')">Edit</button>`;
           productsContainer.appendChild(item);
         });
 
@@ -53,8 +53,8 @@
       }
     }
 
-    // Add or Edit Product
-    window.submitProduct = async function () {
+    // Add a new product
+    window.addProduct = async function () {
       const name = document.getElementById("productName").value.trim();
       const price = parseFloat(document.getElementById("productPrice").value);
       const category = document.getElementById("productCategory").value;
@@ -66,61 +66,48 @@
       }
 
       try {
-        if (editingProductId) {
-          // Editing an existing product
-          await updateDoc(doc(db, category, editingProductId), {
-            name,
-            price,
-            colors
-          });
-          alert("Product updated!");
-        } else {
-          // Adding a new product
-          await addDoc(collection(db, category), {
-            name,
-            price,
-            colors
-          });
-          alert("Product added!");
-        }
-        clearForm();
-        loadProducts(category);
+        await addDoc(collection(db, category), {
+          name,
+          price,
+          colors
+        });
+        alert("Product added!");
+        loadProducts(category); // Reload products after adding
       } catch (error) {
-        console.error("Error submitting product:", error);
-        alert("Error submitting product.");
+        console.error("Error adding product:", error);
+        alert("Error adding product.");
       }
     };
 
-    // Set form fields to edit an existing product
-    window.editProduct = function (id, name, price, colors) {
-      editingProductId = id;
-      document.getElementById("productName").value = name;
-      document.getElementById("productPrice").value = price;
-      document.getElementById("productCategory").value = name.toLowerCase().includes("cookie") ? "cookies" : "bracelets";
-      document.getElementById("productColors").value = colors.join(", ");
+    // Edit an existing product
+    window.editProduct = async function (id, name, price, colors) {
+      const productName = prompt("Edit product name", name);
+      const productPrice = prompt("Edit product price", price);
+      const productColors = prompt("Edit product colors (comma-separated)", colors);
+
+      if (productName && productPrice && productColors) {
+        try {
+          const productRef = doc(db, "products", id);
+          await updateDoc(productRef, {
+            name: productName,
+            price: parseFloat(productPrice),
+            colors: productColors.split(',').map(c => c.trim())
+          });
+          alert("Product updated!");
+          loadProducts("cookies"); // Reload products after editing
+        } catch (error) {
+          console.error("Error updating product:", error);
+          alert("Error updating product.");
+        }
+      }
     };
 
-    // Clear the form for adding new product
-    window.clearForm = function () {
-      document.getElementById("productName").value = '';
-      document.getElementById("productPrice").value = '';
-      document.getElementById("productCategory").value = 'cookies';
-      document.getElementById("productColors").value = '';
-      editingProductId = null; // Reset the editing product ID
-    };
-
-    // Load products based on category selection
+    // Load products when the page loads
     window.addEventListener("DOMContentLoaded", () => {
-      loadProducts("cookies"); // Default load cookies on page load
-    });
-
-    // Force reload when switching categories
-    document.addEventListener("DOMContentLoaded", function() {
-      const categorySelect = document.getElementById("categorySelect");
-      categorySelect.addEventListener("change", function() {
-        const category = this.value;
+      const category = new URLSearchParams(window.location.search).get('category');
+      if (category === 'bracelets' || category === 'cookies') {
         loadProducts(category);
-      });
+      }
     });
   </script>
 
@@ -146,7 +133,7 @@
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     }
 
-    select, input, button, .product-list {
+    input, select, button {
       width: 100%;
       margin: 10px 0;
       padding: 10px;
@@ -164,6 +151,10 @@
       background-color: darkblue;
     }
 
+    .product-list {
+      margin-top: 20px;
+    }
+
     .product-item {
       padding: 10px;
       background: #eee;
@@ -175,19 +166,8 @@
 
 <body>
   <h1>Admin Panel</h1>
-
-  <!-- Category selection -->
   <div class="container">
-    <h2>Select Category</h2>
-    <select id="categorySelect">
-      <option value="cookies">Cookies</option>
-      <option value="bracelets">Bracelets</option>
-    </select>
-  </div>
-
-  <!-- Product form for adding and editing products -->
-  <div class="container">
-    <h2>Product Form</h2>
+    <h2>Add Product</h2>
     <input type="text" id="productName" placeholder="Product Name">
     <input type="number" id="productPrice" placeholder="Price">
     <select id="productCategory">
@@ -195,11 +175,9 @@
       <option value="cookies">Cookie</option>
     </select>
     <input type="text" id="productColors" placeholder="Available Colors (comma-separated)">
-    <button onclick="submitProduct()">Submit Product</button>
-    <button onclick="clearForm()">Clear Form</button>
+    <button onclick="addProduct()">Add Product</button>
   </div>
 
-  <!-- List of products -->
   <div class="container product-list">
     <h2>Existing Products</h2>
     <div id="products"></div>
