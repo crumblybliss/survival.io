@@ -78,7 +78,8 @@
           colors
         });
         alert("Product added!");
-        loadProducts(category);
+        loadProducts('cookies');  // Load cookies after adding
+        loadProducts('bracelets'); // Load bracelets after adding
       } catch (error) {
         console.error("Error adding product:", error);
         alert("Error adding product.");
@@ -145,14 +146,28 @@
     // Load products based on the category
     async function loadProducts(category) {
       const productsContainer = document.getElementById("products");
-      productsContainer.innerHTML = "<p>Loading...</p>";
+      let categoryHeader = document.getElementById(`${category}-header`);
+
+      if (!categoryHeader) {
+        // Create header for category if not already created
+        categoryHeader = document.createElement("h2");
+        categoryHeader.id = `${category}-header`;
+        categoryHeader.textContent = `${category.charAt(0).toUpperCase() + category.slice(1)} Products`;
+        productsContainer.appendChild(categoryHeader);
+      }
+
+      const categoryContainer = document.createElement("div");
+      categoryContainer.id = `${category}-products`;
+      productsContainer.appendChild(categoryContainer);
+      
+      categoryContainer.innerHTML = "<p>Loading...</p>";
 
       try {
         const querySnapshot = await getDocs(collection(db, category));
-        productsContainer.innerHTML = "";
+        categoryContainer.innerHTML = "";
 
         if (querySnapshot.empty) {
-          productsContainer.innerHTML = "<p>No products found.</p>";
+          categoryContainer.innerHTML = "<p>No products found.</p>";
           return;
         }
 
@@ -164,11 +179,11 @@
             ${data.name} - $${data.price} (${data.category}) [Colors: ${data.colors?.join(', ') ?? 'N/A'}]
             <button onclick="editProduct('${doc.id}', '${category}')">Edit</button>
           `;
-          productsContainer.appendChild(item);
+          categoryContainer.appendChild(item);
         });
       } catch (error) {
         console.error("Error loading products:", error);
-        productsContainer.innerHTML = "<p>Error loading products.</p>";
+        categoryContainer.innerHTML = "<p>Error loading products.</p>";
       }
     }
 
@@ -231,6 +246,10 @@
       margin: 5px 0;
       border-radius: 5px;
     }
+
+    #products {
+      margin-top: 20px;
+    }
   </style>
 </head>
 
@@ -249,7 +268,6 @@
   </div>
 
   <div class="container product-list">
-    <h2>Existing Products (Cookies and Bracelets)</h2>
     <div id="products"></div>
   </div>
 </body>
