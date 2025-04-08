@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
             margin: 0;
             text-align: center;
         }
+
         .navbar {
             background-color: #0a1d37;
             color: white;
@@ -23,15 +25,18 @@
             z-index: 100;
             text-align: center;
         }
+
         .navbar a {
             color: white;
             margin: 0 20px;
             text-decoration: none;
             font-weight: bold;
         }
+
         .navbar a:hover {
             text-decoration: underline;
         }
+
         .navbar .auth-btn {
             background-color: #00bcd4;
             color: white;
@@ -40,12 +45,15 @@
             cursor: pointer;
             border-radius: 5px;
         }
+
         .navbar .auth-btn:hover {
             background-color: #0097a7;
         }
+
         .container {
-            padding-top: 70px; /* Adjust to prevent navbar from overlapping content */
+            padding-top: 70px;
         }
+
         .product {
             display: inline-block;
             width: 200px;
@@ -53,13 +61,15 @@
             padding: 10px;
             background: #fff;
             border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
+
         .product img {
             width: 100%;
             border-radius: 10px;
         }
+
         .product button {
             background-color: #00bcd4;
             color: white;
@@ -69,11 +79,13 @@
             cursor: pointer;
             border-radius: 5px;
         }
+
         .product button:hover {
             background-color: #0097a7;
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation Bar -->
     <div class="navbar">
@@ -109,8 +121,11 @@
         const auth = getAuth();
         const provider = new GoogleAuthProvider();
 
-        // Add to Cart functionality (without persistence)
+        // Add to Cart functionality (with persistence in localStorage)
         window.addToCart = (product) => {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.push(product);
+            localStorage.setItem("cart", JSON.stringify(cart));
             alert(`${product.name} added to cart!`);
         };
 
@@ -167,4 +182,6 @@
         fetchCookies();
     </script>
 </body>
+
 </html>
+
