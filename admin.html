@@ -85,6 +85,63 @@
       }
     };
 
+    // Edit a product
+    window.editProduct = async function (productId, category) {
+      // Get the product data
+      const productRef = doc(db, category, productId);
+      const productDoc = await getDoc(productRef);
+      if (productDoc.exists()) {
+        const data = productDoc.data();
+
+        // Populate the form with the product data for editing
+        document.getElementById("productName").value = data.name;
+        document.getElementById("productPrice").value = data.price;
+        document.getElementById("productCategory").value = data.category;
+        document.getElementById("productColors").value = data.colors.join(', ');
+
+        // Change the add button to update
+        const button = document.querySelector("button");
+        button.textContent = "Update Product";
+        button.onclick = function () {
+          updateProduct(productId, category);
+        };
+      }
+    };
+
+    // Update a product
+    async function updateProduct(productId, category) {
+      const name = document.getElementById("productName").value.trim();
+      const price = parseFloat(document.getElementById("productPrice").value);
+      const categorySelected = document.getElementById("productCategory").value;
+      const colors = document.getElementById("productColors").value.split(',').map(c => c.trim());
+
+      if (!name || isNaN(price)) {
+        alert("Please enter a valid name and price.");
+        return;
+      }
+
+      try {
+        const productRef = doc(db, category, productId);
+        await updateDoc(productRef, {
+          name,
+          price,
+          category: categorySelected,
+          colors
+        });
+
+        alert("Product updated!");
+        loadProducts(categorySelected);
+
+        // Reset the form
+        const button = document.querySelector("button");
+        button.textContent = "Add Product";
+        button.onclick = addProduct;
+      } catch (error) {
+        console.error("Error updating product:", error);
+        alert("Error updating product.");
+      }
+    }
+
     // Load products based on the category
     async function loadProducts(category) {
       const productsContainer = document.getElementById("products");
@@ -103,7 +160,10 @@
           const data = doc.data();
           const item = document.createElement("div");
           item.className = "product-item";
-          item.textContent = `${data.name} - $${data.price} (${data.category}) [Colors: ${data.colors?.join(', ') ?? 'N/A'}]`;
+          item.innerHTML = `
+            ${data.name} - $${data.price} (${data.category}) [Colors: ${data.colors?.join(', ') ?? 'N/A'}]
+            <button onclick="editProduct('${doc.id}', '${category}')">Edit</button>
+          `;
           productsContainer.appendChild(item);
         });
       } catch (error) {
@@ -177,7 +237,7 @@
 <body>
   <h1>Admin Panel</h1>
   <div class="container">
-    <h2>Add Product</h2>
+    <h2>Add/Update Product</h2>
     <input type="text" id="productName" placeholder="Product Name">
     <input type="number" id="productPrice" placeholder="Price">
     <select id="productCategory">
