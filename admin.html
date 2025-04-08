@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Panel - CrumblyBliss</title>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
       authDomain: "survival-f35e2.firebaseapp.com",
@@ -20,41 +23,43 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth();
 
-    // Load products based on the category (cookies or bracelets)
-    async function loadProducts(category) {
-      const productsContainer = document.getElementById("products");
-      productsContainer.innerHTML = "<p>Loading...</p>";
+    let currentUser = null;
 
-      const collectionName = category === "cookies" ? "cookies" : "bracelets"; // Set collection based on category
+    // Check if the user is authenticated and has an admin role
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        console.log("User is authenticated:", user.uid);
+        checkAdminRole();
+      } else {
+        console.log("User is not authenticated.");
+        alert("Please login to access the admin panel.");
+        // Redirect to login or show login form
+      }
+    });
 
-      try {
-        const querySnapshot = await getDocs(collection(db, collectionName));
-        productsContainer.innerHTML = "";
-
-        if (querySnapshot.empty) {
-          productsContainer.innerHTML = "<p>No products found.</p>";
-          return;
+    async function checkAdminRole() {
+      if (currentUser) {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists() && userDoc.data().role === "admin") {
+          console.log("User is an admin.");
+        } else {
+          alert("You are not authorized to access the admin panel.");
+          // Redirect to home or show an access denied message
         }
-
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const colors = data.colors && Array.isArray(data.colors) ? data.colors.join(', ') : 'N/A'; // Handle undefined or non-array colors
-          const item = document.createElement("div");
-          item.className = "product-item";
-          item.innerHTML = `${data.name} - $${data.price} [Available Colors: ${colors}] 
-            <button onclick="editProduct('${doc.id}', '${data.name}', ${data.price}, '${data.colors ? data.colors.join(", ") : ""}')">Edit</button>`;
-          productsContainer.appendChild(item);
-        });
-
-      } catch (error) {
-        console.error("Error loading products:", error);
-        productsContainer.innerHTML = "<p>Error loading products.</p>";
       }
     }
 
     // Add a new product
     window.addProduct = async function () {
+      if (!currentUser) {
+        alert("Please login to add products.");
+        return;
+      }
+
       const name = document.getElementById("productName").value.trim();
       const price = parseFloat(document.getElementById("productPrice").value);
       const category = document.getElementById("productCategory").value;
@@ -69,45 +74,48 @@
         await addDoc(collection(db, category), {
           name,
           price,
+          category,
           colors
         });
         alert("Product added!");
-        loadProducts(category); // Reload products after adding
+        loadProducts(category);
       } catch (error) {
         console.error("Error adding product:", error);
         alert("Error adding product.");
       }
     };
 
-    // Edit an existing product
-    window.editProduct = async function (id, name, price, colors) {
-      const productName = prompt("Edit product name", name);
-      const productPrice = prompt("Edit product price", price);
-      const productColors = prompt("Edit product colors (comma-separated)", colors);
+    // Load products based on the category
+    async function loadProducts(category) {
+      const productsContainer = document.getElementById("products");
+      productsContainer.innerHTML = "<p>Loading...</p>";
 
-      if (productName && productPrice && productColors) {
-        try {
-          const productRef = doc(db, "products", id);
-          await updateDoc(productRef, {
-            name: productName,
-            price: parseFloat(productPrice),
-            colors: productColors.split(',').map(c => c.trim())
-          });
-          alert("Product updated!");
-          loadProducts("cookies"); // Reload products after editing
-        } catch (error) {
-          console.error("Error updating product:", error);
-          alert("Error updating product.");
+      try {
+        const querySnapshot = await getDocs(collection(db, category));
+        productsContainer.innerHTML = "";
+
+        if (querySnapshot.empty) {
+          productsContainer.innerHTML = "<p>No products found.</p>";
+          return;
         }
-      }
-    };
 
-    // Load products when the page loads
-    window.addEventListener("DOMContentLoaded", () => {
-      const category = new URLSearchParams(window.location.search).get('category');
-      if (category === 'bracelets' || category === 'cookies') {
-        loadProducts(category);
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const item = document.createElement("div");
+          item.className = "product-item";
+          item.textContent = `${data.name} - $${data.price} (${data.category}) [Colors: ${data.colors?.join(', ') ?? 'N/A'}]`;
+          productsContainer.appendChild(item);
+        });
+      } catch (error) {
+        console.error("Error loading products:", error);
+        productsContainer.innerHTML = "<p>Error loading products.</p>";
       }
+    }
+
+    // Load products when the page loads (for both categories)
+    window.addEventListener("DOMContentLoaded", () => {
+      loadProducts('cookies');
+      loadProducts('bracelets');
     });
   </script>
 
@@ -133,7 +141,9 @@
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     }
 
-    input, select, button {
+    input,
+    select,
+    button {
       width: 100%;
       margin: 10px 0;
       padding: 10px;
@@ -179,8 +189,9 @@
   </div>
 
   <div class="container product-list">
-    <h2>Existing Products</h2>
+    <h2>Existing Products (Cookies and Bracelets)</h2>
     <div id="products"></div>
   </div>
 </body>
+
 </html>
