@@ -1,246 +1,229 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cookies - Tactics & Treats</title>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f1f1f1;
-      color: #333;
-      margin: 0;
-      text-align: center;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cookies - Tactics & Treats</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f1f1f1;
+            color: #333;
+            margin: 0;
+            text-align: center;
+        }
 
-    .navbar {
-      background-color: #0a1d37;
-      color: white;
-      padding: 15px 0;
-      font-size: 18px;
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 100;
-      text-align: center;
-    }
+        .navbar {
+            background-color: #0a1d37;
+            color: white;
+            padding: 15px 0;
+            font-size: 18px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+        }
 
-    .navbar a {
-      color: white;
-      margin: 0 20px;
-      text-decoration: none;
-      font-weight: bold;
-    }
+        .navbar a {
+            color: white;
+            margin: 0 20px;
+            text-decoration: none;
+            font-weight: bold;
+        }
 
-    .navbar a:hover {
-      text-decoration: underline;
-    }
+        .navbar a:hover {
+            text-decoration: underline;
+        }
 
-    .navbar .auth-btn {
-      background-color: #00bcd4;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
+        .navbar .auth-btn {
+            background-color: #00bcd4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
 
-    .navbar .auth-btn:hover {
-      background-color: #0097a7;
-    }
+        .navbar .auth-btn:hover {
+            background-color: #0097a7;
+        }
 
-    .container {
-      padding-top: 100px;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
+        .container {
+            padding-top: 90px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
 
-    .product {
-      display: inline-block;
-      width: 250px;
-      margin: 20px;
-      padding: 20px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
+        .product {
+            width: 250px;
+            margin: 20px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
 
-    .product img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
+        .product img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
 
-    .product h3 {
-      margin: 15px 0;
-      font-size: 18px;
-    }
+        .product h3 {
+            margin: 15px 0;
+            font-size: 18px;
+        }
 
-    .product p {
-      font-size: 16px;
-      color: #555;
-    }
+        .product p {
+            font-size: 16px;
+            color: #555;
+        }
 
-    .product select {
-      padding: 5px;
-      margin: 10px 0;
-      font-size: 14px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
+        .product select {
+            padding: 5px;
+            margin: 10px 0;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
 
-    .product button {
-      background-color: #00bcd4;
-      color: white;
-      border: none;
-      padding: 10px;
-      width: 100%;
-      cursor: pointer;
-      border-radius: 5px;
-    }
+        .product button {
+            background-color: #00bcd4;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
+            border-radius: 5px;
+        }
 
-    .product button:hover {
-      background-color: #0097a7;
-    }
-  </style>
+        .product button:hover {
+            background-color: #0097a7;
+        }
+    </style>
 </head>
 
 <body>
-  <!-- Navbar -->
-  <div class="navbar">
-    <a href="index.html">Home</a>
-    <a href="bracelets.html">Bracelets</a>
-    <a href="cookies.html">Cookies</a>
-    <a href="admin.html">Admin Panel</a>
-    <button id="loginButton" class="auth-btn">Login</button>
-  </div>
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="bracelets.html">Bracelets</a>
+        <a href="cookies.html">Cookies</a>
+        <a href="admin.html">Admin Panel</a>
+        <button id="loginButton" class="auth-btn">Login</button>
+    </div>
 
-  <!-- Product Container -->
-  <div class="container" id="cookiesProducts">
-    <h1>Cookies</h1>
-  </div>
+    <div class="container" id="cookiesProducts">
+        <h1 style="width: 100%;">Cookies</h1>
+    </div>
 
-  <!-- Firebase Integration -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-      authDomain: "survival-f35e2.firebaseapp.com",
-      projectId: "survival-f35e2",
-      storageBucket: "survival-f35e2.appspot.com",
-      messagingSenderId: "704462603548",
-      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth();
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth();
 
-    // 🔁 Load Products
-    const fetchCookies = async () => {
-      const cookiesContainer = document.getElementById("cookiesProducts");
-      cookiesContainer.innerHTML = "";
+        // Add to cart
+        window.addToCart = async (productJSON, selectedSize) => {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Please login to add items to your cart.");
+                return;
+            }
 
-      const cookiesCollection = collection(db, "cookies");
-      const snapshot = await getDocs(cookiesCollection);
-      const cookies = snapshot.docs.map(doc => {
-        const data = doc.data();
-        console.log("Fetched cookie:", data); // ✅ Debug log
-        return data;
-      });
+            const product = JSON.parse(productJSON);
+            const sizeInfo = (product.sizes || []).find(s => s.size === selectedSize);
 
-      if (cookies.length === 0) {
-        cookiesContainer.innerHTML = "<p>No cookies found.</p>";
-        return;
-      }
+            if (!sizeInfo) {
+                alert("Invalid size selected.");
+                return;
+            }
 
-      cookies.forEach(product => {
-        const imageUrl = product.imageUrl || "default.jpg";
-        const sizeOptions = (Array.isArray(product.sizes) ? product.sizes : [])
-          .map(size => `<option value="${size.size}">${size.size} - $${size.price}</option>`)
-          .join("");
+            const cartRef = doc(db, "carts", user.uid);
+            const cartDoc = await getDoc(cartRef);
+            let cart = cartDoc.exists() ? cartDoc.data().items : [];
 
-        const productDiv = document.createElement("div");
-        productDiv.classList.add("product");
-        productDiv.innerHTML = `
-          <img src="${imageUrl}" alt="${product.name}" />
-          <h3>${product.name}</h3>
-          <p>Select Size</p>
-          <select id="sizeSelect-${product.id}">
-            <option value="" disabled selected>Select Size</option>
-            ${sizeOptions}
-          </select>
-          <button 
-            data-product='${JSON.stringify(product).replace(/'/g, "&apos;")}'
-            data-id="${product.id}"
-            onclick="handleAddToCart(this)">
-            Add to Cart
-          </button>
-        `;
+            const existing = cart.find(item => item.id === product.id && item.size === selectedSize);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name || "Unnamed",
+                    size: sizeInfo.size,
+                    price: sizeInfo.price,
+                    quantity: 1,
+                    imageUrl: product.imageUrl || "default.jpg"
+                });
+            }
 
-        cookiesContainer.appendChild(productDiv);
-      });
-    };
+            await setDoc(cartRef, { items: cart });
+            alert(`${product.name} (${selectedSize}) added to your cart for $${sizeInfo.price}`);
+        };
 
-    // 🔁 Add to Cart
-    window.handleAddToCart = async (button) => {
-      const raw = button.getAttribute("data-product").replace(/&apos;/g, "'");
-      const product = JSON.parse(raw);
-      const selectedSize = document.getElementById(`sizeSelect-${product.id}`).value;
+        // Fetch products
+        const fetchCookies = async () => {
+            const snap = await getDocs(collection(db, "cookies"));
+            const container = document.getElementById("cookiesProducts");
 
-      const user = auth.currentUser;
-      if (!user) {
-        alert("Please login to add items to your cart.");
-        return;
-      }
+            snap.forEach(doc => {
+                const product = doc.data();
+                const imageUrl = product.imageUrl || "default.jpg";
+                const sizes = Array.isArray(product.sizes) ? product.sizes : [];
 
-      try {
-        const sizeInfo = product.sizes.find(s => s.size === selectedSize);
-        if (!sizeInfo) {
-          alert("Invalid size selected.");
-          return;
-        }
+                const options = sizes.map(size => {
+                    const sizeName = size.size || "Unknown";
+                    const sizePrice = size.price ?? "0.00";
+                    return `<option value="${sizeName}">${sizeName} - $${sizePrice}</option>`;
+                }).join("");
 
-        const cartRef = doc(db, "carts", user.uid);
-        const cartSnap = await getDoc(cartRef);
-        let cart = cartSnap.exists() ? cartSnap.data().items : [];
+                const encodedProduct = encodeURIComponent(JSON.stringify(product).replace(/"/g, '&quot;'));
 
-        const existingIndex = cart.findIndex(item => item.id === product.id && item.size === selectedSize);
-        if (existingIndex > -1) {
-          cart[existingIndex].quantity += 1;
-        } else {
-          cart.push({ ...product, size: selectedSize, price: sizeInfo.price, quantity: 1 });
-        }
+                const div = document.createElement("div");
+                div.className = "product";
+                div.innerHTML = `
+                    <img src="${imageUrl}" alt="${product.name || "Cookie"}">
+                    <h3>${product.name || "Unnamed Cookie"}</h3>
+                    <p>Select Size:</p>
+                    <select id="size-${doc.id}">
+                        <option value="" disabled selected>Select Size</option>
+                        ${options}
+                    </select>
+                    <button onclick="addToCart('${encodedProduct}', document.getElementById('size-${doc.id}').value)">Add to Cart</button>
+                `;
+                container.appendChild(div);
+            });
+        };
 
-        await setDoc(cartRef, { items: cart });
-        alert(`${product.name} (${selectedSize}) added to cart for $${sizeInfo.price}`);
-      } catch (error) {
-        console.error("Error adding to cart:", error);
-        alert("Failed to add product to cart.");
-      }
-    };
+        // Auth change
+        onAuthStateChanged(auth, (user) => {
+            const btn = document.getElementById("loginButton");
+            if (user) {
+                btn.innerText = "Logout";
+                btn.onclick = () => signOut(auth);
+            } else {
+                btn.innerText = "Login";
+                btn.onclick = () => window.location.href = "login.html";
+            }
+        });
 
-    // 🔁 Auth Button
-    onAuthStateChanged(auth, user => {
-      const btn = document.getElementById("loginButton");
-      if (user) {
-        btn.innerText = "Logout";
-        btn.onclick = () => signOut(auth);
-      } else {
-        btn.innerText = "Login";
-        btn.onclick = () => window.location.href = "login.html";
-      }
-    });
-
-    // 🔁 Load on page
-    fetchCookies();
-  </script>
+        fetchCookies();
+    </script>
 </body>
-</html>
 
+</html>
