@@ -7,7 +7,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -20,6 +20,8 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
+    let editingProductId = null; // Store the ID of the product being edited
 
     async function loadProducts(category) {
       console.log(`Loading products for category: ${category}`); // Log category
@@ -43,7 +45,8 @@
           const data = doc.data();
           const item = document.createElement("div");
           item.className = "product-item";
-          item.textContent = `${data.name} - $${data.price} [Available Colors: ${data.colors?.join(', ') ?? 'N/A'}]`;
+          item.innerHTML = `${data.name} - $${data.price} [Available Colors: ${data.colors?.join(', ') ?? 'N/A'}] 
+            <button onclick="editProduct('${doc.id}', '${data.name}', ${data.price}, '${data.colors.join(", ")}')">Edit</button>`;
           productsContainer.appendChild(item);
         });
 
@@ -52,6 +55,62 @@
         productsContainer.innerHTML = "<p>Error loading products.</p>";
       }
     }
+
+    // Add or Edit Product
+    window.submitProduct = async function () {
+      const name = document.getElementById("productName").value.trim();
+      const price = parseFloat(document.getElementById("productPrice").value);
+      const category = document.getElementById("productCategory").value;
+      const colors = document.getElementById("productColors").value.split(',').map(c => c.trim());
+
+      if (!name || isNaN(price)) {
+        alert("Please enter a valid name and price.");
+        return;
+      }
+
+      try {
+        if (editingProductId) {
+          // Editing an existing product
+          await updateDoc(doc(db, category, editingProductId), {
+            name,
+            price,
+            colors
+          });
+          alert("Product updated!");
+        } else {
+          // Adding a new product
+          await addDoc(collection(db, category), {
+            name,
+            price,
+            colors
+          });
+          alert("Product added!");
+        }
+        clearForm();
+        loadProducts(category);
+      } catch (error) {
+        console.error("Error submitting product:", error);
+        alert("Error submitting product.");
+      }
+    };
+
+    // Set form fields to edit an existing product
+    window.editProduct = function (id, name, price, colors) {
+      editingProductId = id;
+      document.getElementById("productName").value = name;
+      document.getElementById("productPrice").value = price;
+      document.getElementById("productCategory").value = name.toLowerCase().includes("cookie") ? "cookies" : "bracelets";
+      document.getElementById("productColors").value = colors.join(", ");
+    };
+
+    // Clear the form for adding new product
+    window.clearForm = function () {
+      document.getElementById("productName").value = '';
+      document.getElementById("productPrice").value = '';
+      document.getElementById("productCategory").value = 'cookies';
+      document.getElementById("productColors").value = '';
+      editingProductId = null; // Reset the editing product ID
+    };
 
     // Load products based on category selection
     window.addEventListener("DOMContentLoaded", () => {
@@ -90,7 +149,7 @@
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     }
 
-    select, .product-list {
+    select, input, button, .product-list {
       width: 100%;
       margin: 10px 0;
       padding: 10px;
@@ -125,6 +184,19 @@
       <option value="cookies">Cookies</option>
       <option value="bracelets">Bracelets</option>
     </select>
+  </div>
+
+  <div class="container">
+    <h2>Product Form</h2>
+    <input type="text" id="productName" placeholder="Product Name">
+    <input type="number" id="productPrice" placeholder="Price">
+    <select id="productCategory">
+      <option value="bracelets">Bracelet</option>
+      <option value="cookies">Cookie</option>
+    </select>
+    <input type="text" id="productColors" placeholder="Available Colors (comma-separated)">
+    <button onclick="submitProduct()">Submit Product</button>
+    <button onclick="clearForm()">Clear Form</button>
   </div>
 
   <div class="container product-list">
