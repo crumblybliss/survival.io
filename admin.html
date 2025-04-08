@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Edit Products</title>
+    <title>Admin - Manage Products</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -59,7 +59,8 @@
             font-size: 18px;
         }
 
-        .edit-form {
+        .edit-form,
+        .add-form {
             display: none;
             margin: 20px;
             padding: 20px;
@@ -67,13 +68,15 @@
             border-radius: 10px;
         }
 
-        .edit-form input {
+        .edit-form input,
+        .add-form input {
             padding: 8px;
             margin: 5px 0;
             width: 100%;
         }
 
-        .edit-form button {
+        .edit-form button,
+        .add-form button {
             background-color: #00bcd4;
             color: white;
             padding: 10px;
@@ -82,7 +85,22 @@
             border: none;
         }
 
-        .edit-form button:hover {
+        .edit-form button:hover,
+        .add-form button:hover {
+            background-color: #0097a7;
+        }
+
+        .add-product-btn {
+            background-color: #0a1d37;
+            color: white;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            margin-top: 20px;
+        }
+
+        .add-product-btn:hover {
             background-color: #0097a7;
         }
 
@@ -97,6 +115,9 @@
         <a href="cookies.html">Cookies</a>
         <a href="admin.html">Admin Panel</a>
     </div>
+
+    <!-- Add Product Button -->
+    <button class="add-product-btn" onclick="showAddForm()">Add New Product</button>
 
     <!-- Product List -->
     <div class="product-list" id="product-list">
@@ -119,10 +140,28 @@
         <button onclick="saveProduct()">Save</button>
     </div>
 
+    <!-- Add Product Form -->
+    <div class="add-form" id="add-form">
+        <h3>Add New Product</h3>
+        <label for="add-name">Name:</label>
+        <input id="add-name" type="text" required><br><br>
+
+        <label for="add-size">Size:</label>
+        <input id="add-size" type="text" required><br><br>
+
+        <label for="add-price">Price ($):</label>
+        <input id="add-price" type="number" step="0.01" required><br><br>
+
+        <label for="add-image">Image URL (Optional):</label>
+        <input id="add-image" type="text"><br><br>
+
+        <button onclick="addNewProduct()">Add Product</button>
+    </div>
+
     <!-- Firebase SDK for app integration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -204,6 +243,34 @@
             } catch (error) {
                 console.error("Error updating product:", error);
                 alert("Failed to update product.");
+            }
+        };
+
+        // Show the Add Product form
+        window.showAddForm = () => {
+            document.getElementById("add-form").style.display = "block";
+        };
+
+        // Add a new product to Firestore
+        window.addNewProduct = async () => {
+            const name = document.getElementById("add-name").value;
+            const size = document.getElementById("add-size").value;
+            const price = parseFloat(document.getElementById("add-price").value);
+            const imageUrl = document.getElementById("add-image").value || '';
+
+            const newProduct = {
+                name: name,
+                sizes: [{ size: size, price: price }],
+                imageUrl: imageUrl
+            };
+
+            try {
+                await addDoc(collection(db, "cookies"), newProduct);
+                alert("New product added successfully!");
+                location.reload(); // Reload to show the new product
+            } catch (error) {
+                console.error("Error adding product:", error);
+                alert("Failed to add new product.");
             }
         };
 
