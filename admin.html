@@ -58,206 +58,196 @@
     }
 
     .product-card {
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
       border-radius: 5px;
       padding: 10px;
       margin: 10px 0;
+      background: #fff;
+    }
+
+    .product-card img {
+      max-width: 250px;
+      max-height: 180px;
     }
 
     .actions button {
-      margin-right: 5px;
+      margin: 5px 2px;
     }
   </style>
 </head>
 <body>
-  <div class="navbar">
-    <a href="index.html">Home</a>
-    <a href="cookies.html">Cookies</a>
-    <a href="bracelets.html">Bracelets</a>
-    <a href="admin.html">Admin Panel</a>
+
+<div class="navbar">
+  <a href="index.html">Home</a>
+  <a href="cookies.html">Cookies</a>
+  <a href="bracelets.html">Bracelets</a>
+  <a href="admin.html">Admin Panel</a>
+</div>
+
+<div class="container">
+  <h2>Admin Login</h2>
+  <div class="login-form">
+    <input type="email" id="email" placeholder="Enter email" />
+    <input type="password" id="password" placeholder="Enter password" />
+    <button onclick="login()">Login</button>
   </div>
 
-  <div class="container">
-    <h2>Admin Login</h2>
-    <div class="login-form">
-      <input type="email" id="email" placeholder="Enter email" />
-      <input type="password" id="password" placeholder="Enter password" />
-      <button onclick="login()">Login</button>
-    </div>
+  <h2>Add or Edit Product</h2>
+  <input type="text" id="productName" placeholder="Product Name" />
+  <input type="text" id="productCategory" placeholder="Category (cookies, bracelets)" />
+  <input type="text" id="productImage" placeholder="Image URL (optional)" />
 
-    <h2>Add or Edit Product</h2>
-    <input type="text" id="productName" placeholder="Product Name" />
-    <input type="text" id="productCategory" placeholder="Category (cookies, bracelets)" />
-    <input type="text" id="productImage" placeholder="Image URL" />
+  <h4>Sizes & Prices</h4>
+  <input type="text" id="sizeInput" placeholder="Size (e.g., Small)" />
+  <input type="number" id="priceInput" placeholder="Price" step="0.01" />
+  <button onclick="addSize()">Add Size</button>
 
-    <h4>Sizes & Prices</h4>
-    <input type="text" id="sizeInput" placeholder="Size (e.g., Small)" />
-    <input type="number" id="priceInput" placeholder="Price" step="0.01" />
-    <button onclick="addSize()">Add Size</button>
+  <div id="sizesList"></div>
+  <button onclick="submitProduct()">Submit Product</button>
 
-    <ul id="sizesList"></ul>
-    <button onclick="submitProduct()">Submit Product</button>
+  <h2>All Products</h2>
+  <div class="product-list" id="productList"></div>
+</div>
 
-    <h2>All Products</h2>
-    <div class="product-list" id="productList"></div>
-  </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+    authDomain: "survival-f35e2.firebaseapp.com",
+    projectId: "survival-f35e2",
+    storageBucket: "survival-f35e2.appspot.com",
+    messagingSenderId: "704462603548",
+    appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+  };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-      authDomain: "survival-f35e2.firebaseapp.com",
-      projectId: "survival-f35e2",
-      storageBucket: "survival-f35e2.appspot.com",
-      messagingSenderId: "704462603548",
-      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-    };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth();
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth();
+  let sizes = [];
+  let editingProduct = null;
 
-    let sizes = [];
-    let editingProduct = null;
+  setPersistence(auth, browserLocalPersistence);
 
-    setPersistence(auth, browserLocalPersistence);
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.querySelector(".login-form").style.display = "none";
+      loadProducts();
+    }
+  });
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        document.querySelector(".login-form").style.display = "none";
-        loadProducts();
+  window.login = () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    if (!email || !password) return alert("Enter both email and password.");
 
-        // Optional admin setup
-        if (user.email === "youremail@example.com") { // CHANGE THIS
-          const btn = document.createElement("button");
-          btn.textContent = "Set Myself as Admin";
-          btn.style.background = "darkred";
-          btn.style.color = "white";
-          btn.onclick = async () => {
-            await setDoc(doc(db, "users", user.uid), { role: "admin" });
-            alert("You are now an admin");
-          };
-          document.querySelector(".container").appendChild(btn);
-        }
-      }
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => location.reload())
+      .catch((err) => alert("Login failed."));
+  };
+
+  window.addSize = () => {
+    const size = document.getElementById("sizeInput").value.trim();
+    const price = parseFloat(document.getElementById("priceInput").value);
+    if (!size || isNaN(price)) return alert("Enter valid size and price.");
+    sizes.push({ size, price });
+    updateSizeList();
+    document.getElementById("sizeInput").value = "";
+    document.getElementById("priceInput").value = "";
+  };
+
+  function updateSizeList() {
+    const container = document.getElementById("sizesList");
+    container.innerHTML = "";
+    sizes.forEach((s, i) => {
+      const div = document.createElement("div");
+      div.innerHTML = `${s.size} - $${s.price.toFixed(2)} <button onclick="removeSize(${i})">x</button>`;
+      container.appendChild(div);
     });
+  }
 
-    window.login = () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+  window.removeSize = (index) => {
+    sizes.splice(index, 1);
+    updateSizeList();
+  };
 
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          document.querySelector(".login-form").style.display = "none";
-        })
-        .catch((error) => {
-          alert("Login failed: " + error.message);
-        });
-    };
+  window.submitProduct = async () => {
+    const name = document.getElementById("productName").value.trim();
+    const category = document.getElementById("productCategory").value.trim().toLowerCase();
+    const imageUrl = document.getElementById("productImage").value.trim() || "default.jpg";
 
-    window.addSize = () => {
-      const size = document.getElementById("sizeInput").value;
-      const price = parseFloat(document.getElementById("priceInput").value);
+    if (!name || !category || sizes.length === 0) return alert("Complete all fields and sizes.");
 
-      if (size && !isNaN(price)) {
-        sizes.push({ size, price });
-        updateSizeList();
+    const product = { name, category, imageUrl, sizes };
+    try {
+      if (editingProduct) {
+        const ref = doc(db, category, editingProduct.id);
+        await updateDoc(ref, product);
+        alert("Product updated.");
+      } else {
+        await addDoc(collection(db, category), product);
+        alert("Product added.");
       }
-    };
+      clearForm();
+      loadProducts();
+    } catch (e) {
+      alert("Error saving product.");
+    }
+  };
 
-    function updateSizeList() {
-      const list = document.getElementById("sizesList");
-      list.innerHTML = "";
-      sizes.forEach((s, i) => {
-        const li = document.createElement("li");
-        li.innerHTML = `${s.size} - $${s.price.toFixed(2)} <button onclick="removeSize(${i})">Remove</button>`;
-        list.appendChild(li);
+  const clearForm = () => {
+    editingProduct = null;
+    sizes = [];
+    document.getElementById("productName").value = "";
+    document.getElementById("productCategory").value = "";
+    document.getElementById("productImage").value = "";
+    updateSizeList();
+  };
+
+  const loadProducts = async () => {
+    const productList = document.getElementById("productList");
+    productList.innerHTML = "";
+    const categories = ["cookies", "bracelets"];
+
+    for (const cat of categories) {
+      const snapshot = await getDocs(collection(db, cat));
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const img = data.imageUrl?.trim() || "default.jpg";
+        const div = document.createElement("div");
+        div.className = "product-card";
+        div.innerHTML = `
+          <img src="${img}" alt="${data.name}" />
+          <h3>${data.name}</h3>
+          <p>Category: ${data.category}</p>
+          <p>${(data.sizes || []).map(s => `${s.size}: $${s.price.toFixed(2)}`).join("<br>")}</p>
+          <div class="actions">
+            <button onclick='editProduct(${JSON.stringify({ ...data, id: docSnap.id })})'>Edit</button>
+            <button onclick='deleteProduct("${cat}", "${docSnap.id}")'>Delete</button>
+          </div>`;
+        productList.appendChild(div);
       });
     }
+  };
 
-    window.removeSize = (index) => {
-      sizes.splice(index, 1);
-      updateSizeList();
-    };
+  window.editProduct = (product) => {
+    editingProduct = product;
+    sizes = product.sizes || [];
+    document.getElementById("productName").value = product.name;
+    document.getElementById("productCategory").value = product.category;
+    document.getElementById("productImage").value = product.imageUrl;
+    updateSizeList();
+  };
 
-    window.submitProduct = async () => {
-      const name = document.getElementById("productName").value;
-      const category = document.getElementById("productCategory").value.toLowerCase();
-      const imageUrl = document.getElementById("productImage").value || "https://via.placeholder.com/250x180?text=No+Image";
+  window.deleteProduct = async (category, id) => {
+    if (!confirm("Delete this product?")) return;
+    await deleteDoc(doc(db, category, id));
+    loadProducts();
+  };
+</script>
 
-      if (!name || !category || sizes.length === 0) return alert("Missing fields");
-
-      const product = { name, category, imageUrl, sizes };
-
-      try {
-        if (editingProduct) {
-          await updateDoc(doc(db, category, editingProduct.id), product);
-          alert("Updated!");
-        } else {
-          await addDoc(collection(db, category), product);
-          alert("Added!");
-        }
-        clearForm();
-        loadProducts();
-      } catch (err) {
-        alert("Error: " + err.message);
-      }
-    };
-
-    function clearForm() {
-      editingProduct = null;
-      sizes = [];
-      document.getElementById("productName").value = "";
-      document.getElementById("productCategory").value = "";
-      document.getElementById("productImage").value = "";
-      updateSizeList();
-    }
-
-    async function loadProducts() {
-      const list = document.getElementById("productList");
-      list.innerHTML = "";
-      const categories = ["cookies", "bracelets"];
-
-      for (const cat of categories) {
-        const snap = await getDocs(collection(db, cat));
-        snap.forEach(docSnap => {
-          const d = docSnap.data();
-          const img = d.imageUrl || "https://via.placeholder.com/250x180?text=No+Image";
-          const div = document.createElement("div");
-          div.className = "product-card";
-          div.innerHTML = `
-            <img src="${img}" style="width:100%; max-width:250px;" />
-            <h3>${d.name}</h3>
-            <p>${cat}</p>
-            <p>${(d.sizes || []).map(s => `${s.size}: $${s.price}`).join("<br>")}</p>
-            <div class="actions">
-              <button onclick='editProduct(${JSON.stringify({ ...d, id: docSnap.id })})'>Edit</button>
-              <button onclick='deleteProduct("${cat}", "${docSnap.id}")'>Delete</button>
-            </div>
-          `;
-          list.appendChild(div);
-        });
-      }
-    }
-
-    window.editProduct = (p) => {
-      editingProduct = p;
-      document.getElementById("productName").value = p.name;
-      document.getElementById("productCategory").value = p.category;
-      document.getElementById("productImage").value = p.imageUrl;
-      sizes = p.sizes || [];
-      updateSizeList();
-    };
-
-    window.deleteProduct = async (cat, id) => {
-      if (confirm("Delete this product?")) {
-        await deleteDoc(doc(db, cat, id));
-        loadProducts();
-      }
-    };
-  </script>
 </body>
 </html>
