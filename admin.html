@@ -78,11 +78,19 @@
       justify-content: space-between;
     }
 
-    .product-card .actions button {
-      padding: 6px 10px;
-      font-size: 0.9em;
-      border-radius: 5px;
+    #sizesList div {
+      margin-bottom: 6px;
     }
+
+    #sizesList button {
+      background: red;
+      border: none;
+      padding: 5px 8px;
+      margin-left: 10px;
+      font-size: 0.8em;
+      cursor: pointer;
+    }
+
   </style>
 </head>
 <body>
@@ -140,13 +148,31 @@
     let sizes = [];
     let editingProduct = null;
 
+    const renderSizes = () => {
+      const list = document.getElementById("sizesList");
+      list.innerHTML = "";
+
+      sizes.forEach((s, index) => {
+        const item = document.createElement("div");
+        item.textContent = `${s.size} - $${s.price.toFixed(2)}`;
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "❌";
+        delBtn.onclick = () => {
+          sizes.splice(index, 1);
+          renderSizes();
+        };
+        item.appendChild(delBtn);
+        list.appendChild(item);
+      });
+    };
+
     window.addSize = () => {
       const size = document.getElementById("sizeInput").value;
       const price = parseFloat(document.getElementById("priceInput").value);
 
       if (size && !isNaN(price)) {
         sizes.push({ size, price });
-        document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+        renderSizes();
         document.getElementById("sizeInput").value = "";
         document.getElementById("priceInput").value = "";
       } else {
@@ -195,7 +221,7 @@
       document.getElementById("productName").value = "";
       document.getElementById("productCategory").value = "";
       document.getElementById("productImage").value = "";
-      document.getElementById("sizesList").innerText = "";
+      renderSizes();
     };
 
     window.editProduct = (product) => {
@@ -204,7 +230,7 @@
       document.getElementById("productCategory").value = product.category;
       document.getElementById("productImage").value = product.imageUrl;
       sizes = product.sizes || [];
-      document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+      renderSizes();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -229,16 +255,40 @@
 
           const card = document.createElement("div");
           card.className = "product-card";
-          card.innerHTML = `
-            <img src="${img}" alt="${data.name}" />
-            <h3>${data.name}</h3>
-            <p>Category: ${data.category}</p>
-            <p>${(data.sizes || []).map(s => `${s.size}: $${s.price}`).join("<br>")}</p>
-            <div class="actions">
-              <button onclick='editProduct(${JSON.stringify({ ...data, id: docSnap.id })})'>Edit</button>
-              <button onclick='deleteProduct("${col}", "${docSnap.id}")'>Delete</button>
-            </div>
-          `;
+
+          const image = document.createElement("img");
+          image.src = img;
+          image.alt = data.name;
+
+          const title = document.createElement("h3");
+          title.textContent = data.name;
+
+          const category = document.createElement("p");
+          category.textContent = `Category: ${data.category}`;
+
+          const sizesInfo = document.createElement("p");
+          sizesInfo.innerHTML = (data.sizes || []).map(s => `${s.size}: $${s.price}`).join("<br>");
+
+          const actionsDiv = document.createElement("div");
+          actionsDiv.className = "actions";
+
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "Edit";
+          editBtn.onclick = () => editProduct({ ...data, id: docSnap.id });
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "Delete";
+          deleteBtn.onclick = () => deleteProduct(col, docSnap.id);
+
+          actionsDiv.appendChild(editBtn);
+          actionsDiv.appendChild(deleteBtn);
+
+          card.appendChild(image);
+          card.appendChild(title);
+          card.appendChild(category);
+          card.appendChild(sizesInfo);
+          card.appendChild(actionsDiv);
+
           productList.appendChild(card);
         });
       }
