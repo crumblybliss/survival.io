@@ -82,6 +82,19 @@
     .actions button:hover {
       background-color: #d32f2f;
     }
+
+    .size-item {
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .size-item button {
+      background-color: #f44336;
+      margin-left: 10px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -185,12 +198,32 @@
 
       if (size && !isNaN(price)) {
         sizes.push({ size, price });
-        document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+        updateSizeList();
         document.getElementById("sizeInput").value = "";
         document.getElementById("priceInput").value = "";
       } else {
         alert("Please enter both size and price.");
       }
+    };
+
+    // Update the size list display
+    const updateSizeList = () => {
+      const sizesListDiv = document.getElementById("sizesList");
+      sizesListDiv.innerHTML = "";
+
+      sizes.forEach((sizeObj, index) => {
+        const sizeItem = document.createElement("div");
+        sizeItem.className = "size-item";
+        sizeItem.innerHTML = `${sizeObj.size} - $${sizeObj.price} 
+          <button onclick="deleteSize(${index})">Delete</button>`;
+        sizesListDiv.appendChild(sizeItem);
+      });
+    };
+
+    // Delete size from the list
+    window.deleteSize = (index) => {
+      sizes.splice(index, 1);
+      updateSizeList();
     };
 
     // Submit new or edited product
@@ -276,23 +309,26 @@
       document.getElementById("productCategory").value = product.category;
       document.getElementById("productImage").value = product.imageUrl;
       sizes = product.sizes || [];
-      document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+      updateSizeList();
     };
 
     // Delete product
     window.deleteProduct = async (category, productId) => {
+      const productRef = doc(db, category, productId);
       try {
-        await deleteDoc(doc(db, category, productId));
+        await deleteDoc(productRef);
         alert("Product deleted!");
         loadProducts();
       } catch (error) {
         console.error("Error deleting product:", error);
-        alert("Failed to delete product.");
+        alert("Error deleting product.");
       }
     };
 
+    // Load products when the page loads
     loadProducts();
   </script>
 
 </body>
 </html>
+
