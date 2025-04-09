@@ -14,16 +14,18 @@
   <!-- Login Button -->
   <button id="loginBtn">Login</button>
 
+  <!-- Product Form for Adding Products -->
   <div id="productForm" style="display:none;">
-    <!-- Product Form -->
+    <h3>Add New Product</h3>
     <input type="text" id="productName" placeholder="Product Name" required>
-    <input type="text" id="productDescription" placeholder="Description" required>
+    <input type="text" id="productDescription" placeholder="Product Description" required>
     <input type="file" id="productImage" accept="image/*">
     <button id="submitProduct">Add Product</button>
   </div>
 
+  <!-- Product List Will Be Displayed Here -->
   <div id="productList">
-    <!-- Product List Will Be Displayed Here -->
+    <h3>Product List</h3>
   </div>
 
   <script>
@@ -58,7 +60,7 @@
       auth.signInWithPopup(provider).then((result) => {
         console.log(result.user);
         if (result.user) {
-          productForm.style.display = 'block'; // Show form after login
+          productForm.style.display = 'block'; // Show the product form after login
         }
       }).catch((error) => {
         console.error(error);
