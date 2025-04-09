@@ -157,10 +157,26 @@
         return;
       }
 
-      sizes.push({ size, price });
-      document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+      const sizeObj = { size, price };
+      sizes.push(sizeObj);
+      updateSizeList();
       document.getElementById("sizeInput").value = "";
       document.getElementById("priceInput").value = "";
+    };
+
+    window.deleteSize = (index) => {
+      sizes.splice(index, 1);  // Remove size at the given index
+      updateSizeList();
+    };
+
+    const updateSizeList = () => {
+      const sizeListDiv = document.getElementById("sizesList");
+      sizeListDiv.innerHTML = "";
+      sizes.forEach((sizeObj, index) => {
+        const sizeItem = document.createElement("div");
+        sizeItem.innerHTML = `${sizeObj.size} - $${sizeObj.price} <button onclick="deleteSize(${index})">Delete</button>`;
+        sizeListDiv.appendChild(sizeItem);
+      });
     };
 
     window.submitProduct = async () => {
@@ -219,7 +235,7 @@
       document.getElementById("productCategory").value = product.category;
       document.getElementById("productImage").value = product.imageUrl;
       sizes = product.sizes || [];
-      document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+      updateSizeList();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
