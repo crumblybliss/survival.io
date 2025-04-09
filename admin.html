@@ -1,18 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel - Tactics & Treats</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
 
-  <!-- Firebase SDK (Modular version) -->
+    .navbar {
+      background-color: #0a1d37;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .navbar a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    input, select, button {
+      padding: 10px;
+      margin: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #00bcd4;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0097a7;
+    }
+
+    .login-form {
+      margin-top: 50px;
+      text-align: center;
+    }
+
+    .login-form input {
+      width: 200px;
+    }
+
+    .product-card {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      display: inline-block;
+      width: 200px;
+      text-align: center;
+    }
+
+    .product-card img {
+      width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+    }
+
+    .actions button {
+      background-color: #f44336;
+      margin: 5px;
+      cursor: pointer;
+    }
+
+    .actions button:hover {
+      background-color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <a href="index.html">Home</a>
+    <a href="cookies.html">Cookies</a>
+    <a href="bracelets.html">Bracelets</a>
+    <a href="admin.html">Admin Panel</a>
+  </div>
+
+  <div class="container">
+    <h2>Admin Login</h2>
+    <div class="login-form">
+      <input type="email" id="email" placeholder="Enter email" />
+      <input type="password" id="password" placeholder="Enter password" />
+      <button onclick="login()">Login</button>
+    </div>
+
+    <h2>Add or Edit Product</h2>
+    <input type="text" id="productName" placeholder="Product Name" />
+    <input type="text" id="productCategory" placeholder="Category (cookies, bracelets)" />
+    <input type="text" id="productImage" placeholder="Image URL" />
+    
+    <h4>Sizes & Prices</h4>
+    <input type="text" id="sizeInput" placeholder="Size (e.g., Small)" />
+    <input type="number" id="priceInput" placeholder="Price" step="0.01" />
+    <button onclick="addSize()">Add Size</button>
+
+    <div id="sizesList"></div>
+    <button onclick="submitProduct()">Submit Product</button>
+
+    <h2>All Products</h2>
+    <div class="product-list" id="productList"></div>
+  </div>
+
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js';
-    import { getAuth, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js';
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js';
-    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-storage.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-    // Your Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
       authDomain: "survival-f35e2.firebaseapp.com",
@@ -22,208 +132,167 @@
       appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
-    const storage = getStorage(app);
+    const auth = getAuth();
 
-    // Your existing JavaScript for login and product handling here...
-  </script>
+    let sizes = [];
+    let editingProduct = null;
 
-  <!-- Inline CSS -->
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f9;
-    }
-
-    #loginBtn {
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      margin: 20px;
-    }
-
-    #loginBtn:hover {
-      background-color: #45a049;
-    }
-
-    #productForm {
-      display: none;
-      margin: 20px;
-      background-color: #fff;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-    }
-
-    #productForm input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    #productForm button {
-      padding: 10px 20px;
-      background-color: #2196F3;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-
-    #productForm button:hover {
-      background-color: #0b7dda;
-    }
-
-    #productList {
-      margin: 20px;
-    }
-
-    .product {
-      background-color: #fff;
-      padding: 15px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      margin-bottom: 20px;
-    }
-
-    .product img {
-      max-width: 100%;
-      height: auto;
-    }
-
-    .product button {
-      padding: 8px 16px;
-      background-color: #f44336;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .product button:hover {
-      background-color: #e53935;
-    }
-
-  </style>
-</head>
-<body>
-  <!-- Login Button -->
-  <button id="loginBtn">Login</button>
-
-  <!-- Product Form for Adding Products -->
-  <div id="productForm">
-    <h3>Add New Product</h3>
-    <input type="text" id="productName" placeholder="Product Name" required>
-    <input type="text" id="productDescription" placeholder="Product Description" required>
-    <input type="file" id="productImage" accept="image/*">
-    <button id="submitProduct">Add Product</button>
-  </div>
-
-  <!-- Product List Will Be Displayed Here -->
-  <div id="productList">
-    <h3>Product List</h3>
-  </div>
-
-  <script type="module">
-    // Login function
-    const loginBtn = document.getElementById("loginBtn");
-    const submitProductBtn = document.getElementById("submitProduct");
-    const productNameInput = document.getElementById("productName");
-    const productDescriptionInput = document.getElementById("productDescription");
-    const productImageInput = document.getElementById("productImage");
-    const productList = document.getElementById("productList");
-    const productForm = document.getElementById("productForm");
-
-    // Login function
-    loginBtn.addEventListener("click", () => {
-      const provider = new GoogleAuthProvider();
-      signInWithPopup(auth, provider).then((result) => {
-        console.log(result.user);
-        if (result.user) {
-          productForm.style.display = 'block'; // Show the product form after login
-        }
-      }).catch((error) => {
-        console.error(error);
+    // Set persistence to local storage
+    setPersistence(auth, browserLocalPersistence)
+      .then(() => {
+        console.log("Persistence set to local");
+      })
+      .catch((error) => {
+        console.error("Error setting persistence:", error);
       });
-    });
 
-    // Submit Product function
-    submitProductBtn.addEventListener("click", async () => {
-      const name = productNameInput.value;
-      const description = productDescriptionInput.value;
-      const imageFile = productImageInput.files[0];
-
-      if (name && description && imageFile) {
-        try {
-          const imageRef = ref(storage, 'productImages/' + imageFile.name);
-          await uploadBytes(imageRef, imageFile);
-          const imageURL = await getDownloadURL(imageRef);
-
-          const product = {
-            name: name,
-            description: description,
-            image: imageURL
-          };
-
-          await addDoc(collection(db, 'products'), product);
-          alert('Product added successfully!');
-          loadProducts(); // Reload the product list
-        } catch (error) {
-          console.error("Error adding product:", error);
-        }
+    // Listen for authentication state changes
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User signed in:", user);
+        document.querySelector(".login-form").style.display = "none"; // Hide login form if logged in
       } else {
-        alert("Please fill in all fields.");
+        console.log("No user signed in");
       }
     });
 
-    // Load products function
-    const loadProducts = async () => {
-      const snapshot = await getDocs(collection(db, 'products'));
-      productList.innerHTML = ''; // Clear the existing product list
+    // Login function
+    window.login = () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
 
-      snapshot.forEach(doc => {
-        const product = doc.data();
-        const productDiv = document.createElement('div');
-        productDiv.classList.add('product');
-
-        const productImage = product.image || 'images/no-image.jpg'; // Use local placeholder if no image exists
-        productDiv.innerHTML = `
-          <img src="${productImage}" alt="Product Image" width="250" height="180">
-          <h3>${product.name}</h3>
-          <p>${product.description}</p>
-        `;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.innerText = 'Delete';
-        deleteBtn.addEventListener('click', async () => {
-          try {
-            await deleteDoc(doc(db, 'products', doc.id));
-            alert('Product deleted successfully!');
-            loadProducts(); // Reload the product list
-          } catch (error) {
-            console.error("Error deleting product:", error);
-          }
-        });
-
-        productDiv.appendChild(deleteBtn);
-        productList.appendChild(productDiv);
-      });
+      if (email && password) {
+        signInWithEmailAndPassword(auth, email, password)
+          .then((userCredential) => {
+            console.log("User signed in:", userCredential.user);
+            document.querySelector(".login-form").style.display = "none"; // Hide login form after successful login
+          })
+          .catch((error) => {
+            console.error("Error signing in:", error);
+            alert("Failed to sign in. Please check your email and password.");
+          });
+      } else {
+        alert("Please enter both email and password.");
+      }
     };
 
-    // Run loadProducts when the page is loaded
+    // Add size to product
+    window.addSize = () => {
+      const size = document.getElementById("sizeInput").value;
+      const price = parseFloat(document.getElementById("priceInput").value);
+
+      if (size && !isNaN(price)) {
+        sizes.push({ size, price });
+        document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+        document.getElementById("sizeInput").value = "";
+        document.getElementById("priceInput").value = "";
+      } else {
+        alert("Please enter both size and price.");
+      }
+    };
+
+    // Submit new or edited product
+    window.submitProduct = async () => {
+      const name = document.getElementById("productName").value.trim();
+      const category = document.getElementById("productCategory").value.trim().toLowerCase();
+      const imageUrl = document.getElementById("productImage").value.trim();
+
+      if (!name || !category || sizes.length === 0) {
+        alert("Fill in all fields and add at least one size.");
+        return;
+      }
+
+      const product = {
+        name,
+        category,
+        imageUrl: imageUrl || "https://via.placeholder.com/250x180?text=No+Image",  // Fallback to placeholder image
+        sizes
+      };
+
+      try {
+        if (editingProduct) {
+          const ref = doc(db, category, editingProduct.id);
+          await updateDoc(ref, product);
+          alert("Product updated!");
+        } else {
+          await addDoc(collection(db, category), product);
+          alert("Product added!");
+        }
+
+        clearForm();
+        loadProducts();
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error saving product.");
+      }
+    };
+
+    // Clear the form for adding/editing products
+    const clearForm = () => {
+      editingProduct = null;
+      sizes = [];
+      document.getElementById("productName").value = "";
+      document.getElementById("productCategory").value = "";
+      document.getElementById("productImage").value = "";
+      document.getElementById("sizesList").innerText = "";
+    };
+
+    // Load products from Firestore
+    const loadProducts = async () => {
+      const productList = document.getElementById("productList");
+      productList.innerHTML = "";
+
+      const allCollections = ["cookies", "bracelets"];
+
+      for (const col of allCollections) {
+        const snapshot = await getDocs(collection(db, col));
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const img = data.imageUrl && data.imageUrl.trim() !== "" ? data.imageUrl : "https://via.placeholder.com/250x180?text=No+Image";
+
+          const card = document.createElement("div");
+          card.className = "product-card";
+          card.innerHTML = `
+            <img src="${img}" alt="${data.name}" />
+            <h3>${data.name}</h3>
+            <p>Category: ${data.category}</p>
+            <p>${(data.sizes || []).map(s => `${s.size}: $${s.price}`).join("<br>")}</p>
+            <div class="actions">
+              <button onclick='editProduct(${JSON.stringify({ ...data, id: docSnap.id })})'>Edit</button>
+              <button onclick='deleteProduct("${col}", "${docSnap.id}")'>Delete</button>
+            </div>
+          `;
+          productList.appendChild(card);
+        });
+      }
+    };
+
+    // Edit product
+    window.editProduct = (product) => {
+      editingProduct = product;
+      document.getElementById("productName").value = product.name;
+      document.getElementById("productCategory").value = product.category;
+      document.getElementById("productImage").value = product.imageUrl;
+      sizes = product.sizes || [];
+      document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+    };
+
+    // Delete product
+    window.deleteProduct = async (category, productId) => {
+      try {
+        await deleteDoc(doc(db, category, productId));
+        alert("Product deleted!");
+        loadProducts();
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        alert("Failed to delete product.");
+      }
+    };
+
     loadProducts();
   </script>
+
 </body>
 </html>
