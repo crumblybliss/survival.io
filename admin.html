@@ -83,6 +83,13 @@
       font-size: 0.9em;
       border-radius: 5px;
     }
+
+    .size-actions button {
+      color: red;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -146,12 +153,25 @@
 
       if (size && !isNaN(price)) {
         sizes.push({ size, price });
-        document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+        document.getElementById("sizesList").innerHTML = sizes.map((s, index) => 
+          `<div>
+            ${s.size} - $${s.price}
+            <button class="size-actions" onclick="deleteSize(${index})">Delete</button>
+          </div>`).join("");
         document.getElementById("sizeInput").value = "";
         document.getElementById("priceInput").value = "";
       } else {
         alert("Please enter both size and price.");
       }
+    };
+
+    window.deleteSize = (index) => {
+      sizes.splice(index, 1);  // Remove size at the specified index
+      document.getElementById("sizesList").innerHTML = sizes.map((s, index) => 
+        `<div>
+          ${s.size} - $${s.price}
+          <button class="size-actions" onclick="deleteSize(${index})">Delete</button>
+        </div>`).join("");
     };
 
     window.submitProduct = async () => {
@@ -195,7 +215,7 @@
       document.getElementById("productName").value = "";
       document.getElementById("productCategory").value = "";
       document.getElementById("productImage").value = "";
-      document.getElementById("sizesList").innerText = "";
+      document.getElementById("sizesList").innerHTML = "";
     };
 
     window.editProduct = (product) => {
@@ -204,7 +224,11 @@
       document.getElementById("productCategory").value = product.category;
       document.getElementById("productImage").value = product.imageUrl;
       sizes = product.sizes || [];
-      document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+      document.getElementById("sizesList").innerHTML = sizes.map((s, index) => 
+        `<div>
+          ${s.size} - $${s.price}
+          <button class="size-actions" onclick="deleteSize(${index})">Delete</button>
+        </div>`).join("");
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -249,4 +273,3 @@
 
 </body>
 </html>
-
