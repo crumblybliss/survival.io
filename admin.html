@@ -63,7 +63,6 @@
       width: 250px;
       text-align: center;
       position: relative;
-      box-sizing: border-box;
     }
 
     .product-card img {
@@ -85,10 +84,8 @@
       border-radius: 5px;
     }
 
-    @media (max-width: 600px) {
-      .product-card {
-        width: 100%;
-      }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
@@ -98,39 +95,37 @@
     <a href="index.html">Home</a>
     <a href="cookies.html">Cookies</a>
     <a href="bracelets.html">Bracelets</a>
-    <a href="admin.html">Admin Panel</a>
+    <a href="admin.html" id="adminLink">Admin Panel</a>
   </div>
 
   <div class="container">
-    <h2>Add or Edit Product</h2>
+    <h2 id="adminPanelHeading" class="hidden">Admin Panel</h2>
+    <h2 class="hidden" id="notAdminHeading">You are not authorized to view this page</h2>
 
-    <input type="text" id="productName" placeholder="Product Name" />
-    <input type="text" id="productCategory" placeholder="Category (cookies, bracelets)" />
-    <input type="text" id="productImage" placeholder="Image URL (e.g., image.jpg)" />
+    <div class="hidden" id="adminForm">
+      <h3>Add or Edit Product</h3>
 
-    <h4>Sizes & Prices</h4>
-    <input type="text" id="sizeInput" placeholder="Size (e.g., Small)" />
-    <input type="number" id="priceInput" placeholder="Price" step="0.01" />
-    <button onclick="addSize()">Add Size</button>
+      <input type="text" id="productName" placeholder="Product Name" />
+      <input type="text" id="productCategory" placeholder="Category (cookies, bracelets)" />
+      <input type="text" id="productImage" placeholder="Image URL" />
 
-    <div id="sizesList"></div>
-    <button onclick="submitProduct()">Submit Product</button>
+      <h4>Sizes & Prices</h4>
+      <input type="text" id="sizeInput" placeholder="Size (e.g., Small)" />
+      <input type="number" id="priceInput" placeholder="Price" step="0.01" />
+      <button onclick="addSize()">Add Size</button>
 
-    <h2>All Products</h2>
-    <div class="product-list" id="productList"></div>
+      <div id="sizesList"></div>
+      <button onclick="submitProduct()">Submit Product</button>
+
+      <h2>All Products</h2>
+      <div class="product-list" id="productList"></div>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      getDocs,
-      doc,
-      deleteDoc,
-      updateDoc
-    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
     // Firebase config (use the updated values)
     const firebaseConfig = {
@@ -144,55 +139,66 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth();
 
     let sizes = [];
     let editingProduct = null;
+    let isAdmin = false;
+
+    // Set session persistence to 'local' for remembering login
+    auth.setPersistence(browserLocalPersistence).then(() => {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          console.log("User signed in:", user.uid);
+
+          // Fetch the user's role from Firestore
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            if (userData.role === "admin") {
+              isAdmin = true;
+              document.getElementById("adminPanelHeading").classList.remove("hidden");
+              document.getElementById("adminForm").classList.remove("hidden");
+              document.getElementById("adminLink").classList.add("hidden");  // Hide admin link if already logged in as admin
+              loadProducts();
+            } else {
+              document.getElementById("notAdminHeading").classList.remove("hidden");
+            }
+          } else {
+            console.log("No role data found.");
+          }
+        } else {
+          console.log("No user is signed in.");
+          document.getElementById("notAdminHeading").classList.remove("hidden");
+        }
+      });
+    }).catch((error) => {
+      console.log("Error with persistence:", error);
+    });
 
     window.addSize = () => {
-      const size = document.getElementById("sizeInput").value.trim();
+      const size = document.getElementById("sizeInput").value;
       const price = parseFloat(document.getElementById("priceInput").value);
 
-      if (!size || isNaN(price) || price <= 0) {
-        alert("Please enter a valid size and price greater than 0.");
-        return;
+      if (size && !isNaN(price)) {
+        sizes.push({ size, price });
+        document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+        document.getElementById("sizeInput").value = "";
+        document.getElementById("priceInput").value = "";
+      } else {
+        alert("Please enter both size and price.");
       }
-
-      const sizeObj = { size, price };
-      sizes.push(sizeObj);
-      updateSizeList();
-      document.getElementById("sizeInput").value = "";
-      document.getElementById("priceInput").value = "";
-    };
-
-    window.deleteSize = (index) => {
-      sizes.splice(index, 1);  // Remove size at the given index
-      updateSizeList();
-    };
-
-    const updateSizeList = () => {
-      const sizeListDiv = document.getElementById("sizesList");
-      sizeListDiv.innerHTML = "";
-      sizes.forEach((sizeObj, index) => {
-        const sizeItem = document.createElement("div");
-        sizeItem.innerHTML = `${sizeObj.size} - $${sizeObj.price} <button onclick="deleteSize(${index})">Delete</button>`;
-        sizeListDiv.appendChild(sizeItem);
-      });
     };
 
     window.submitProduct = async () => {
       const name = document.getElementById("productName").value.trim();
       const category = document.getElementById("productCategory").value.trim().toLowerCase();
-      let imageUrl = document.getElementById("productImage").value.trim();
+      const imageUrl = document.getElementById("productImage").value.trim();
 
       if (!name || !category || sizes.length === 0) {
-        alert("Please fill in all fields and add at least one size.");
+        alert("Fill in all fields and add at least one size.");
         return;
-      }
-
-      // Check if the image URL is valid
-      if (imageUrl && !/^https?:\/\//.test(imageUrl)) {
-        // If no protocol (http:// or https://), treat it as a local image in the same folder
-        imageUrl = `./${imageUrl}`;
       }
 
       const product = {
@@ -235,7 +241,7 @@
       document.getElementById("productCategory").value = product.category;
       document.getElementById("productImage").value = product.imageUrl;
       sizes = product.sizes || [];
-      updateSizeList();
+      document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -256,7 +262,7 @@
         const snapshot = await getDocs(collection(db, col));
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          const img = data.imageUrl && data.imageUrl.trim() !== "" ? data.imageUrl : "./default.jpg"; // Replace 'default.jpg' with an actual default image
+          const img = data.imageUrl && data.imageUrl.trim() !== "" ? data.imageUrl : "default.jpg"; // Replace 'default.jpg' if no image
 
           const card = document.createElement("div");
           card.className = "product-card";
@@ -274,10 +280,7 @@
         });
       }
     };
-
-    loadProducts();
   </script>
 
 </body>
 </html>
-
