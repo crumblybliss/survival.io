@@ -4,18 +4,126 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel</title>
-  <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-storage.js"></script>
-  <link rel="stylesheet" href="style.css"> <!-- Link to your custom CSS -->
+
+  <!-- Firebase SDK (Modular version) -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js';
+    import { getAuth, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-storage.js';
+
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // Your existing JavaScript for login and product handling here...
+  </script>
+
+  <!-- Inline CSS -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+
+    #loginBtn {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 20px;
+    }
+
+    #loginBtn:hover {
+      background-color: #45a049;
+    }
+
+    #productForm {
+      display: none;
+      margin: 20px;
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    #productForm input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    #productForm button {
+      padding: 10px 20px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    #productForm button:hover {
+      background-color: #0b7dda;
+    }
+
+    #productList {
+      margin: 20px;
+    }
+
+    .product {
+      background-color: #fff;
+      padding: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .product img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .product button {
+      padding: 8px 16px;
+      background-color: #f44336;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .product button:hover {
+      background-color: #e53935;
+    }
+
+  </style>
 </head>
 <body>
   <!-- Login Button -->
   <button id="loginBtn">Login</button>
 
   <!-- Product Form for Adding Products -->
-  <div id="productForm" style="display:none;">
+  <div id="productForm">
     <h3>Add New Product</h3>
     <input type="text" id="productName" placeholder="Product Name" required>
     <input type="text" id="productDescription" placeholder="Product Description" required>
@@ -28,24 +136,8 @@
     <h3>Product List</h3>
   </div>
 
-  <script>
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-      authDomain: "survival-f35e2.firebaseapp.com",
-      projectId: "survival-f35e2",
-      storageBucket: "survival-f35e2.appspot.com",
-      messagingSenderId: "704462603548",
-      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-    };
-
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const storage = firebase.storage();
-
-    // DOM Elements
+  <script type="module">
+    // Login function
     const loginBtn = document.getElementById("loginBtn");
     const submitProductBtn = document.getElementById("submitProduct");
     const productNameInput = document.getElementById("productName");
@@ -56,8 +148,8 @@
 
     // Login function
     loginBtn.addEventListener("click", () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).then((result) => {
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider).then((result) => {
         console.log(result.user);
         if (result.user) {
           productForm.style.display = 'block'; // Show the product form after login
@@ -75,9 +167,9 @@
 
       if (name && description && imageFile) {
         try {
-          const imageRef = storage.ref().child('productImages/' + imageFile.name);
-          await imageRef.put(imageFile);
-          const imageURL = await imageRef.getDownloadURL();
+          const imageRef = ref(storage, 'productImages/' + imageFile.name);
+          await uploadBytes(imageRef, imageFile);
+          const imageURL = await getDownloadURL(imageRef);
 
           const product = {
             name: name,
@@ -85,7 +177,7 @@
             image: imageURL
           };
 
-          await db.collection('products').add(product);
+          await addDoc(collection(db, 'products'), product);
           alert('Product added successfully!');
           loadProducts(); // Reload the product list
         } catch (error) {
@@ -98,7 +190,7 @@
 
     // Load products function
     const loadProducts = async () => {
-      const snapshot = await db.collection('products').get();
+      const snapshot = await getDocs(collection(db, 'products'));
       productList.innerHTML = ''; // Clear the existing product list
 
       snapshot.forEach(doc => {
@@ -117,7 +209,7 @@
         deleteBtn.innerText = 'Delete';
         deleteBtn.addEventListener('click', async () => {
           try {
-            await db.collection('products').doc(doc.id).delete();
+            await deleteDoc(doc(db, 'products', doc.id));
             alert('Product deleted successfully!');
             loadProducts(); // Reload the product list
           } catch (error) {
