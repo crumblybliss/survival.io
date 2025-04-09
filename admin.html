@@ -57,32 +57,19 @@
       width: 200px;
     }
 
-    .product-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
     .product-card {
-      width: 250px;
+      margin: 20px;
       padding: 10px;
-      background-color: #fff;
       border: 1px solid #ccc;
       border-radius: 5px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .product-card img {
-      width: 100%;
-      height: auto;
-    }
-
-    .actions {
-      margin-top: 10px;
+      background-color: white;
+      width: 200px;
+      display: inline-block;
+      text-align: center;
     }
 
     .actions button {
-      margin-right: 10px;
+      margin: 5px;
     }
   </style>
 </head>
@@ -102,8 +89,8 @@
       <input type="password" id="password" placeholder="Enter password" />
       <button onclick="login()">Login</button>
     </div>
+    
     <h2>Add or Edit Product</h2>
-
     <input type="text" id="productName" placeholder="Product Name" />
     <input type="text" id="productCategory" placeholder="Category (cookies, bracelets)" />
     <input type="text" id="productImage" placeholder="Image URL" />
@@ -112,7 +99,6 @@
     <input type="text" id="sizeInput" placeholder="Size (e.g., Small)" />
     <input type="number" id="priceInput" placeholder="Price" step="0.01" />
     <button onclick="addSize()">Add Size</button>
-
     <div id="sizesList"></div>
     <button onclick="submitProduct()">Submit Product</button>
 
@@ -122,7 +108,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, getDoc, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
     import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -209,7 +195,7 @@
       const product = {
         name,
         category,
-        imageUrl: imageUrl || "default.jpg",  // Fallback to default image
+        imageUrl: imageUrl || "default.jpg",  // Use default image if none provided
         sizes
       };
 
@@ -277,30 +263,43 @@
 
     // Edit product
     window.editProduct = (productId) => {
-      const productRef = doc(db, "cookies", productId);
-      getDocs(productRef).then(docSnap => {
-        const data = docSnap.data();
-        document.getElementById("productName").value = data.name;
-        document.getElementById("productCategory").value = data.category;
-        document.getElementById("productImage").value = data.imageUrl;
-        sizes = [...data.sizes];
-        document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
-        editingProduct = { id: productId };
+      const productRef = doc(db, "cookies", productId);  // Change to "bracelets" if needed
+      getDoc(productRef).then(docSnap => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          document.getElementById("productName").value = data.name || "";
+          document.getElementById("productCategory").value = data.category || "";
+          document.getElementById("productImage").value = data.imageUrl || "default.jpg";
+          sizes = [...data.sizes];
+          document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+          editingProduct = { id: productId };
+        } else {
+          console.error("Product not found!");
+          alert("Product not found!");
+        }
+      }).catch(error => {
+        console.error("Error fetching product:", error);
+        alert("Failed to load product data.");
       });
     };
 
     // Delete product
     window.deleteProduct = async (productId) => {
-      const category = document.getElementById("productCategory").value.trim().toLowerCase();
-      const ref = doc(db, category, productId);
-      await deleteDoc(ref);
-      alert("Product deleted!");
-      loadProducts();
+      const productCategory = document.getElementById("productCategory").value.trim().toLowerCase();
+      const ref = doc(db, productCategory, productId);
+
+      try {
+        await deleteDoc(ref);
+        alert("Product deleted!");
+        loadProducts();
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        alert("Failed to delete product.");
+      }
     };
 
-    // Load the products on page load
-    window.onload = loadProducts;
+    loadProducts();
   </script>
-
 </body>
 </html>
+
