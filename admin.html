@@ -181,7 +181,7 @@
       const product = {
         name,
         category,
-        imageUrl,
+        imageUrl: imageUrl || "https://via.placeholder.com/250x180?text=No+Image",  // Fallback to placeholder image
         sizes
       };
 
@@ -224,7 +224,7 @@
         const snapshot = await getDocs(collection(db, col));
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          const img = data.imageUrl && data.imageUrl.trim() !== "" ? data.imageUrl : "difficult.jpg";
+          const img = data.imageUrl && data.imageUrl.trim() !== "" ? data.imageUrl : "https://via.placeholder.com/250x180?text=No+Image";
 
           const card = document.createElement("div");
           card.className = "product-card";
@@ -241,6 +241,16 @@
           productList.appendChild(card);
         });
       }
+    };
+
+    // Edit product
+    window.editProduct = (product) => {
+      editingProduct = product;
+      document.getElementById("productName").value = product.name;
+      document.getElementById("productCategory").value = product.category;
+      document.getElementById("productImage").value = product.imageUrl;
+      sizes = product.sizes || [];
+      document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
     };
 
     loadProducts();
