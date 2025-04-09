@@ -146,25 +146,12 @@
 
       if (size && !isNaN(price)) {
         sizes.push({ size, price });
-        updateSizesDisplay();
+        document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
         document.getElementById("sizeInput").value = "";
         document.getElementById("priceInput").value = "";
       } else {
         alert("Please enter both size and price.");
       }
-    };
-
-    const updateSizesDisplay = () => {
-      const list = sizes.map((s, index) =>
-        `<div>${s.size} - $${s.price.toFixed(2)} 
-        <button onclick="removeSize(${index})" style="margin-left:10px;background:red;">X</button></div>`
-      ).join("");
-      document.getElementById("sizesList").innerHTML = list;
-    };
-
-    window.removeSize = (index) => {
-      sizes.splice(index, 1);
-      updateSizesDisplay();
     };
 
     window.submitProduct = async () => {
@@ -177,7 +164,12 @@
         return;
       }
 
-      const product = { name, category, imageUrl, sizes };
+      const product = {
+        name,
+        category,
+        imageUrl,
+        sizes
+      };
 
       try {
         if (editingProduct) {
@@ -193,7 +185,7 @@
         loadProducts();
       } catch (error) {
         console.error("Error:", error);
-        alert("Error saving product. Check Firebase rules.");
+        alert("Error saving product.");
       }
     };
 
@@ -203,7 +195,7 @@
       document.getElementById("productName").value = "";
       document.getElementById("productCategory").value = "";
       document.getElementById("productImage").value = "";
-      updateSizesDisplay();
+      document.getElementById("sizesList").innerText = "";
     };
 
     window.editProduct = (product) => {
@@ -212,7 +204,7 @@
       document.getElementById("productCategory").value = product.category;
       document.getElementById("productImage").value = product.imageUrl;
       sizes = product.sizes || [];
-      updateSizesDisplay();
+      document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -233,14 +225,12 @@
         const snapshot = await getDocs(collection(db, col));
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          const img = data.imageUrl && data.imageUrl.trim() !== "" 
-            ? data.imageUrl 
-            : "https://via.placeholder.com/250x180?text=No+Image";
+          const img = data.imageUrl && data.imageUrl.trim() !== "" ? data.imageUrl : "https://placehold.co/250x180?text=No+Image";
 
           const card = document.createElement("div");
           card.className = "product-card";
           card.innerHTML = `
-            <img src="${img}" alt="${data.name}" />
+            <img src="${img}" alt="${data.name}" onerror="this.src='https://placehold.co/250x180?text=No+Image'" />
             <h3>${data.name}</h3>
             <p>Category: ${data.category}</p>
             <p>${(data.sizes || []).map(s => `${s.size}: $${s.price}`).join("<br>")}</p>
@@ -259,3 +249,4 @@
 
 </body>
 </html>
+
