@@ -58,47 +58,18 @@
     }
 
     .product-card {
-      border: 1px solid #ccc;
-      padding: 15px;
-      margin-bottom: 20px;
+      border: 1px solid #ddd;
       border-radius: 5px;
-      display: inline-block;
-      width: 200px;
-      text-align: center;
-    }
-
-    .product-card img {
-      width: 100%;
-      height: auto;
-      margin-bottom: 10px;
+      padding: 10px;
+      margin: 10px 0;
     }
 
     .actions button {
-      background-color: #f44336;
-      margin: 5px;
-      cursor: pointer;
-    }
-
-    .actions button:hover {
-      background-color: #d32f2f;
-    }
-
-    .size-item {
-      margin-bottom: 5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .size-item button {
-      background-color: #f44336;
-      margin-left: 10px;
-      cursor: pointer;
+      margin-right: 5px;
     }
   </style>
 </head>
 <body>
-
   <div class="navbar">
     <a href="index.html">Home</a>
     <a href="cookies.html">Cookies</a>
@@ -118,13 +89,13 @@
     <input type="text" id="productName" placeholder="Product Name" />
     <input type="text" id="productCategory" placeholder="Category (cookies, bracelets)" />
     <input type="text" id="productImage" placeholder="Image URL" />
-    
+
     <h4>Sizes & Prices</h4>
     <input type="text" id="sizeInput" placeholder="Size (e.g., Small)" />
     <input type="number" id="priceInput" placeholder="Price" step="0.01" />
     <button onclick="addSize()">Add Size</button>
 
-    <div id="sizesList"></div>
+    <ul id="sizesList"></ul>
     <button onclick="submitProduct()">Submit Product</button>
 
     <h2>All Products</h2>
@@ -133,7 +104,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
     import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -152,46 +123,41 @@
     let sizes = [];
     let editingProduct = null;
 
-    // Set persistence to local storage
-    setPersistence(auth, browserLocalPersistence)
-      .then(() => {
-        console.log("Persistence set to local");
-      })
-      .catch((error) => {
-        console.error("Error setting persistence:", error);
-      });
+    setPersistence(auth, browserLocalPersistence);
 
-    // Listen for authentication state changes
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
-        console.log("User signed in:", user);
-        document.querySelector(".login-form").style.display = "none"; // Hide login form if logged in
-      } else {
-        console.log("No user signed in");
+        document.querySelector(".login-form").style.display = "none";
+        loadProducts();
+
+        // Optional admin setup
+        if (user.email === "youremail@example.com") { // CHANGE THIS
+          const btn = document.createElement("button");
+          btn.textContent = "Set Myself as Admin";
+          btn.style.background = "darkred";
+          btn.style.color = "white";
+          btn.onclick = async () => {
+            await setDoc(doc(db, "users", user.uid), { role: "admin" });
+            alert("You are now an admin");
+          };
+          document.querySelector(".container").appendChild(btn);
+        }
       }
     });
 
-    // Login function
     window.login = () => {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-      if (email && password) {
-        signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-            console.log("User signed in:", userCredential.user);
-            document.querySelector(".login-form").style.display = "none"; // Hide login form after successful login
-          })
-          .catch((error) => {
-            console.error("Error signing in:", error);
-            alert("Failed to sign in. Please check your email and password.");
-          });
-      } else {
-        alert("Please enter both email and password.");
-      }
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          document.querySelector(".login-form").style.display = "none";
+        })
+        .catch((error) => {
+          alert("Login failed: " + error.message);
+        });
     };
 
-    // Add size to product
     window.addSize = () => {
       const size = document.getElementById("sizeInput").value;
       const price = parseFloat(document.getElementById("priceInput").value);
@@ -199,136 +165,99 @@
       if (size && !isNaN(price)) {
         sizes.push({ size, price });
         updateSizeList();
-        document.getElementById("sizeInput").value = "";
-        document.getElementById("priceInput").value = "";
-      } else {
-        alert("Please enter both size and price.");
       }
     };
 
-    // Update the size list display
-    const updateSizeList = () => {
-      const sizesListDiv = document.getElementById("sizesList");
-      sizesListDiv.innerHTML = "";
-
-      sizes.forEach((sizeObj, index) => {
-        const sizeItem = document.createElement("div");
-        sizeItem.className = "size-item";
-        sizeItem.innerHTML = `${sizeObj.size} - $${sizeObj.price} 
-          <button onclick="deleteSize(${index})">Delete</button>`;
-        sizesListDiv.appendChild(sizeItem);
+    function updateSizeList() {
+      const list = document.getElementById("sizesList");
+      list.innerHTML = "";
+      sizes.forEach((s, i) => {
+        const li = document.createElement("li");
+        li.innerHTML = `${s.size} - $${s.price.toFixed(2)} <button onclick="removeSize(${i})">Remove</button>`;
+        list.appendChild(li);
       });
-    };
+    }
 
-    // Delete size from the list
-    window.deleteSize = (index) => {
+    window.removeSize = (index) => {
       sizes.splice(index, 1);
       updateSizeList();
     };
 
-    // Submit new or edited product
     window.submitProduct = async () => {
-      const name = document.getElementById("productName").value.trim();
-      const category = document.getElementById("productCategory").value.trim().toLowerCase();
-      const imageUrl = document.getElementById("productImage").value.trim();
+      const name = document.getElementById("productName").value;
+      const category = document.getElementById("productCategory").value.toLowerCase();
+      const imageUrl = document.getElementById("productImage").value || "https://via.placeholder.com/250x180?text=No+Image";
 
-      if (!name || !category || sizes.length === 0) {
-        alert("Fill in all fields and add at least one size.");
-        return;
-      }
+      if (!name || !category || sizes.length === 0) return alert("Missing fields");
 
-      const product = {
-        name,
-        category,
-        imageUrl: imageUrl || "https://via.placeholder.com/250x180?text=No+Image",  // Fallback to placeholder image
-        sizes
-      };
+      const product = { name, category, imageUrl, sizes };
 
       try {
         if (editingProduct) {
-          const ref = doc(db, category, editingProduct.id);
-          await updateDoc(ref, product);
-          alert("Product updated!");
+          await updateDoc(doc(db, category, editingProduct.id), product);
+          alert("Updated!");
         } else {
           await addDoc(collection(db, category), product);
-          alert("Product added!");
+          alert("Added!");
         }
-
         clearForm();
         loadProducts();
-      } catch (error) {
-        console.error("Error:", error);
-        alert("Error saving product.");
+      } catch (err) {
+        alert("Error: " + err.message);
       }
     };
 
-    // Clear the form for adding/editing products
-    const clearForm = () => {
+    function clearForm() {
       editingProduct = null;
       sizes = [];
       document.getElementById("productName").value = "";
       document.getElementById("productCategory").value = "";
       document.getElementById("productImage").value = "";
-      document.getElementById("sizesList").innerText = "";
-    };
+      updateSizeList();
+    }
 
-    // Load products from Firestore
-    const loadProducts = async () => {
-      const productList = document.getElementById("productList");
-      productList.innerHTML = "";
+    async function loadProducts() {
+      const list = document.getElementById("productList");
+      list.innerHTML = "";
+      const categories = ["cookies", "bracelets"];
 
-      const allCollections = ["cookies", "bracelets"];
-
-      for (const col of allCollections) {
-        const snapshot = await getDocs(collection(db, col));
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          const img = data.imageUrl && data.imageUrl.trim() !== "" ? data.imageUrl : "https://via.placeholder.com/250x180?text=No+Image";
-
-          const card = document.createElement("div");
-          card.className = "product-card";
-          card.innerHTML = `
-            <img src="${img}" alt="${data.name}" />
-            <h3>${data.name}</h3>
-            <p>Category: ${data.category}</p>
-            <p>${(data.sizes || []).map(s => `${s.size}: $${s.price}`).join("<br>")}</p>
+      for (const cat of categories) {
+        const snap = await getDocs(collection(db, cat));
+        snap.forEach(docSnap => {
+          const d = docSnap.data();
+          const img = d.imageUrl || "https://via.placeholder.com/250x180?text=No+Image";
+          const div = document.createElement("div");
+          div.className = "product-card";
+          div.innerHTML = `
+            <img src="${img}" style="width:100%; max-width:250px;" />
+            <h3>${d.name}</h3>
+            <p>${cat}</p>
+            <p>${(d.sizes || []).map(s => `${s.size}: $${s.price}`).join("<br>")}</p>
             <div class="actions">
-              <button onclick='editProduct(${JSON.stringify({ ...data, id: docSnap.id })})'>Edit</button>
-              <button onclick='deleteProduct("${col}", "${docSnap.id}")'>Delete</button>
+              <button onclick='editProduct(${JSON.stringify({ ...d, id: docSnap.id })})'>Edit</button>
+              <button onclick='deleteProduct("${cat}", "${docSnap.id}")'>Delete</button>
             </div>
           `;
-          productList.appendChild(card);
+          list.appendChild(div);
         });
       }
-    };
+    }
 
-    // Edit product
-    window.editProduct = (product) => {
-      editingProduct = product;
-      document.getElementById("productName").value = product.name;
-      document.getElementById("productCategory").value = product.category;
-      document.getElementById("productImage").value = product.imageUrl;
-      sizes = product.sizes || [];
+    window.editProduct = (p) => {
+      editingProduct = p;
+      document.getElementById("productName").value = p.name;
+      document.getElementById("productCategory").value = p.category;
+      document.getElementById("productImage").value = p.imageUrl;
+      sizes = p.sizes || [];
       updateSizeList();
     };
 
-    // Delete product
-    window.deleteProduct = async (category, productId) => {
-      const productRef = doc(db, category, productId);
-      try {
-        await deleteDoc(productRef);
-        alert("Product deleted!");
+    window.deleteProduct = async (cat, id) => {
+      if (confirm("Delete this product?")) {
+        await deleteDoc(doc(db, cat, id));
         loadProducts();
-      } catch (error) {
-        console.error("Error deleting product:", error);
-        alert("Error deleting product.");
       }
     };
-
-    // Load products when the page loads
-    loadProducts();
   </script>
-
 </body>
 </html>
-
