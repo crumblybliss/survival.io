@@ -10,6 +10,7 @@
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
         // Firebase Config
         const firebaseConfig = {
@@ -24,6 +25,7 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
         // DOM Elements
@@ -53,7 +55,6 @@
                 showSpinner();
                 await signInWithEmailAndPassword(auth, email, password);
                 alert("Login successful!");
-                window.location.href = "index.html";
             } catch (error) {
                 alert(error.message);
             } finally {
@@ -92,7 +93,6 @@
                 showSpinner();
                 await signInWithPopup(auth, provider);
                 alert("Google login successful!");
-                window.location.href = "index.html";
             } catch (error) {
                 alert(error.message);
             } finally {
@@ -141,9 +141,19 @@
         toggleFormsLink.addEventListener("click", toggleForms);
 
         // Redirect if already logged in
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                window.location.href = "index.html";
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    if (userData.role === "admin") {
+                        window.location.href = "admin.html"; // Redirect admin to admin page
+                    } else {
+                        window.location.href = "index.html"; // Redirect regular user to home page
+                    }
+                }
             }
         });
 
@@ -158,50 +168,97 @@
     </script>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #0a1d37;
-            color: white;
-            text-align: center;
+        /* General Reset */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
         .container {
-            background: white;
-            color: black;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 400px;
-            margin: 50px auto;
-            box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4);
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
         }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
         input, button {
             width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
-            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-bottom: 12px;
             font-size: 16px;
+            outline: none;
         }
+
         input {
-            background-color: #f1f1f1;
-            border: 1px solid #ccc;
+            background-color: #fafafa;
         }
+
         button {
             background-color: #00bcd4;
             color: white;
+            font-size: 16px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background-color 0.3s ease;
         }
+
         button:hover {
             background-color: #0097a7;
         }
+
         .toggle-link {
             color: #00bcd4;
             cursor: pointer;
-            margin-top: 10px;
-            display: block;
+            font-size: 14px;
+            display: inline-block;
+            margin-top: 12px;
         }
+
+        .toggle-link:hover {
+            text-decoration: underline;
+        }
+
+        #google-login {
+            background-color: #db4437;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        #google-login:hover {
+            background-color: #c1351d;
+        }
+
+        #forgot-password {
+            color: #00bcd4;
+            font-size: 14px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
         #spinner {
             display: none;
             position: fixed;
@@ -213,8 +270,9 @@
             border-radius: 50%;
             width: 50px;
             height: 50px;
-            animation: spin 2s linear infinite;
+            animation: spin 1s linear infinite;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
