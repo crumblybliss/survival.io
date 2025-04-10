@@ -151,8 +151,15 @@
       const product = JSON.parse(atob(productB64));
       const sizeInfo = (product.sizes || []).find(s => s.size === selectedSize);
 
+      // Check if sizeInfo is valid
       if (!sizeInfo) {
         alert("Invalid size selected.");
+        return;
+      }
+
+      // Ensure all required product data is valid
+      if (!product.id || !product.name || !sizeInfo.price || !sizeInfo.size) {
+        alert("Product data is incomplete.");
         return;
       }
 
@@ -160,6 +167,7 @@
       const cartDoc = await getDoc(cartRef);
       let cart = cartDoc.exists() ? cartDoc.data().items : [];
 
+      // Check if the cart already contains this item
       const existing = cart.find(item => item.id === product.id && item.size === selectedSize);
       if (existing) {
         existing.quantity += 1;
@@ -172,6 +180,12 @@
           quantity: 1,
           imageUrl: product.imageUrl || "default.jpg"
         });
+      }
+
+      // Ensure the cart is valid before saving
+      if (!cart || cart.length === 0) {
+        alert("Error: Cart is empty.");
+        return;
       }
 
       await setDoc(cartRef, { items: cart });
