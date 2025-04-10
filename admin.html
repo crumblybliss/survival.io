@@ -1,462 +1,249 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Panel - Tactics & Treats</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - CrumblyBliss</title>
 
-    .navbar {
-      background-color: #003366;
-      padding: 15px;
-      text-align: center;
-    }
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"></script>
 
-    .navbar a {
-      color: white;
-      padding: 14px 20px;
-      text-decoration: none;
-      display: inline-block;
-    }
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
 
-    .container {
-      padding: 20px;
-    }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
-    #adminContainer {
-      display: block;
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
-      background-color: white;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
 
-    input[type="text"], input[type="number"], input[type="date"], input[type="email"], input[type="password"] {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
+        .product-list {
+            list-style-type: none;
+            padding: 0;
+        }
 
-    button {
-      background-color: #003366;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+        .product-item {
+            background-color: #ecf0f1;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    button:hover {
-      background-color: #005b96;
-    }
+        .product-item span {
+            font-size: 1.1em;
+        }
 
-    h2 {
-      color: #003366;
-      font-size: 1.8em;
-      margin-bottom: 20px;
-    }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
-    h4 {
-      color: #003366;
-      font-size: 1.2em;
-      margin-bottom: 10px;
-    }
+        .btn:hover {
+            background-color: #2980b9;
+        }
 
-    .product-list, #promoCodeList {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
-      margin-top: 30px;
-    }
-
-    .product-card, .promo-card {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
-
-    .product-card img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-    }
-
-    .actions {
-      margin-top: 15px;
-    }
-
-    .actions button {
-      margin: 5px;
-    }
-
-    .product-card h3, .promo-card p {
-      color: #003366;
-      font-size: 1.2em;
-      margin: 10px 0;
-    }
-
-    .login-form {
-      text-align: center;
-      margin-top: 50px;
-    }
-
-    .login-form input {
-      padding: 12px;
-      width: 250px;
-      margin: 10px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-    }
-
-    .promo-code-form input[type="text"], .promo-code-form input[type="number"], .promo-code-form input[type="date"] {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-
-    .promo-code-form button {
-      width: 100%;
-      background-color: #003366;
-      color: white;
-      padding: 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .promo-code-form button:hover {
-      background-color: #005b96;
-    }
-
-    .promo-card button {
-      margin-top: 5px;
-      background-color: #e74c3c;
-      color: white;
-      border-radius: 4px;
-      padding: 5px 10px;
-    }
-
-    .promo-card button:hover {
-      background-color: #c0392b;
-    }
-  </style>
+        .login-status {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+    </style>
 </head>
 <body>
-
-  <div class="navbar">
-    <a href="index.html">Home</a>
-    <a href="cookies.html">Cookies</a>
-    <a href="bracelets.html">Bracelets</a>
-    <a href="coolers.html">Coolers</a>
-    <a href="admin.html" id="adminLink">Admin Panel</a>
-  </div>
-
-  <div class="container">
-    <div id="adminContainer">
-      <!-- Product Management -->
-      <h2>Add or Edit Product</h2>
-      <input type="text" id="productName" placeholder="Product Name" />
-      <input type="text" id="productCategory" placeholder="Category (cookies, bracelets, coolers)" />
-      <input type="text" id="productImage" placeholder="Image URL" />
-      
-      <h4>Sizes & Prices</h4>
-      <input type="text" id="sizeInput" placeholder="Size (e.g., Small)" />
-      <input type="number" id="priceInput" placeholder="Price" step="0.01" />
-      <input type="text" id="colorInput" placeholder="Color (Optional)" />
-      <button onclick="addSize()">Add Size</button>
-      <div id="sizesList"></div>
-      <button onclick="submitProduct()">Submit Product</button>
-
-      <!-- Promo Code Management -->
-      <h2>Manage Promo Codes</h2>
-      <div class="promo-code-form">
-        <input type="text" id="promoCodeInput" placeholder="Promo Code" />
-        <input type="number" id="discountInput" placeholder="Discount Percentage" step="1" />
-        <input type="date" id="expirationInput" placeholder="Expiration Date" />
-        <button onclick="submitPromoCode()">Submit Promo Code</button>
-      </div>
-
-      <h2>All Products</h2>
-      <div class="product-list" id="productList"></div>
-
-      <h2>All Promo Codes</h2>
-      <div id="promoCodeList"></div>
-    </div>
-
-    <div class="login-form" id="loginForm">
-      <h2>Admin Login</h2>
-      <input type="email" id="email" placeholder="Enter email" />
-      <input type="password" id="password" placeholder="Enter password" />
-      <button onclick="login()">Login</button>
-    </div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, getDoc, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-      authDomain: "survival-f35e2.firebaseapp.com",
-      projectId: "survival-f35e2",
-      storageBucket: "survival-f35e2.appspot.com",
-      messagingSenderId: "704462603548",
-      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth();
-
-    let sizes = [];
-    let editingProduct = null;
-
-    setPersistence(auth, browserLocalPersistence)
-      .then(() => {
-        console.log("Persistence set to local");
-      })
-      .catch((error) => {
-        console.error("Error setting persistence:", error);
-      });
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        user.getIdTokenResult().then((idTokenResult) => {
-          if (idTokenResult.claims.admin) {
-            console.log("User is an admin.");
-            document.getElementById('adminContainer').style.display = 'block';
-            document.getElementById('loginForm').style.display = 'none';
-            loadProducts();
-            loadPromoCodes();
-          } else {
-            console.log("User is not an admin.");
-            alert("You do not have admin privileges.");
-            window.location.href = "index.html";
-          }
-        });
-      } else {
-        console.log("No user signed in");
-      }
-    });
-
-    window.login = () => {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-
-      if (email && password) {
-        signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-            console.log("User signed in:", userCredential.user);
-          })
-          .catch((error) => {
-            console.error("Error signing in:", error);
-            alert("Failed to sign in.");
-          });
-      } else {
-        alert("Please enter both email and password.");
-      }
-    };
-
-    window.addSize = () => {
-      const sizeInput = document.getElementById("sizeInput").value.trim();
-      const priceInput = parseFloat(document.getElementById("priceInput").value.trim());
-      const colorInput = document.getElementById("colorInput").value.trim();
-
-      if (sizeInput && !isNaN(priceInput)) {
-        sizes.push({
-          size: sizeInput,
-          price: priceInput,
-          color: colorInput
-        });
-        updateSizeList();
-        document.getElementById("sizeInput").value = "";
-        document.getElementById("priceInput").value = "";
-        document.getElementById("colorInput").value = "";
-      } else {
-        alert("Please provide valid size and price.");
-      }
-    };
-
-    const updateSizeList = () => {
-      const sizesListDiv = document.getElementById("sizesList");
-      sizesListDiv.innerHTML = sizes.map((size, index) => `
-        <div>
-          Size: ${size.size}, Price: $${size.price.toFixed(2)} ${size.color ? `, Color: ${size.color}` : ""}
-          <button onclick="deleteSize(${index})">Delete</button>
+    <div class="container">
+        <div class="login-status">
+            <span id="login-status">Not logged in</span> 
+            <button id="login-btn" class="btn">Login</button>
         </div>
-      `).join('');
-    };
+        <h1>Admin Dashboard</h1>
 
-    window.deleteSize = (index) => {
-      sizes.splice(index, 1);
-      updateSizeList();
-    };
+        <div>
+            <button id="load-products" class="btn">Load Products</button>
+        </div>
+        
+        <ul id="product-list" class="product-list">
+            <!-- Product list will be injected here -->
+        </ul>
 
-    window.submitProduct = async () => {
-      const name = document.getElementById("productName").value.trim();
-      const category = document.getElementById("productCategory").value.trim();
-      const imageUrl = document.getElementById("productImage").value.trim();
+        <div>
+            <button id="add-product-btn" class="btn">Add New Product</button>
+        </div>
+    </div>
 
-      if (name && category && sizes.length > 0) {
-        try {
-          if (editingProduct) {
-            await updateDoc(doc(db, category, editingProduct.id), {
-              name,
-              category,
-              imageUrl,
-              sizes
-            });
-            alert("Product updated successfully!");
-          } else {
-            await addDoc(collection(db, category), {
-              name,
-              category,
-              imageUrl,
-              sizes
-            });
-            alert("Product added successfully!");
-          }
-          loadProducts();
-          resetForm();
-        } catch (error) {
-          console.error("Error adding/updating product:", error);
-          alert("Failed to add/update product.");
-        }
-      } else {
-        alert("Please fill out all fields and add at least one size.");
-      }
-    };
+    <!-- Firebase Initialization -->
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0", // Replace with your new API key after rotating
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
 
-    const loadProducts = async () => {
-      const productList = document.getElementById("productList");
-      productList.innerHTML = "";
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
 
-      const allCollections = ["cookies", "bracelets", "coolers"];  // Include coolers
+        // DOM Elements
+        const loginStatus = document.getElementById('login-status');
+        const loginBtn = document.getElementById('login-btn');
+        const productList = document.getElementById('product-list');
+        const loadProductsBtn = document.getElementById('load-products');
+        const addProductBtn = document.getElementById('add-product-btn');
 
-      for (const col of allCollections) {
-        const snapshot = await getDocs(collection(db, col));
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          const img = data.imageUrl && data.imageUrl.trim() !== "" ? data.imageUrl : "default.jpg";
+        let isLoggedIn = false;
 
-          const card = document.createElement("div");
-          card.classList.add("product-card");
-          card.innerHTML = `
-            <img src="${img}" alt="${data.name}" />
-            <h3>${data.name}</h3>
-            <p>${data.category}</p>
-            <button onclick="editProduct('${col}', '${docSnap.id}')">Edit</button>
-            <button onclick="deleteProduct('${col}', '${docSnap.id}')">Delete</button>
-          `;
-          productList.appendChild(card);
+        // Login/Logout functionality
+        loginBtn.addEventListener('click', async () => {
+            if (isLoggedIn) {
+                await auth.signOut();
+                isLoggedIn = false;
+                loginStatus.textContent = 'Not logged in';
+                loginBtn.textContent = 'Login';
+            } else {
+                const user = await auth.signInAnonymously();
+                isLoggedIn = true;
+                loginStatus.textContent = `Logged in as ${user.user.uid}`;
+                loginBtn.textContent = 'Logout';
+            }
         });
-      }
-    };
 
-    window.editProduct = async (category, productId) => {
-      const docRef = doc(db, category, productId);
-      const docSnap = await getDoc(docRef);
-      const data = docSnap.data();
+        // Load products from Firestore
+        loadProductsBtn.addEventListener('click', async () => {
+            const snapshot = await db.collection('products').get();
+            productList.innerHTML = '';
+            snapshot.forEach(doc => {
+                const product = doc.data();
+                const li = document.createElement('li');
+                li.classList.add('product-item');
+                li.innerHTML = `
+                    <span>${product.name} - $${product.price}</span>
+                    <button class="btn edit-btn" data-id="${doc.id}">Edit</button>
+                    <button class="btn delete-btn" data-id="${doc.id}">Delete</button>
+                `;
+                productList.appendChild(li);
 
-      document.getElementById("productName").value = data.name;
-      document.getElementById("productCategory").value = data.category;
-      document.getElementById("productImage").value = data.imageUrl;
+                // Edit button handler
+                li.querySelector('.edit-btn').addEventListener('click', () => {
+                    const id = li.querySelector('.edit-btn').getAttribute('data-id');
+                    editProduct(id);
+                });
 
-      sizes = data.sizes || [];
-      updateSizeList();
-      editingProduct = { id: productId, category };
-    };
+                // Delete button handler
+                li.querySelector('.delete-btn').addEventListener('click', () => {
+                    const id = li.querySelector('.delete-btn').getAttribute('data-id');
+                    deleteProduct(id);
+                });
+            });
+        });
 
-    window.deleteProduct = async (category, productId) => {
-      try {
-        await deleteDoc(doc(db, category, productId));
-        alert("Product deleted successfully!");
-        loadProducts();
-      } catch (error) {
-        console.error("Error deleting product:", error);
-        alert("Failed to delete product.");
-      }
-    };
-
-    const resetForm = () => {
-      document.getElementById("productName").value = "";
-      document.getElementById("productCategory").value = "";
-      document.getElementById("productImage").value = "";
-      sizes = [];
-      updateSizeList();
-      editingProduct = null;
-    };
-
-    const loadPromoCodes = async () => {
-      const promoCodeList = document.getElementById("promoCodeList");
-      promoCodeList.innerHTML = "";
-
-      const snapshot = await getDocs(collection(db, "promoCodes"));
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        const card = document.createElement("div");
-        card.classList.add("promo-card");
-        card.innerHTML = `
-          <p>Code: ${data.code}</p>
-          <p>Discount: ${data.discount}%</p>
-          <p>Expires on: ${data.expirationDate}</p>
-          <button onclick="deletePromoCode('${docSnap.id}')">Delete</button>
-        `;
-        promoCodeList.appendChild(card);
-      });
-    };
-
-    window.submitPromoCode = async () => {
-      const code = document.getElementById("promoCodeInput").value.trim();
-      const discount = parseInt(document.getElementById("discountInput").value.trim());
-      const expiration = document.getElementById("expirationInput").value.trim();
-
-      if (code && discount > 0 && expiration) {
-        try {
-          await addDoc(collection(db, "promoCodes"), {
-            code,
-            discount,
-            expirationDate: expiration
-          });
-          alert("Promo code added!");
-          loadPromoCodes();
-          document.getElementById("promoCodeInput").value = "";
-          document.getElementById("discountInput").value = "";
-          document.getElementById("expirationInput").value = "";
-        } catch (error) {
-          console.error("Error adding promo code:", error);
-          alert("Failed to add promo code.");
+        // Edit product functionality
+        async function editProduct(id) {
+            const productRef = db.collection('products').doc(id);
+            const productSnapshot = await productRef.get();
+            if (productSnapshot.exists) {
+                const product = productSnapshot.data();
+                const newName = prompt('Edit product name:', product.name);
+                const newPrice = prompt('Edit product price:', product.price);
+                if (newName && newPrice) {
+                    await productRef.update({
+                        name: newName,
+                        price: parseFloat(newPrice)
+                    });
+                    alert('Product updated!');
+                    loadProducts();
+                }
+            }
         }
-      } else {
-        alert("Please fill in all promo code fields.");
-      }
-    };
 
-    window.deletePromoCode = async (promoCodeId) => {
-      try {
-        await deleteDoc(doc(db, "promoCodes", promoCodeId));
-        alert("Promo code deleted!");
-        loadPromoCodes();
-      } catch (error) {
-        console.error("Error deleting promo code:", error);
-        alert("Failed to delete promo code.");
-      }
-    };
-  </script>
+        // Delete product functionality
+        async function deleteProduct(id) {
+            const productRef = db.collection('products').doc(id);
+            await productRef.delete();
+            alert('Product deleted!');
+            loadProducts();
+        }
+
+        // Add new product functionality
+        addProductBtn.addEventListener('click', async () => {
+            const name = prompt('Enter product name:');
+            const price = parseFloat(prompt('Enter product price:'));
+            if (name && price) {
+                await db.collection('products').add({
+                    name: name,
+                    price: price
+                });
+                alert('New product added!');
+                loadProducts();
+            }
+        });
+
+        // Initialize the page
+        async function loadProducts() {
+            const snapshot = await db.collection('products').get();
+            productList.innerHTML = '';
+            snapshot.forEach(doc => {
+                const product = doc.data();
+                const li = document.createElement('li');
+                li.classList.add('product-item');
+                li.innerHTML = `
+                    <span>${product.name} - $${product.price}</span>
+                    <button class="btn edit-btn" data-id="${doc.id}">Edit</button>
+                    <button class="btn delete-btn" data-id="${doc.id}">Delete</button>
+                `;
+                productList.appendChild(li);
+
+                // Edit button handler
+                li.querySelector('.edit-btn').addEventListener('click', () => {
+                    const id = li.querySelector('.edit-btn').getAttribute('data-id');
+                    editProduct(id);
+                });
+
+                // Delete button handler
+                li.querySelector('.delete-btn').addEventListener('click', () => {
+                    const id = li.querySelector('.delete-btn').getAttribute('data-id');
+                    deleteProduct(id);
+                });
+            });
+        }
+
+        // Check user login status
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                isLoggedIn = true;
+                loginStatus.textContent = `Logged in as ${user.uid}`;
+                loginBtn.textContent = 'Logout';
+            } else {
+                isLoggedIn = false;
+                loginStatus.textContent = 'Not logged in';
+                loginBtn.textContent = 'Login';
+            }
+        });
+    </script>
 </body>
 </html>
