@@ -1,172 +1,200 @@
+<!-- UPDATED CODE: Firestore-based cart, consistent with cookies.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactics & Treats - Bracelets</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #0a1d37;
-            color: #f1f1f1;
-            text-align: center;
-            margin: 0;
-        }
-        ul {
-            background-color: #003c5a;
-            padding: 10px;
-            list-style: none;
-            margin: 0;
-        }
-        ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-        ul li a {
-            color: #f1f1f1;
-            text-decoration: none;
-            font-size: 18px;
-        }
-        ul li a:hover {
-            color: #00bcd4;
-        }
-        .container {
-            padding: 50px;
-            background: rgba(0, 0, 0, 0.7);
-            margin: 20px;
-            border-radius: 8px;
-        }
-        .product-list {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .product {
-            background: #003c5a;
-            padding: 20px;
-            margin: 10px;
-            border-radius: 8px;
-            width: 200px;
-            text-align: center;
-        }
-        .product img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-        }
-        button {
-            padding: 10px;
-            background: #00bcd4;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #0097a7;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bracelets - Tactics & Treats</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #0a1d37;
+      color: #f1f1f1;
+      margin: 0;
+      text-align: center;
+    }
+
+    ul {
+      background-color: #003c5a;
+      padding: 10px;
+      list-style: none;
+      margin: 0;
+    }
+
+    ul li {
+      display: inline;
+      margin: 0 15px;
+    }
+
+    ul li a {
+      color: #f1f1f1;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    ul li a:hover {
+      color: #00bcd4;
+    }
+
+    .container {
+      padding: 50px;
+    }
+
+    .product-list {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .product {
+      background: #003c5a;
+      padding: 20px;
+      margin: 10px;
+      border-radius: 8px;
+      width: 200px;
+    }
+
+    .product img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    select {
+      margin: 5px 0;
+      padding: 5px;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px;
+      background: #00bcd4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #0097a7;
+    }
+  </style>
 </head>
 <body>
-    <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="bracelets.html">Bracelets</a></li>
-        <li><a href="cookies.html">Cookies</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="commitments.html">Commitments</a></li>
-        <li><a href="cart.html">Cart 🛒</a></li>
-        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
-    </ul>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="bracelets.html">Bracelets</a></li>
+    <li><a href="cookies.html">Cookies</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="commitments.html">Commitments</a></li>
+    <li><a href="cart.html">Cart 🛒</a></li>
+    <li><a href="admin.html">Admin Dashboard</a></li>
+    <li><button id="loginButton" style="background: #00bcd4; padding: 5px 15px; border: none; border-radius: 5px;">Login</button></li>
+  </ul>
 
-    <div class="container">
-        <h1>Bracelets</h1>
-        <p>Explore our collection of amazing bracelets!</p>
-        <div class="product-list" id="products-list"></div>
-    </div>
+  <div class="container">
+    <h1>Bracelets</h1>
+    <p>Explore our collection of amazing bracelets!</p>
+    <div class="product-list" id="products-list"></div>
+  </div>
 
-    <!-- Firebase SDK for app integration -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
 
-        // Function to load bracelets with color and size options
-        async function loadBracelets() {
-            const productList = document.getElementById("products-list");
-            productList.innerHTML = "<p>Loading bracelets...</p>";
+    const productList = document.getElementById("products-list");
 
-            try {
-                const querySnapshot = await getDocs(collection(db, "bracelets"));
-                productList.innerHTML = "";
+    async function loadBracelets() {
+      productList.innerHTML = "<p>Loading bracelets...</p>";
+      const snap = await getDocs(collection(db, "bracelets"));
+      productList.innerHTML = "";
 
-                if (querySnapshot.empty) {
-                    productList.innerHTML = "<p>No bracelets available.</p>";
-                    return;
-                }
+      if (snap.empty) {
+        productList.innerHTML = "<p>No bracelets available.</p>";
+        return;
+      }
 
-                querySnapshot.forEach((doc) => {
-                    const product = doc.data();
-                    const productDiv = document.createElement("div");
-                    productDiv.classList.add("product");
+      snap.forEach((docSnap) => {
+        const product = docSnap.data();
+        const id = docSnap.id;
+        const colors = Array.isArray(product.colors) ? product.colors : [];
+        const sizes = Array.isArray(product.sizes) ? product.sizes : [];
 
-                    // Ensure colors and sizes are arrays before calling map
-                    const colors = Array.isArray(product.colors) ? product.colors : [];
-                    const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+        const colorOptions = colors.length > 0 ? colors.map(c => `<option value="${c}">${c}</option>`).join("") : "<option>No colors</option>";
+        const sizeOptions = sizes.length > 0 ? sizes.map(s => `<option value="${s}">${s}</option>`).join("") : "<option>No sizes</option>";
 
-                    const colorOptions = colors.length > 0 
-                        ? colors.map(color => `<option value="${color}">${color}</option>`).join("")
-                        : "<option>No colors available</option>";
+        const div = document.createElement("div");
+        div.className = "product";
+        div.innerHTML = `
+          <img src="${product.imageUrl || 'default.jpg'}" alt="${product.name}">
+          <h3>${product.name}</h3>
+          <p>$${product.price.toFixed(2)}</p>
+          <p>Color: <select id="color-${id}">${colorOptions}</select></p>
+          <p>Size: <select id="size-${id}">${sizeOptions}</select></p>
+          <button onclick="addToCart('${id}', '${product.name}', ${product.price}, '${product.imageUrl || ''}')">Add to Cart</button>
+        `;
+        productList.appendChild(div);
+      });
+    }
 
-                    const sizeOptions = sizes.length > 0 
-                        ? sizes.map(size => `<option value="${size}">${size}</option>`).join("")
-                        : "<option>No sizes available</option>";
+    window.addToCart = async (id, name, price, imageUrl) => {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please login to add items to your cart.");
+        return;
+      }
 
-                    productDiv.innerHTML = `
-                        <img src="${product.imageUrl}" alt="${product.name}">
-                        <h3>${product.name}</h3>
-                        <p>$${product.price.toFixed(2)}</p>
-                        <p>Colors: <select id="color-${doc.id}">${colorOptions}</select></p>
-                        <p>Sizes: <select id="size-${doc.id}">${sizeOptions}</select></p>
-                        <button onclick="addToCart('${doc.id}', '${product.name}', ${product.price}, '${product.imageUrl}')">Add to Cart</button>
-                    `;
-                    productList.appendChild(productDiv);
-                });
-            } catch (error) {
-                productList.innerHTML = "<p>Error loading products.</p>";
-                console.error("Error fetching products:", error);
-            }
-        }
+      const color = document.getElementById(`color-${id}`).value;
+      const size = document.getElementById(`size-${id}`).value;
 
-        // Function to add products to cart with selected color and size
-        window.addToCart = (id, name, price, imageUrl) => {
-            const color = document.getElementById(`color-${id}`).value;
-            const size = document.getElementById(`size-${id}`).value;
+      if (!color || !size) {
+        alert("Please select both color and size.");
+        return;
+      }
 
-            if (!color || !size) {
-                alert("Please select both color and size.");
-                return;
-            }
+      const cartRef = doc(db, "carts", user.uid);
+      const cartSnap = await getDoc(cartRef);
+      let cart = cartSnap.exists() ? cartSnap.data().items : [];
 
-            let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            cart.push({ id, name, price, imageUrl, color, size });
-            localStorage.setItem("cart", JSON.stringify(cart));
-            alert(`${name} added to cart!`);
-        };
+      const existing = cart.find(item => item.id === id && item.size === size && item.color === color);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({ id, name, price, imageUrl, color, size, quantity: 1 });
+      }
 
-        // Load bracelets on page load
-        window.onload = loadBracelets;
-    </script>
+      await setDoc(cartRef, { items: cart });
+      alert(`${name} (${color}, ${size}) added to your cart!`);
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      const btn = document.getElementById("loginButton");
+      if (user) {
+        btn.textContent = "Logout";
+        btn.onclick = () => signOut(auth);
+      } else {
+        btn.textContent = "Login";
+        btn.onclick = () => window.location.href = "login.html";
+      }
+    });
+
+    loadBracelets();
+  </script>
 </body>
 </html>
-
