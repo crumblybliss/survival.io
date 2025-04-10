@@ -121,14 +121,14 @@
                     productDiv.classList.add("product");
 
                     // Ensure colors and sizes are arrays before calling map
-                    const colors = Array.isArray(product.colors) ? product.colors : [];
-                    const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+                    const colors = Array.isArray(product.colors) && product.colors.length > 0 ? product.colors : null;
+                    const sizes = Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes : null;
 
-                    const colorOptions = colors.length > 0 
+                    const colorOptions = colors 
                         ? colors.map(color => `<option value="${color}">${color}</option>`).join("")
                         : "<option>No colors available</option>";
 
-                    const sizeOptions = sizes.length > 0 
+                    const sizeOptions = sizes 
                         ? sizes.map(size => `<option value="${size}">${size}</option>`).join("")
                         : "<option>No sizes available</option>";
 
