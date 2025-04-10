@@ -180,6 +180,70 @@
       }
     };
 
+    // Add size to the sizes array
+    window.addSize = () => {
+      const sizeInput = document.getElementById("sizeInput").value.trim();
+      const priceInput = parseFloat(document.getElementById("priceInput").value.trim());
+      const colorInput = document.getElementById("colorInput").value.trim();
+
+      if (sizeInput && !isNaN(priceInput)) {
+        sizes.push({
+          size: sizeInput,
+          price: priceInput,
+          color: colorInput
+        });
+        updateSizeList();
+        // Clear input fields after adding the size
+        document.getElementById("sizeInput").value = "";
+        document.getElementById("priceInput").value = "";
+        document.getElementById("colorInput").value = "";
+      } else {
+        alert("Please provide valid size and price.");
+      }
+    };
+
+    // Update the displayed list of sizes
+    const updateSizeList = () => {
+      const sizesListDiv = document.getElementById("sizesList");
+      sizesListDiv.innerHTML = sizes.map((size, index) => `
+        <div>
+          Size: ${size.size}, Price: $${size.price.toFixed(2)} ${size.color ? `, Color: ${size.color}` : ""}
+          <button onclick="deleteSize(${index})">Delete</button>
+        </div>
+      `).join('');
+    };
+
+    // Delete a size from the sizes array
+    window.deleteSize = (index) => {
+      sizes.splice(index, 1);
+      updateSizeList();
+    };
+
+    // Submit the product to Firestore
+    window.submitProduct = async () => {
+      const name = document.getElementById("productName").value.trim();
+      const category = document.getElementById("productCategory").value.trim();
+      const imageUrl = document.getElementById("productImage").value.trim();
+
+      if (name && category && sizes.length > 0) {
+        try {
+          await addDoc(collection(db, category), {
+            name,
+            category,
+            imageUrl,
+            sizes
+          });
+          alert("Product added successfully!");
+          loadProducts();
+        } catch (error) {
+          console.error("Error adding product:", error);
+          alert("Failed to add product.");
+        }
+      } else {
+        alert("Please fill out all fields and add at least one size.");
+      }
+    };
+
     // Load products from Firestore
     const loadProducts = async () => {
       const productList = document.getElementById("productList");
@@ -211,51 +275,6 @@
           `;
           productList.appendChild(card);
         });
-      }
-    };
-
-    // Delete size from product in Firestore
-    window.deleteSizeFromProduct = async (productId, sizeIndex) => {
-      const productRef = doc(db, "cookies", productId);
-      const productDoc = await getDoc(productRef);
-      if (productDoc.exists()) {
-        const product = productDoc.data();
-        product.sizes.splice(sizeIndex, 1); 
-        await updateDoc(productRef, { sizes: product.sizes });
-        alert("Size deleted successfully!");
-        loadProducts();
-      }
-    };
-
-    // Edit product (load data into form)
-    window.editProduct = async (productId, category) => {
-      const productRef = doc(db, category, productId);
-      const productDoc = await getDoc(productRef);
-      if (productDoc.exists()) {
-        const product = productDoc.data();
-        document.getElementById("productName").value = product.name;
-        document.getElementById("productCategory").value = product.category;
-        document.getElementById("productImage").value = product.imageUrl;
-
-        sizes = [...product.sizes];
-        updateSizeList();
-
-        editingProduct = { id: productId };
-      }
-    };
-
-    // Delete product from Firestore
-    window.deleteProduct = async (productId, category) => {
-      if (confirm("Are you sure you want to delete this product?")) {
-        try {
-          const productRef = doc(db, category, productId);
-          await deleteDoc(productRef);
-          alert("Product deleted successfully!");
-          loadProducts();
-        } catch (error) {
-          console.error("Error deleting product:", error);
-          alert("Error deleting product.");
-        }
       }
     };
   </script>
