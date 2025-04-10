@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />    
   <title>Cookies - Tactics & Treats</title>
   <style>
     body {
@@ -149,6 +149,10 @@
       }
 
       const product = JSON.parse(atob(productB64));
+
+      // Log product data for debugging
+      console.log("Fetched product data:", product);
+
       const sizeInfo = (product.sizes || []).find(s => s.size === selectedSize);
 
       // Check if sizeInfo is valid
@@ -159,6 +163,7 @@
 
       // Ensure all required product data is valid
       if (!product.id || !product.name || !sizeInfo.price || !sizeInfo.size) {
+        console.error("Product data is incomplete:", product); // Log the problematic product
         alert("Product data is incomplete.");
         return;
       }
@@ -205,6 +210,9 @@
         const product = doc.data();
         const imageUrl = product.imageUrl || "default.jpg";
         const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+
+        // Log product details to verify data
+        console.log("Fetched cookie product:", product);
 
         const options = sizes.map(size => {
           return `<option value="${size.size}">${size.size} - $${size.price}</option>`;
