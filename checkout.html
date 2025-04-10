@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Cart - Your Website</title>
+    <title>Checkout - Your Website</title>
     <style>
-        /* General styles */
+        /* Similar styles to the cart page for consistency */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -72,11 +72,11 @@
             text-align: center;
         }
 
-        .cart-items {
+        .checkout-details {
             margin-top: 20px;
         }
 
-        .cart-item {
+        .checkout-item {
             padding: 15px;
             margin-bottom: 15px;
             border-radius: 8px;
@@ -85,34 +85,25 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
-        .cart-item h3 {
+        .checkout-item h3 {
             margin: 0;
             font-size: 18px;
             color: #f1f1f1;
         }
 
-        .cart-item p {
+        .checkout-item p {
             margin: 5px 0;
             color: #b0c4d3; /* Light gray for details */
         }
 
-        #checkout-button {
-            margin-top: 20px;
-            padding: 12px;
-            background-color: #00bcd4; /* Aqua Blue */
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 18px;
-            width: 100%;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.4);
+        #total-price {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 30px;
         }
 
-        #checkout-button:hover {
-            background-color: #0097a7; /* Slightly darker aqua blue */
-            box-shadow: 0 7px 20px rgba(0, 188, 212, 0.6);
+        #paypal-button-container {
+            margin-top: 30px;
         }
 
         footer {
@@ -122,22 +113,6 @@
             color: white;
             margin-top: 40px;
             box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Responsive Design */
-        @media screen and (max-width: 600px) {
-            .profile-pic {
-                width: 35px;
-                height: 35px;
-            }
-
-            .content {
-                padding: 10px;
-            }
-
-            #checkout-button {
-                font-size: 16px;
-            }
         }
     </style>
 </head>
@@ -158,71 +133,74 @@
     </nav>
 
     <div class="content">
-        <h1>Your Cart</h1>
-        <div class="cart-items" id="cart-items"></div>
-        <p id="total-price">Total: $0.00</p>
-        <div id="paypal-button-container"></div>
-        <p id="result-message"></p>
+        <h1>Checkout</h1>
+        <div class="checkout-details">
+            <h2>Order Summary</h2>
+            <div class="checkout-items" id="checkout-items"></div>
+            <p id="total-price">Total: $0.00</p>
 
-        <!-- PayPal button script -->
-        <script src="https://www.paypal.com/sdk/js?client-id=Aa4LfD1dnj8w9ytQpxXQMmZqauIm7dQr0l6-JxOHJLqQpIXSvI6QRILuBv0MRrMVx7zI0C761uO_QPaS&currency=USD&components=buttons&enable-funding=venmo,paylater,card"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const cartItemsElement = document.getElementById('cart-items');
-                const totalPriceElement = document.getElementById('total-price');
-                const cart = getCartFromLocalStorage() || [];
-                
-                let totalPrice = 0;
-
-                if (cart.length === 0) {
-                    cartItemsElement.innerHTML = '<p>Your cart is empty!</p>';
-                } else {
-                    cart.forEach(item => {
-                        const itemDiv = document.createElement('div');
-                        itemDiv.classList.add('cart-item');
-                        itemDiv.innerHTML = `
-                            <h3>${item.name}</h3>
-                            <p>Size: ${item.selectedSize}</p>
-                            <p>Color: ${item.selectedColor}</p>
-                            <p>Price: $${item.price.toFixed(2)}</p>
-                        `;
-                        cartItemsElement.appendChild(itemDiv);
-                        totalPrice += item.price;
-                    });
-                }
-
-                totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
-
-                // PayPal Button
-                paypal.Buttons({
-                    createOrder: function(data, actions) {
-                        return actions.order.create({
-                            purchase_units: [{
-                                amount: {
-                                    value: totalPrice.toFixed(2)
-                                }
-                            }]
-                        });
-                    },
-                    onApprove: function(data, actions) {
-                        return actions.order.capture().then(function(details) {
-                            document.getElementById('result-message').textContent = 'Transaction completed by ' + details.payer.name.given_name;
-                            // Optionally clear cart after successful transaction
-                            localStorage.removeItem('cart');
-                        });
-                    }
-                }).render('#paypal-button-container');
-            });
-
-            // Helper function to get cart from localStorage
-            function getCartFromLocalStorage() {
-                return JSON.parse(localStorage.getItem('cart'));
-            }
-        </script>
+            <div id="paypal-button-container"></div>
+            <p id="result-message"></p>
+        </div>
     </div>
 
     <footer>
         <p>&copy; 2025 Your Website</p>
     </footer>
+
+    <script src="https://www.paypal.com/sdk/js?client-id=Aa4LfD1dnj8w9ytQpxXQMmZqauIm7dQr0l6-JxOHJLqQpIXSvI6QRILuBv0MRrMVx7zI0C761uO_QPaS&currency=USD&components=buttons&enable-funding=venmo,paylater,card"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkoutItemsElement = document.getElementById('checkout-items');
+            const totalPriceElement = document.getElementById('total-price');
+            const cart = getCartFromLocalStorage() || [];
+
+            let totalPrice = 0;
+
+            if (cart.length === 0) {
+                checkoutItemsElement.innerHTML = '<p>Your cart is empty!</p>';
+            } else {
+                cart.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.classList.add('checkout-item');
+                    itemDiv.innerHTML = `
+                        <h3>${item.name}</h3>
+                        <p>Size: ${item.selectedSize}</p>
+                        <p>Color: ${item.selectedColor}</p>
+                        <p>Price: $${item.price.toFixed(2)}</p>
+                    `;
+                    checkoutItemsElement.appendChild(itemDiv);
+                    totalPrice += item.price;
+                });
+            }
+
+            totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
+
+            // PayPal Button
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: totalPrice.toFixed(2)
+                            }
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        document.getElementById('result-message').textContent = 'Transaction completed by ' + details.payer.name.given_name;
+                        // Optionally clear cart after successful transaction
+                        localStorage.removeItem('cart');
+                    });
+                }
+            }).render('#paypal-button-container');
+        });
+
+        // Helper function to get cart from localStorage
+        function getCartFromLocalStorage() {
+            return JSON.parse(localStorage.getItem('cart'));
+        }
+    </script>
 </body>
 </html>
