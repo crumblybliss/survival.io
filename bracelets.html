@@ -50,8 +50,9 @@
             text-align: center;
         }
         .product img {
-            width: 100px;
-            height: 100px;
+            width: 100%;
+            max-width: 150px;
+            max-height: 150px;
             object-fit: cover;
         }
         button {
@@ -122,11 +123,11 @@
 
                     // Check if colors and sizes are arrays, and handle them
                     const colors = Array.isArray(product.colors) && product.colors.length > 0
-                        ? product.colors.map(color => color.toString()) // Ensure it's a string
+                        ? product.colors.map(color => color.toString())
                         : null;
 
                     const sizes = Array.isArray(product.sizes) && product.sizes.length > 0
-                        ? product.sizes.map(size => size.toString()) // Ensure it's a string
+                        ? product.sizes.map(size => size.toString())
                         : null;
 
                     // Create options for colors and sizes
@@ -139,7 +140,7 @@
                         : "<option>No sizes available</option>";
 
                     // Adding Price
-                    const price = product.price || 0; // Default to 0 if no price is set
+                    const price = product.price || 0;
 
                     productDiv.innerHTML = `
                         <img src="${product.imageUrl}" alt="${product.name}">
@@ -147,7 +148,7 @@
                         <p>$${price.toFixed(2)}</p>
                         <p>Colors: <select id="color-${doc.id}">${colorOptions}</select></p>
                         <p>Sizes: <select id="size-${doc.id}">${sizeOptions}</select></p>
-                        <button onclick="addToCart('${doc.id}', '${product.name}', ${price}, '${product.imageUrl}')">Add to Cart</button>
+                        <button onclick="addToCart('${doc.id}', '${product.name}', ${price}, '${product.imageUrl}')">Add ${product.name} to Cart</button>
                     `;
                     productList.appendChild(productDiv);
                 });
