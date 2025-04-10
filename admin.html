@@ -1,243 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Dashboard - Products</title>
-  <style>
-    body {
-      background-color: #0a1d37;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    .container {
-      margin-top: 20px;
-    }
-    .product {
-      background-color: #003c5a;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    .product input, .product textarea, .product select {
-      width: 100%;
-      margin: 5px 0;
-      padding: 8px;
-      border-radius: 5px;
-      border: none;
-    }
-    .product img {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      margin-bottom: 10px;
-    }
-    button {
-      padding: 8px 12px;
-      border: none;
-      border-radius: 5px;
-      background-color: #00bcd4;
-      color: #fff;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0097a7;
-    }
-    .hidden { display: none; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tactics & Treats - Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #0a1d37;
+            color: #f1f1f1;
+            text-align: center;
+            margin: 0;
+        }
+        ul {
+            background-color: #003c5a;
+            padding: 10px;
+            list-style: none;
+            margin: 0;
+        }
+        ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+        ul li a {
+            color: #f1f1f1;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        ul li a:hover {
+            color: #00bcd4;
+        }
+        .container {
+            padding: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            margin: 20px;
+            border-radius: 8px;
+        }
+        .product-list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .product {
+            background: #003c5a;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 8px;
+            width: 200px;
+            text-align: center;
+        }
+        .product img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+        input, button {
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px;
+            background: #00bcd4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0097a7;
+        }
+    </style>
 </head>
 <body>
-  <h1>Admin Dashboard - Manage Products</h1>
-  <div id="status">Checking admin status...</div>
 
-  <div id="admin-form" class="hidden">
-    <h2>Add New Product</h2>
-    <input type="text" id="productName" placeholder="Product Name" />
-    <input type="text" id="imageUrl" placeholder="Image URL" />
-    <input type="number" id="price" placeholder="Price" />
-    <input type="text" id="colors" placeholder="Colors (comma-separated)" />
-    <input type="text" id="sizes" placeholder="Sizes (comma-separated)" />
-    <select id="productType">
-      <option value="bracelets">Bracelets</option>
-      <option value="cookies">Cookies</option>
-    </select>
-    <button onclick="addProduct()">Add Product</button>
-  </div>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="bracelets.html">Bracelets</a></li>
+        <li><a href="cookies.html">Cookies</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="commitments.html">Commitments</a></li>
+        <li><a href="cart.html">Cart 🛒</a></li>
+        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
+    </ul>
 
-  <div id="product-list" class="container">
-    <h2>All Products</h2>
-    <div id="bracelets-list"></div>
-    <div id="cookies-list"></div>
-  </div>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        <div class="product-list" id="products-list"></div>
+    </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, getDocs, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-      authDomain: "survival-f35e2.firebaseapp.com",
-      projectId: "survival-f35e2",
-      storageBucket: "survival-f35e2.appspot.com",
-      messagingSenderId: "704462603548",
-      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+            authDomain: "survival-f35e2.firebaseapp.com",
+            projectId: "survival-f35e2",
+            storageBucket: "survival-f35e2.appspot.com",
+            messagingSenderId: "704462603548",
+            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth();
-    const status = document.getElementById("status");
-    const adminForm = document.getElementById("admin-form");
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    const productTypeSelect = document.getElementById("productType");
+        // Function to create the product div and handle undefined values
+        const createProductDiv = (id, product, type) => {
+            const div = document.createElement("div");
+            div.classList.add("product");
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const userRef = doc(db, "users", user.uid);
-          const userSnap = await getDoc(userRef);
+            // Ensure colors and sizes are arrays, and provide a fallback if undefined
+            const colors = Array.isArray(product.colors) ? product.colors : [];
+            const sizes = Array.isArray(product.sizes) ? product.sizes : [];
 
-          if (userSnap.exists() && userSnap.data().role === "admin") {
-            status.innerText = "Welcome, Admin!";
-            adminForm.classList.remove("hidden");
-            loadProducts();
-          } else {
-            status.innerText = "Access Denied. You are not an admin.";
-          }
-        } catch (error) {
-          status.innerText = "Error verifying admin status.";
-          console.error("Admin check error:", error);
-        }
-      } else {
-        status.innerText = "Please sign in to access this page.";
-      }
-    });
+            div.innerHTML = `
+                <img src="${product.imageUrl}" alt="${product.name}">
+                <h3>${product.name}</h3>
+                <input type="text" value="${product.name}" id="name-${id}" />
+                <input type="text" value="${product.imageUrl}" id="imageUrl-${id}" />
+                <input type="number" value="${product.price}" id="price-${id}" />
+                <input type="text" value="${colors.join(", ")}" id="colors-${id}" />
+                <input type="text" value="${sizes.join(", ")}" id="sizes-${id}" />
+                <button onclick="editProduct('${id}', '${type}')">Save Changes</button>
+                <button onclick="deleteProduct('${id}', '${type}')">Delete</button>
+            `;
+            return div;
+        };
 
-    const loadProducts = async () => {
-      const braceletsList = document.getElementById("bracelets-list");
-      const cookiesList = document.getElementById("cookies-list");
+        // Function to load products from Firestore and display them
+        const loadProducts = async () => {
+            const productList = document.getElementById("products-list");
+            productList.innerHTML = "<p>Loading products...</p>";
 
-      braceletsList.innerHTML = "<p>Loading bracelets...</p>";
-      cookiesList.innerHTML = "<p>Loading cookies...</p>";
+            try {
+                const querySnapshot = await getDocs(collection(db, "bracelets"));
+                querySnapshot.forEach((doc) => {
+                    const product = doc.data();
+                    const div = createProductDiv(doc.id, product, "bracelets");
+                    productList.appendChild(div);
+                });
 
-      try {
-        const braceletsSnapshot = await getDocs(collection(db, "bracelets"));
-        braceletsList.innerHTML = "";
-        if (!braceletsSnapshot.empty) {
-          braceletsSnapshot.forEach(doc => {
-            const product = doc.data();
-            const productDiv = createProductDiv(doc.id, product, 'bracelets');
-            braceletsList.appendChild(productDiv);
-          });
-        } else {
-          braceletsList.innerHTML = "<p>No bracelets available.</p>";
-        }
+                const querySnapshotCookies = await getDocs(collection(db, "cookies"));
+                querySnapshotCookies.forEach((doc) => {
+                    const product = doc.data();
+                    const div = createProductDiv(doc.id, product, "cookies");
+                    productList.appendChild(div);
+                });
 
-        const cookiesSnapshot = await getDocs(collection(db, "cookies"));
-        cookiesList.innerHTML = "";
-        if (!cookiesSnapshot.empty) {
-          cookiesSnapshot.forEach(doc => {
-            const product = doc.data();
-            const productDiv = createProductDiv(doc.id, product, 'cookies');
-            cookiesList.appendChild(productDiv);
-          });
-        } else {
-          cookiesList.innerHTML = "<p>No cookies available.</p>";
-        }
-      } catch (error) {
-        console.error("Error loading products:", error);
-        braceletsList.innerHTML = "<p>Error loading products.</p>";
-        cookiesList.innerHTML = "<p>Error loading products.</p>";
-      }
-    };
+            } catch (error) {
+                console.error("Error loading products:", error);
+                productList.innerHTML = "<p>Error loading products.</p>";
+            }
+        };
 
-    const createProductDiv = (id, product, type) => {
-      const div = document.createElement("div");
-      div.classList.add("product");
-      div.innerHTML = `
-        <img src="${product.imageUrl}" alt="${product.name}">
-        <h3>${product.name}</h3>
-        <input type="text" value="${product.name}" id="name-${id}" />
-        <input type="text" value="${product.imageUrl}" id="imageUrl-${id}" />
-        <input type="number" value="${product.price}" id="price-${id}" />
-        <input type="text" value="${product.colors.join(", ")}" id="colors-${id}" />
-        <input type="text" value="${product.sizes.join(", ")}" id="sizes-${id}" />
-        <button onclick="editProduct('${id}', '${type}')">Save Changes</button>
-        <button onclick="deleteProduct('${id}', '${type}')">Delete</button>
-      `;
-      return div;
-    };
+        // Function to edit a product
+        window.editProduct = async (id, type) => {
+            const name = document.getElementById(`name-${id}`).value;
+            const imageUrl = document.getElementById(`imageUrl-${id}`).value;
+            const price = parseFloat(document.getElementById(`price-${id}`).value);
+            const colors = document.getElementById(`colors-${id}`).value.split(",").map(item => item.trim());
+            const sizes = document.getElementById(`sizes-${id}`).value.split(",").map(item => item.trim());
 
-    const addProduct = async () => {
-      const name = document.getElementById("productName").value.trim();
-      const imageUrl = document.getElementById("imageUrl").value.trim();
-      const price = parseFloat(document.getElementById("price").value);
-      const colors = document.getElementById("colors").value.split(",").map(c => c.trim());
-      const sizes = document.getElementById("sizes").value.split(",").map(s => s.trim());
-      const type = productTypeSelect.value;
+            try {
+                const productRef = doc(db, type, id);
+                await updateDoc(productRef, {
+                    name,
+                    imageUrl,
+                    price,
+                    colors,
+                    sizes
+                });
+                alert("Product updated successfully!");
+            } catch (error) {
+                console.error("Error updating product:", error);
+                alert("Failed to update product.");
+            }
+        };
 
-      if (!name || !imageUrl || isNaN(price)) {
-        alert("Please fill in all required fields correctly.");
-        return;
-      }
+        // Function to delete a product
+        window.deleteProduct = async (id, type) => {
+            try {
+                const productRef = doc(db, type, id);
+                await deleteDoc(productRef);
+                alert("Product deleted successfully!");
+                loadProducts(); // Reload the products
+            } catch (error) {
+                console.error("Error deleting product:", error);
+                alert("Failed to delete product.");
+            }
+        };
 
-      try {
-        await addDoc(collection(db, type), {
-          name,
-          imageUrl,
-          price,
-          colors,
-          sizes
-        });
-        alert("Product added successfully!");
-        loadProducts();
-      } catch (error) {
-        console.error("Error adding product:", error);
-        alert("Failed to add product. Check console for details.");
-      }
-    };
-
-    const editProduct = async (id, type) => {
-      const name = document.getElementById(`name-${id}`).value;
-      const imageUrl = document.getElementById(`imageUrl-${id}`).value;
-      const price = parseFloat(document.getElementById(`price-${id}`).value);
-      const colors = document.getElementById(`colors-${id}`).value.split(",").map(c => c.trim());
-      const sizes = document.getElementById(`sizes-${id}`).value.split(",").map(s => s.trim());
-
-      if (!name || !imageUrl || isNaN(price)) {
-        alert("Please fill in all fields.");
-        return;
-      }
-
-      try {
-        const productRef = doc(db, type, id);
-        await updateDoc(productRef, {
-          name,
-          imageUrl,
-          price,
-          colors,
-          sizes
-        });
-        alert("Product updated successfully!");
-        loadProducts();
-      } catch (error) {
-        console.error("Error updating product:", error);
-        alert("Failed to update product.");
-      }
-    };
-
-    const deleteProduct = async (id, type) => {
-      try {
-        const productRef = doc(db, type, id);
-        await deleteDoc(productRef);
-        alert("Product deleted successfully!");
-        loadProducts();
-      } catch (error) {
-        console.error("Error deleting product:", error);
-        alert("Failed to delete product.");
-      }
-    };
-  </script>
+        // Load products on page load
+        window.onload = loadProducts;
+    </script>
 </body>
 </html>
