@@ -5,7 +5,154 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Panel - Tactics & Treats</title>
   <style>
-    /* Existing Styles (unchanged) */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background-color: #003366;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .navbar a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    #adminContainer {
+      display: block;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+      background-color: white;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], input[type="email"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #003366;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005b96;
+    }
+
+    h2 {
+      color: #003366;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+    }
+
+    h4 {
+      color: #003366;
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+
+    .product-list, #promoCodeList {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .product-card, .promo-card {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .product-card img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+
+    .actions {
+      margin-top: 15px;
+    }
+
+    .actions button {
+      margin: 5px;
+    }
+
+    .product-card h3, .promo-card p {
+      color: #003366;
+      font-size: 1.2em;
+      margin: 10px 0;
+    }
+
+    .login-form {
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    .login-form input {
+      padding: 12px;
+      width: 250px;
+      margin: 10px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+
+    .promo-code-form input[type="text"], .promo-code-form input[type="number"], .promo-code-form input[type="date"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .promo-code-form button {
+      width: 100%;
+      background-color: #003366;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .promo-code-form button:hover {
+      background-color: #005b96;
+    }
+
+    .promo-card button {
+      margin-top: 5px;
+      background-color: #e74c3c;
+      color: white;
+      border-radius: 4px;
+      padding: 5px 10px;
+    }
+
+    .promo-card button:hover {
+      background-color: #c0392b;
+    }
   </style>
 </head>
 <body>
@@ -14,17 +161,18 @@
     <a href="index.html">Home</a>
     <a href="cookies.html">Cookies</a>
     <a href="bracelets.html">Bracelets</a>
-    <a href="coolers.html">Coolers</a>
+    <a href="coolers.html">Coolers</a> <!-- Added Coolers link -->
     <a href="admin.html" id="adminLink">Admin Panel</a>
   </div>
 
   <div class="container">
     <div id="adminContainer">
-      <!-- Product Management Section (existing) -->
+      <!-- Product Management -->
       <h2>Add or Edit Product</h2>
       <input type="text" id="productName" placeholder="Product Name" />
       <input type="text" id="productCategory" placeholder="Category (cookies, bracelets, coolers)" />
       <input type="text" id="productImage" placeholder="Image URL" />
+      
       <h4>Sizes & Prices</h4>
       <input type="text" id="sizeInput" placeholder="Size (e.g., Small)" />
       <input type="number" id="priceInput" placeholder="Price" step="0.01" />
@@ -33,19 +181,20 @@
       <div id="sizesList"></div>
       <button onclick="submitProduct()">Submit Product</button>
 
-      <!-- Promo Code Management Section -->
-      <h2>Add or Edit Promo Code</h2>
-      <input type="text" id="promoCodeInput" placeholder="Promo Code" />
-      <input type="number" id="discountInput" placeholder="Discount Percentage" step="0.01" />
-      <input type="date" id="expiryInput" placeholder="Expiry Date" />
-      <button onclick="submitPromoCode()">Submit Promo Code</button>
+      <!-- Promo Code Management -->
+      <h2>Manage Promo Codes</h2>
+      <div class="promo-code-form">
+        <input type="text" id="promoCodeInput" placeholder="Promo Code" />
+        <input type="number" id="discountInput" placeholder="Discount Percentage" step="1" />
+        <input type="date" id="expirationInput" placeholder="Expiration Date" />
+        <button onclick="submitPromoCode()">Submit Promo Code</button>
+      </div>
+
+      <h2>All Products</h2>
+      <div class="product-list" id="productList"></div>
 
       <h2>All Promo Codes</h2>
       <div id="promoCodeList"></div>
-
-      <!-- All Products Section -->
-      <h2>All Products</h2>
-      <div class="product-list" id="productList"></div>
     </div>
 
     <div class="login-form" id="loginForm">
@@ -76,11 +225,14 @@
 
     let sizes = [];
     let editingProduct = null;
-    let editingPromoCode = null;
 
     setPersistence(auth, browserLocalPersistence)
-      .then(() => { console.log("Persistence set to local"); })
-      .catch((error) => { console.error("Error setting persistence:", error); });
+      .then(() => {
+        console.log("Persistence set to local");
+      })
+      .catch((error) => {
+        console.error("Error setting persistence:", error);
+      });
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -102,21 +254,167 @@
       }
     });
 
-    // Promo Code CRUD Functions
+    window.login = () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      if (email && password) {
+        signInWithEmailAndPassword(auth, email, password)
+          .then((userCredential) => {
+            console.log("User signed in:", userCredential.user);
+          })
+          .catch((error) => {
+            console.error("Error signing in:", error);
+            alert("Failed to sign in.");
+          });
+      } else {
+        alert("Please enter both email and password.");
+      }
+    };
+
+    window.addSize = () => {
+      const sizeInput = document.getElementById("sizeInput").value.trim();
+      const priceInput = parseFloat(document.getElementById("priceInput").value.trim());
+      const colorInput = document.getElementById("colorInput").value.trim();
+
+      if (sizeInput && !isNaN(priceInput)) {
+        sizes.push({
+          size: sizeInput,
+          price: priceInput,
+          color: colorInput
+        });
+        updateSizeList();
+        document.getElementById("sizeInput").value = "";
+        document.getElementById("priceInput").value = "";
+        document.getElementById("colorInput").value = "";
+      } else {
+        alert("Please provide valid size and price.");
+      }
+    };
+
+    const updateSizeList = () => {
+      const sizesListDiv = document.getElementById("sizesList");
+      sizesListDiv.innerHTML = sizes.map((size, index) => `
+        <div>
+          Size: ${size.size}, Price: $${size.price.toFixed(2)} ${size.color ? `, Color: ${size.color}` : ""}
+          <button onclick="deleteSize(${index})">Delete</button>
+        </div>
+      `).join('');
+    };
+
+    window.deleteSize = (index) => {
+      sizes.splice(index, 1);
+      updateSizeList();
+    };
+
+    window.submitProduct = async () => {
+      const name = document.getElementById("productName").value.trim();
+      const category = document.getElementById("productCategory").value.trim();
+      const imageUrl = document.getElementById("productImage").value.trim();
+
+      if (name && category && sizes.length > 0) {
+        try {
+          if (editingProduct) {
+            await updateDoc(doc(db, category, editingProduct.id), {
+              name,
+              category,
+              imageUrl,
+              sizes
+            });
+            alert("Product updated successfully!");
+          } else {
+            await addDoc(collection(db, category), {
+              name,
+              category,
+              imageUrl,
+              sizes
+            });
+            alert("Product added successfully!");
+          }
+          loadProducts();
+          resetForm();
+        } catch (error) {
+          console.error("Error adding/updating product:", error);
+          alert("Failed to add/update product.");
+        }
+      } else {
+        alert("Please fill out all fields and add at least one size.");
+      }
+    };
+
+    const loadProducts = async () => {
+      const productList = document.getElementById("productList");
+      productList.innerHTML = "";
+
+      const allCollections = ["cookies", "bracelets", "coolers"];  // Include coolers
+
+      for (const col of allCollections) {
+        const snapshot = await getDocs(collection(db, col));
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const img = data.imageUrl && data.imageUrl.trim() !== "" ? data.imageUrl : "default.jpg";
+
+          const card = document.createElement("div");
+          card.classList.add("product-card");
+          card.innerHTML = `
+            <img src="${img}" alt="${data.name}" />
+            <h3>${data.name}</h3>
+            <p>${data.category}</p>
+            <button onclick="editProduct('${col}', '${docSnap.id}')">Edit</button>
+            <button onclick="deleteProduct('${col}', '${docSnap.id}')">Delete</button>
+          `;
+          productList.appendChild(card);
+        });
+      }
+    };
+
+    window.editProduct = async (category, productId) => {
+      const docRef = doc(db, category, productId);
+      const docSnap = await getDoc(docRef);
+      const data = docSnap.data();
+
+      document.getElementById("productName").value = data.name;
+      document.getElementById("productCategory").value = data.category;
+      document.getElementById("productImage").value = data.imageUrl;
+
+      sizes = data.sizes || [];
+      updateSizeList();
+      editingProduct = { id: productId, category };
+    };
+
+    window.deleteProduct = async (category, productId) => {
+      try {
+        await deleteDoc(doc(db, category, productId));
+        alert("Product deleted successfully!");
+        loadProducts();
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        alert("Failed to delete product.");
+      }
+    };
+
+    const resetForm = () => {
+      document.getElementById("productName").value = "";
+      document.getElementById("productCategory").value = "";
+      document.getElementById("productImage").value = "";
+      sizes = [];
+      updateSizeList();
+      editingProduct = null;
+    };
+
     const loadPromoCodes = async () => {
       const promoCodeList = document.getElementById("promoCodeList");
       promoCodeList.innerHTML = "";
 
-      const promoCodeSnapshot = await getDocs(collection(db, "promo_codes"));
-      promoCodeSnapshot.forEach((docSnap) => {
+      const snapshot = await getDocs(collection(db, "promoCodes"));
+      snapshot.forEach(docSnap => {
         const data = docSnap.data();
         const card = document.createElement("div");
-        card.className = "promo-card";
+        card.classList.add("promo-card");
         card.innerHTML = `
-          <p>Promo Code: ${data.code}</p>
+          <p>Code: ${data.code}</p>
           <p>Discount: ${data.discount}%</p>
-          <p>Expires on: ${data.expiry}</p>
-          <button onclick="editPromoCode('${docSnap.id}')">Edit</button>
+          <p>Expires on: ${data.expirationDate}</p>
           <button onclick="deletePromoCode('${docSnap.id}')">Delete</button>
         `;
         promoCodeList.appendChild(card);
@@ -126,46 +424,29 @@
     window.submitPromoCode = async () => {
       const code = document.getElementById("promoCodeInput").value.trim();
       const discount = parseFloat(document.getElementById("discountInput").value.trim());
-      const expiry = document.getElementById("expiryInput").value.trim();
+      const expiration = document.getElementById("expirationInput").value.trim();
 
-      if (code && !isNaN(discount) && expiry) {
+      if (code && !isNaN(discount) && expiration) {
         try {
-          if (editingPromoCode) {
-            await updateDoc(doc(db, "promo_codes", editingPromoCode.id), { code, discount, expiry });
-            alert("Promo code updated successfully!");
-          } else {
-            await addDoc(collection(db, "promo_codes"), { code, discount, expiry });
-            alert("Promo code added successfully!");
-          }
+          await addDoc(collection(db, "promoCodes"), {
+            code,
+            discount,
+            expirationDate: expiration
+          });
+          alert("Promo Code added successfully!");
           loadPromoCodes();
-          resetPromoCodeForm();
         } catch (error) {
-          console.error("Error adding/updating promo code:", error);
-          alert("Failed to add/update promo code.");
+          console.error("Error adding promo code:", error);
+          alert("Failed to add promo code.");
         }
       } else {
         alert("Please fill out all fields.");
       }
     };
 
-    window.editPromoCode = async (id) => {
-      const promoCodeRef = doc(db, "promo_codes", id);
-      const docSnap = await getDoc(promoCodeRef);
-
-      if (docSnap.exists()) {
-        const promoData = docSnap.data();
-        editingPromoCode = { id, ...promoData };
-        document.getElementById("promoCodeInput").value = promoData.code;
-        document.getElementById("discountInput").value = promoData.discount;
-        document.getElementById("expiryInput").value = promoData.expiry;
-      } else {
-        alert("Promo code not found!");
-      }
-    };
-
-    window.deletePromoCode = async (id) => {
+    window.deletePromoCode = async (promoCodeId) => {
       try {
-        await deleteDoc(doc(db, "promo_codes", id));
+        await deleteDoc(doc(db, "promoCodes", promoCodeId));
         alert("Promo code deleted successfully!");
         loadPromoCodes();
       } catch (error) {
@@ -173,16 +454,7 @@
         alert("Failed to delete promo code.");
       }
     };
-
-    const resetPromoCodeForm = () => {
-      document.getElementById("promoCodeInput").value = "";
-      document.getElementById("discountInput").value = "";
-      document.getElementById("expiryInput").value = "";
-      editingPromoCode = null;
-    };
-
-    // Other product-related functions are unchanged.
-
   </script>
 </body>
 </html>
+
