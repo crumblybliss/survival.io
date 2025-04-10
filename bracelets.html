@@ -1,181 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactics & Treats - Bracelets</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #0a1d37;
-            color: #f1f1f1;
-            text-align: center;
-            margin: 0;
-        }
-        ul {
-            background-color: #003c5a;
-            padding: 10px;
-            list-style: none;
-            margin: 0;
-        }
-        ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-        ul li a {
-            color: #f1f1f1;
-            text-decoration: none;
-            font-size: 18px;
-        }
-        ul li a:hover {
-            color: #00bcd4;
-        }
-        .container {
-            padding: 50px;
-            background: rgba(0, 0, 0, 0.7);
-            margin: 20px;
-            border-radius: 8px;
-        }
-        .product-list {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .product {
-            background: #003c5a;
-            padding: 20px;
-            margin: 10px;
-            border-radius: 8px;
-            width: 200px;
-            text-align: center;
-        }
-        .product img {
-            width: 100%;
-            max-width: 150px;
-            max-height: 150px;
-            object-fit: cover;
-        }
-        button {
-            padding: 10px;
-            background: #00bcd4;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #0097a7;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tactics & Treats - Bracelets</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #0a1d37;
+      color: #f1f1f1;
+      font-family: 'Arial', sans-serif;
+    }
+    ul {
+      background-color: #003c5a;
+      padding: 10px 0;
+      text-align: center;
+      margin: 0;
+    }
+    ul li {
+      display: inline;
+      margin: 0 15px;
+    }
+    ul li a {
+      color: #f1f1f1;
+      text-decoration: none;
+      font-size: 18px;
+    }
+    ul li a:hover {
+      color: #00bcd4;
+    }
+    .container {
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .product-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 30px;
+    }
+    .product {
+      background-color: #003c5a;
+      border-radius: 12px;
+      padding: 20px;
+      width: 230px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease;
+    }
+    .product:hover {
+      transform: scale(1.03);
+    }
+    .product img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .product h3 {
+      margin: 10px 0 5px;
+      font-size: 20px;
+    }
+    .product p {
+      margin: 8px 0;
+    }
+    select {
+      padding: 6px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: none;
+      background-color: #f1f1f1;
+      color: #003c5a;
+      font-weight: bold;
+    }
+    button {
+      background-color: #00bcd4;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #0097a7;
+    }
+  </style>
 </head>
 <body>
-    <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="bracelets.html">Bracelets</a></li>
-        <li><a href="cookies.html">Cookies</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="commitments.html">Commitments</a></li>
-        <li><a href="cart.html">Cart 🛒</a></li>
-        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
-    </ul>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="bracelets.html">Bracelets</a></li>
+    <li><a href="cookies.html">Cookies</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="commitments.html">Commitments</a></li>
+    <li><a href="cart.html">Cart 🛒</a></li>
+    <li><a href="admin.html">Admin Dashboard 🛒</a></li>
+  </ul>
 
-    <div class="container">
-        <h1>Bracelets</h1>
-        <p>Explore our collection of amazing bracelets!</p>
-        <div class="product-list" id="products-list"></div>
-    </div>
+  <div class="container">
+    <h1>Bracelets</h1>
+    <p>Explore our collection of handmade bracelets!</p>
+    <div class="product-list" id="products-list"></div>
+  </div>
 
-    <!-- Firebase SDK for app integration -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-            authDomain: "survival-f35e2.firebaseapp.com",
-            projectId: "survival-f35e2",
-            storageBucket: "survival-f35e2.appspot.com",
-            messagingSenderId: "704462603548",
-            appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-        };
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        // Function to load bracelets with color and size options
-        async function loadBracelets() {
-            const productList = document.getElementById("products-list");
-            productList.innerHTML = "<p>Loading bracelets...</p>";
+    async function loadBracelets() {
+      const productList = document.getElementById("products-list");
+      productList.innerHTML = "<p>Loading bracelets...</p>";
 
-            try {
-                const querySnapshot = await getDocs(collection(db, "bracelets"));
-                productList.innerHTML = "";
+      try {
+        const querySnapshot = await getDocs(collection(db, "bracelets"));
+        productList.innerHTML = "";
 
-                if (querySnapshot.empty) {
-                    productList.innerHTML = "<p>No bracelets available.</p>";
-                    return;
-                }
-
-                querySnapshot.forEach((doc) => {
-                    const product = doc.data();
-                    const productDiv = document.createElement("div");
-                    productDiv.classList.add("product");
-
-                    // Check if colors and sizes are arrays, and handle them
-                    const colors = Array.isArray(product.colors) && product.colors.length > 0
-                        ? product.colors.map(color => color.toString())
-                        : null;
-
-                    const sizes = Array.isArray(product.sizes) && product.sizes.length > 0
-                        ? product.sizes.map(size => size.toString())
-                        : null;
-
-                    // Create options for colors and sizes
-                    const colorOptions = colors
-                        ? colors.map(color => `<option value="${color}">${color}</option>`).join("")
-                        : "<option>No colors available</option>";
-
-                    const sizeOptions = sizes
-                        ? sizes.map(size => `<option value="${size}">${size}</option>`).join("")
-                        : "<option>No sizes available</option>";
-
-                    // Adding Price
-                    const price = product.price || 0;
-
-                    productDiv.innerHTML = `
-                        <img src="${product.imageUrl}" alt="${product.name}">
-                        <h3>${product.name}</h3>
-                        <p>$${price.toFixed(2)}</p>
-                        <p>Colors: <select id="color-${doc.id}">${colorOptions}</select></p>
-                        <p>Sizes: <select id="size-${doc.id}">${sizeOptions}</select></p>
-                        <button onclick="addToCart('${doc.id}', '${product.name}', ${price}, '${product.imageUrl}')">Add ${product.name} to Cart</button>
-                    `;
-                    productList.appendChild(productDiv);
-                });
-            } catch (error) {
-                productList.innerHTML = "<p>Error loading products.</p>";
-                console.error("Error fetching products:", error);
-            }
+        if (querySnapshot.empty) {
+          productList.innerHTML = "<p>No bracelets available.</p>";
+          return;
         }
 
-        // Function to add products to cart with selected color and size
-        window.addToCart = (id, name, price, imageUrl) => {
-            const color = document.getElementById(`color-${id}`).value;
-            const size = document.getElementById(`size-${id}`).value;
+        querySnapshot.forEach((doc) => {
+          const product = doc.data();
+          const id = doc.id;
+          const price = product.price || 0;
+          const colors = Array.isArray(product.colors) ? product.colors : [];
+          const sizes = Array.isArray(product.sizes) ? product.sizes : [];
 
-            if (!color || !size) {
-                alert("Please select both color and size.");
-                return;
-            }
+          const colorSelect = colors.length > 0
+            ? `<select id="color-${id}">${colors.map(c => `<option value="${c}">${c}</option>`).join("")}</select>`
+            : "<p>No colors</p>";
 
-            let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            cart.push({ id, name, price, imageUrl, color, size });
-            localStorage.setItem("cart", JSON.stringify(cart));
-            alert(`${name} added to cart!`);
-        };
+          const sizeSelect = sizes.length > 0
+            ? `<select id="size-${id}">${sizes.map(s => `<option value="${s}">${s}</option>`).join("")}</select>`
+            : "<p>No sizes</p>";
 
-        // Load bracelets on page load
-        window.onload = loadBracelets;
-    </script>
+          const productHTML = `
+            <div class="product">
+              <img src="${product.imageUrl}" alt="${product.name}" />
+              <h3>${product.name}</h3>
+              <p><strong>$${price.toFixed(2)}</strong></p>
+              <p>Color:<br>${colorSelect}</p>
+              <p>Size:<br>${sizeSelect}</p>
+              <button onclick="addToCart('${id}', '${product.name}', ${price}, '${product.imageUrl}')">Add to Cart</button>
+            </div>
+          `;
+
+          productList.innerHTML += productHTML;
+        });
+      } catch (err) {
+        console.error("Error loading bracelets:", err);
+        productList.innerHTML = "<p>Failed to load bracelets.</p>";
+      }
+    }
+
+    window.addToCart = function (id, name, price, imageUrl) {
+      const colorEl = document.getElementById(`color-${id}`);
+      const sizeEl = document.getElementById(`size-${id}`);
+      const color = colorEl ? colorEl.value : null;
+      const size = sizeEl ? sizeEl.value : null;
+
+      if (!color || !size) {
+        alert("Please select a color and size before adding to cart.");
+        return;
+      }
+
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.push({ id, name, price, imageUrl, color, size });
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert(`${name} added to cart!`);
+    };
+
+    window.onload = loadBracelets;
+  </script>
 </body>
 </html>
