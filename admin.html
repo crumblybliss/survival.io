@@ -98,6 +98,7 @@
     <h4>Sizes & Prices</h4>
     <input type="text" id="sizeInput" placeholder="Size (e.g., Small)" />
     <input type="number" id="priceInput" placeholder="Price" step="0.01" />
+    <input type="text" id="colorInput" placeholder="Color (Optional)" />
     <button onclick="addSize()">Add Size</button>
     <div id="sizesList"></div>
     <button onclick="submitProduct()">Submit Product</button>
@@ -170,14 +171,39 @@
     window.addSize = () => {
       const size = document.getElementById("sizeInput").value;
       const price = parseFloat(document.getElementById("priceInput").value);
+      const color = document.getElementById("colorInput").value.trim();
 
       if (size && !isNaN(price)) {
-        sizes.push({ size, price });
-        document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
+        sizes.push({ size, price, color: color || "N/A" }); // Adding color to the size object
+        updateSizeList(); // Refresh size list UI
         document.getElementById("sizeInput").value = "";
         document.getElementById("priceInput").value = "";
+        document.getElementById("colorInput").value = "";
       } else {
         alert("Please enter both size and price.");
+      }
+    };
+
+    // Update the displayed sizes list
+    const updateSizeList = () => {
+      const sizeList = document.getElementById("sizesList");
+      sizeList.innerHTML = ""; // Clear current list
+
+      sizes.forEach((s, index) => {
+        const sizeEntry = document.createElement("div");
+        sizeEntry.innerHTML = `
+          <p>${s.size} - $${s.price.toFixed(2)} - Color: ${s.color}</p>
+          <button onclick="deleteSize(${index})">Delete</button>
+        `;
+        sizeList.appendChild(sizeEntry);
+      });
+    };
+
+    // Delete size from the list
+    window.deleteSize = (index) => {
+      if (confirm("Are you sure you want to delete this size?")) {
+        sizes.splice(index, 1); // Remove the size at the specified index
+        updateSizeList(); // Refresh size list UI
       }
     };
 
@@ -246,14 +272,14 @@
             <img src="${img}" alt="${data.name}" />
             <h3>${data.name}</h3>
             <p>Category: ${data.category}</p>
-            <p>${(data.sizes || []).map(s => {
+            <p>${(data.sizes || []).map((s, idx) => {
               const size = s.size || "Unknown";
               const price = typeof s.price === "number" ? `$${s.price.toFixed(2)}` : "N/A";
-              return `${size}: ${price}`;
+              return `${size}: ${price} (${s.color}) <button onclick="deleteSizeFromProduct('${docSnap.id}', ${idx})">Delete Size</button>`;
             }).join("<br>")}</p>
             <div class="actions">
-              <button onclick="editProduct('${docSnap.id}')">Edit</button>
-              <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
+              <button onclick="editProduct('${docSnap.id}', '${data.category}')">Edit</button>
+              <button onclick="deleteProduct('${docSnap.id}', '${data.category}')">Delete</button>
             </div>
           `;
           productList.appendChild(card);
@@ -261,40 +287,16 @@
       }
     };
 
-    // Edit product
-    window.editProduct = (productId) => {
-      const productRef = doc(db, "cookies", productId);  // Change to "bracelets" if needed
-      getDoc(productRef).then(docSnap => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          document.getElementById("productName").value = data.name || "";
-          document.getElementById("productCategory").value = data.category || "";
-          document.getElementById("productImage").value = data.imageUrl || "default.jpg";
-          sizes = [...data.sizes];
-          document.getElementById("sizesList").innerText = sizes.map(s => `${s.size} - $${s.price}`).join(", ");
-          editingProduct = { id: productId };
-        } else {
-          console.error("Product not found!");
-          alert("Product not found!");
-        }
-      }).catch(error => {
-        console.error("Error fetching product:", error);
-        alert("Failed to load product data.");
-      });
-    };
-
-    // Delete product
-    window.deleteProduct = async (productId) => {
-      const productCategory = document.getElementById("productCategory").value.trim().toLowerCase();
-      const ref = doc(db, productCategory, productId);
-
-      try {
-        await deleteDoc(ref);
-        alert("Product deleted!");
-        loadProducts();
-      } catch (error) {
-        console.error("Error deleting product:", error);
-        alert("Failed to delete product.");
+    // Delete size from product in Firestore
+    window.deleteSizeFromProduct = async (productId, sizeIndex) => {
+      const productRef = doc(db, "cookies", productId);  // Use category dynamically if needed
+      const productDoc = await getDoc(productRef);
+      if (productDoc.exists()) {
+        const product = productDoc.data();
+        product.sizes.splice(sizeIndex, 1); // Remove size from the sizes array
+        await updateDoc(productRef, { sizes: product.sizes });
+        alert("Size deleted successfully!");
+        loadProducts();  // Refresh products
       }
     };
 
@@ -302,4 +304,3 @@
   </script>
 </body>
 </html>
-
