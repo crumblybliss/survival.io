@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />    
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cookies - Tactics & Treats</title>
   <style>
     body {
@@ -126,7 +126,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -149,58 +149,26 @@
       }
 
       const product = JSON.parse(atob(productB64));
-
-      // Log the fetched product data for debugging
-      console.log("Fetched product data:", product);
-
-      // Ensure product has valid sizes
-      if (!product.sizes || product.sizes.length === 0) {
-        alert("Product is missing size information.");
-        return;
-      }
-
-      // Find the selected size's data
       const sizeInfo = product.sizes.find(s => s.size === selectedSize);
+
       if (!sizeInfo) {
         alert("Invalid size selected.");
         return;
       }
 
-      // Check for missing essential product data
-      if (!product.id || !product.name || !sizeInfo.price || !sizeInfo.size) {
-        console.error("Product data is incomplete:", product); // Log incomplete product
-        alert("Product data is incomplete.");
-        return;
-      }
+      const cartItem = {
+        ...product,
+        selectedSize: selectedSize,
+        price: sizeInfo.price
+      };
 
-      const cartRef = doc(db, "carts", user.uid);
-      const cartDoc = await getDoc(cartRef);
-      let cart = cartDoc.exists() ? cartDoc.data().items : [];
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.push(cartItem);
+      localStorage.setItem("cart", JSON.stringify(cart));
 
-      // Check if the cart already contains this product with the selected size
-      const existing = cart.find(item => item.id === product.id && item.size === selectedSize);
-      if (existing) {
-        existing.quantity += 1; // Increase quantity if product already in cart
-      } else {
-        cart.push({
-          id: product.id,
-          name: product.name || "Unnamed",
-          size: sizeInfo.size,
-          price: sizeInfo.price,
-          quantity: 1,
-          imageUrl: product.imageUrl || "default.jpg"
-        });
-      }
-
-      // Ensure the cart has items before saving
-      if (!cart || cart.length === 0) {
-        alert("Error: Cart is empty.");
-        return;
-      }
-
-      // Save the cart data
-      await setDoc(cartRef, { items: cart });
       alert(`${product.name} (${selectedSize}) added to your cart for $${sizeInfo.price}`);
+
+      window.location.href = "cart.html"; // Redirect to the cart page
     };
 
     const fetchCookies = async () => {
@@ -214,17 +182,9 @@
 
       snap.forEach(doc => {
         const product = doc.data();
-        
-        // Validate fetched product data
-        if (!product.name || !product.sizes || !Array.isArray(product.sizes) || product.sizes.length === 0) {
-          console.error("Invalid product data:", product); // Log invalid product
-          return;
-        }
-
         const imageUrl = product.imageUrl || "default.jpg";
         const sizes = Array.isArray(product.sizes) ? product.sizes : [];
 
-        // Generate size options
         const options = sizes.map(size => {
           return `<option value="${size.size}">${size.size} - $${size.price}</option>`;
         }).join("");
