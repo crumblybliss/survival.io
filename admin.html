@@ -28,7 +28,7 @@
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    input, select, button {
+    input, button {
       padding: 0.5rem;
       margin: 0.5rem 0;
       width: 100%;
@@ -72,24 +72,17 @@
       </select>
       <input type="text" id="productImage" placeholder="Image URL" />
       
-      <select id="size">
-        <option value="">Select Size</option>
-        <option value="Small">Small</option>
-        <option value="Medium">Medium</option>
-        <option value="Large">Large</option>
-      </select>
+      <!-- Manually adding size and price together -->
+      <input type="text" id="sizeInput" placeholder="Enter Size (e.g., Small)" />
+      <input type="number" id="priceInput" placeholder="Enter Price" />
+      <button onclick="addSizePrice()">Add Size/Price</button>
+      <div id="sizePriceList"></div>
       
-      <select id="color">
-        <option value="">Select Color</option>
-        <option value="Red">Red</option>
-        <option value="Blue">Blue</option>
-        <option value="Green">Green</option>
-      </select>
-      
-      <input type="number" id="price" placeholder="Price" />
-      
-      <button onclick="addSize()">Add Size</button>
-      <div id="sizeList"></div>
+      <!-- Manually adding color -->
+      <input type="text" id="colorInput" placeholder="Enter Color (e.g., Red)" />
+      <button onclick="addColor()">Add Color</button>
+      <div id="colorList"></div>
+
       <button onclick="submitProduct()">Save Product</button>
     </section>
 
@@ -128,53 +121,84 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let sizes = [];
+    let sizePriceList = [];
+    let colorList = [];
     let editingProduct = null;
     let editingPromoCode = null;
 
-    // Product Size Management
-    window.addSize = () => {
-      const size = document.getElementById("size").value.trim();
-      const color = document.getElementById("color").value.trim();
-      const price = parseFloat(document.getElementById("price").value);
-      if (size && color && !isNaN(price)) {
-        sizes.push({ size, color, price });
-        updateSizeList();
-        document.getElementById("size").value = "";
-        document.getElementById("color").value = "";
-        document.getElementById("price").value = "";
+    // Add size and price together in a pair
+    window.addSizePrice = () => {
+      const size = document.getElementById("sizeInput").value.trim();
+      const price = parseFloat(document.getElementById("priceInput").value);
+      if (size && !isNaN(price)) {
+        sizePriceList.push({ size, price });
+        updateSizePriceList();
+        document.getElementById("sizeInput").value = "";
+        document.getElementById("priceInput").value = "";
       }
     };
 
-    const updateSizeList = () => {
-      const sizeList = document.getElementById("sizeList");
-      sizeList.innerHTML = sizes.map((s, i) => `
+    // Update the size and price list
+    const updateSizePriceList = () => {
+      const sizePriceListDiv = document.getElementById("sizePriceList");
+      sizePriceListDiv.innerHTML = sizePriceList.map((sp, i) => `
         <div class='size-item'>
-          ${s.size} - $${s.price}${s.color ? ` - ${s.color}` : ''}
-          <button onclick="removeSize(${i})">Remove</button>
+          ${sp.size} - $${sp.price.toFixed(2)}
+          <button onclick="removeSizePrice(${i})">Remove</button>
         </div>
       `).join('');
     };
 
-    window.removeSize = (index) => {
-      sizes.splice(index, 1);
-      updateSizeList();
+    // Remove size/price pair
+    window.removeSizePrice = (index) => {
+      sizePriceList.splice(index, 1);
+      updateSizePriceList();
     };
 
+    // Add color
+    window.addColor = () => {
+      const color = document.getElementById("colorInput").value.trim();
+      if (color) {
+        colorList.push(color);
+        updateColorList();
+        document.getElementById("colorInput").value = "";
+      }
+    };
+
+    // Update the color list
+    const updateColorList = () => {
+      const colorListDiv = document.getElementById("colorList");
+      colorListDiv.innerHTML = colorList.map((color, i) => `
+        <div class='size-item'>
+          ${color}
+          <button onclick="removeColor(${i})">Remove</button>
+        </div>
+      `).join('');
+    };
+
+    // Remove color
+    window.removeColor = (index) => {
+      colorList.splice(index, 1);
+      updateColorList();
+    };
+
+    // Submit the product to Firestore
     window.submitProduct = async () => {
       const name = document.getElementById("productName").value.trim();
       const category = document.getElementById("productCategory").value.trim();
       const imageUrl = document.getElementById("productImage").value.trim();
-      if (name && category && imageUrl && sizes.length > 0) {
-        const productData = { name, imageUrl, sizes };
+      if (name && category && imageUrl && sizePriceList.length > 0) {
+        const productData = { name, imageUrl, sizePriceList, colorList };
         if (editingProduct) {
           await updateDoc(doc(db, editingProduct.category, editingProduct.id), productData);
           editingProduct = null;
         } else {
           await addDoc(collection(db, category), productData);
         }
-        sizes = [];
-        updateSizeList();
+        sizePriceList = [];
+        colorList = [];
+        updateSizePriceList();
+        updateColorList();
         clearForm();
         loadProducts();
       }
@@ -183,47 +207,35 @@
     const clearForm = () => {
       document.getElementById("productName").value = "";
       document.getElementById("productImage").value = "";
-      document.getElementById("size").value = "";
-      document.getElementById("color").value = "";
-      document.getElementById("price").value = "";
+      document.getElementById("sizeInput").value = "";
+      document.getElementById("priceInput").value = "";
+      document.getElementById("colorInput").value = "";
       editingProduct = null;
     };
 
-    // Promo Code Management
-    window.addPromoCode = async () => {
-      const promoCode = document.getElementById("promoCode").value.trim();
-      const discount = parseFloat(document.getElementById("discount").value);
-      if (promoCode && !isNaN(discount)) {
-        const promoData = { promoCode, discount };
-        if (editingPromoCode) {
-          await updateDoc(doc(db, "promoCodes", editingPromoCode.id), promoData);
-          editingPromoCode = null;
-        } else {
-          await addDoc(collection(db, "promoCodes"), promoData);
-        }
-        document.getElementById("promoCode").value = "";
-        document.getElementById("discount").value = "";
-        loadPromoCodes();
-      }
-    };
-
-    window.editPromoCode = async (id) => {
-      const docRef = doc(db, "promoCodes", id);
+    // Edit product (load existing product data)
+    window.editProduct = async (id, category) => {
+      const docRef = doc(db, category, id);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        const promo = docSnap.data();
-        document.getElementById("promoCode").value = promo.promoCode;
-        document.getElementById("discount").value = promo.discount;
-        editingPromoCode = { id };
+        const product = docSnap.data();
+        document.getElementById("productName").value = product.name;
+        document.getElementById("productCategory").value = category;
+        document.getElementById("productImage").value = product.imageUrl;
+        sizePriceList = product.sizePriceList || [];
+        colorList = product.colorList || [];
+        editingProduct = { id, category };
+        updateSizePriceList();
+        updateColorList();
       }
     };
 
-    window.deletePromoCode = async (id) => {
-      await deleteDoc(doc(db, "promoCodes", id));
-      loadPromoCodes();
+    // Delete product
+    window.deleteProduct = async (id, category) => {
+      await deleteDoc(doc(db, category, id));
+      loadProducts();
     };
 
-    // Load Products from Firestore
     const loadProducts = async () => {
       const categories = ["cookies", "bracelets"];
       const productList = document.getElementById("productList");
@@ -240,8 +252,11 @@
             <h3>${product.name}</h3>
             <p><strong>Category:</strong> ${category}</p>
             <div>
-              ${product.sizes.map((s) =>
-                `<p>Size: ${s.size}, Price: $${s.price.toFixed(2)}${s.color ? `, Color: ${s.color}` : ''}</p>`
+              ${product.sizePriceList.map((sp) =>
+                `<p>Size: ${sp.size}, Price: $${sp.price.toFixed(2)}</p>`
+              ).join('')}
+              ${product.colorList.map((color) =>
+                `<p>Color: ${color}</p>`
               ).join('')}
             </div>
             <div class="actions">
@@ -254,28 +269,8 @@
       }
     };
 
-    // Load Promo Codes from Firestore
-    const loadPromoCodes = async () => {
-      const promoCodeList = document.getElementById("promoCodeList");
-      promoCodeList.innerHTML = "";
-      const querySnapshot = await getDocs(collection(db, "promoCodes"));
-      querySnapshot.forEach((docSnap) => {
-        const promo = docSnap.data();
-        const promoDiv = document.createElement("div");
-        promoDiv.className = "promo-code-item";
-        promoDiv.innerHTML = `
-          <p>Code: ${promo.promoCode} - ${promo.discount}%</p>
-          <div class="actions">
-            <button onclick="editPromoCode('${docSnap.id}')">Edit</button>
-            <button onclick="deletePromoCode('${docSnap.id}')">Delete</button>
-          </div>
-        `;
-        promoCodeList.appendChild(promoDiv);
-      });
-    };
-
     loadProducts();
-    loadPromoCodes();
   </script>
 </body>
 </html>
+
