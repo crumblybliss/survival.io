@@ -60,16 +60,8 @@
       background-color: #005b96;
     }
 
-    h2 {
+    h2, h4 {
       color: #003366;
-      font-size: 1.8em;
-      margin-bottom: 20px;
-    }
-
-    h4 {
-      color: #003366;
-      font-size: 1.2em;
-      margin-bottom: 10px;
     }
 
     .product-list, #promoCodeList {
@@ -93,18 +85,8 @@
       border-radius: 8px;
     }
 
-    .actions {
-      margin-top: 15px;
-    }
-
     .actions button {
       margin: 5px;
-    }
-
-    .product-card h3, .promo-card p {
-      color: #003366;
-      font-size: 1.2em;
-      margin: 10px 0;
     }
 
     .login-form {
@@ -112,52 +94,8 @@
       margin-top: 50px;
     }
 
-    .login-form input {
-      padding: 12px;
-      width: 250px;
-      margin: 10px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-    }
-
-    .promo-code-form input[type="text"], .promo-code-form input[type="number"], .promo-code-form input[type="date"] {
+    .promo-code-form input, .promo-code-form button {
       width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-
-    .promo-code-form button {
-      width: 100%;
-      background-color: #003366;
-      color: white;
-      padding: 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .promo-code-form button:hover {
-      background-color: #005b96;
-    }
-
-    .promo-card button {
-      margin-top: 5px;
-      background-color: #e74c3c;
-      color: white;
-      border-radius: 4px;
-      padding: 5px 10px;
-    }
-
-    .promo-card button:hover {
-      background-color: #c0392b;
-    }
-
-    .no-products {
-      text-align: center;
-      font-size: 1.2em;
-      color: #003366;
     }
   </style>
 </head>
@@ -168,31 +106,29 @@
     <a href="cookies.html">Cookies</a>
     <a href="bracelets.html">Bracelets</a>
     <a href="coolers.html">Coolers</a>
-    <a href="admin.html" id="adminLink">Admin Panel</a>
+    <a href="admin.html">Admin Panel</a>
   </div>
 
   <div class="container">
     <div id="adminContainer">
-      <!-- Product Management -->
       <h2>Add or Edit Product</h2>
-      <input type="text" id="productName" placeholder="Product Name" aria-label="Product Name" />
-      <input type="text" id="productCategory" placeholder="Category (cookies, bracelets, coolers)" aria-label="Product Category" />
-      <input type="text" id="productImage" placeholder="Image URL" aria-label="Product Image URL" />
-      
+      <input type="text" id="productName" placeholder="Product Name" />
+      <input type="text" id="productCategory" placeholder="Category (cookies, bracelets, coolers)" />
+      <input type="text" id="productImage" placeholder="Image URL" />
+
       <h4>Sizes & Prices</h4>
-      <input type="text" id="sizeInput" placeholder="Size (e.g., Small)" aria-label="Size" />
-      <input type="number" id="priceInput" placeholder="Price" step="0.01" aria-label="Price" />
-      <input type="text" id="colorInput" placeholder="Color (Optional)" aria-label="Color" />
+      <input type="text" id="sizeInput" placeholder="Size (e.g., Small)" />
+      <input type="number" id="priceInput" placeholder="Price" step="0.01" />
+      <input type="text" id="colorInput" placeholder="Color (Optional)" />
       <button onclick="addSize()">Add Size</button>
       <div id="sizesList"></div>
       <button onclick="submitProduct()">Submit Product</button>
 
-      <!-- Promo Code Management -->
       <h2>Manage Promo Codes</h2>
       <div class="promo-code-form">
-        <input type="text" id="promoCodeInput" placeholder="Promo Code" aria-label="Promo Code" />
-        <input type="number" id="discountInput" placeholder="Discount Percentage" step="1" aria-label="Discount Percentage" />
-        <input type="date" id="expirationInput" placeholder="Expiration Date" aria-label="Expiration Date" />
+        <input type="text" id="promoCodeInput" placeholder="Promo Code" />
+        <input type="number" id="discountInput" placeholder="Discount Percentage" step="1" />
+        <input type="date" id="expirationInput" />
         <button onclick="submitPromoCode()">Submit Promo Code</button>
       </div>
 
@@ -207,229 +143,12 @@
 
     <div class="login-form" id="loginForm">
       <h2>Admin Login</h2>
-      <input type="email" id="email" placeholder="Enter email" aria-label="Admin Email" />
-      <input type="password" id="password" placeholder="Enter password" aria-label="Admin Password" />
+      <input type="email" id="email" placeholder="Enter email" />
+      <input type="password" id="password" placeholder="Enter password" />
       <button onclick="login()">Login</button>
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, getDoc, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-      authDomain: "survival-f35e2.firebaseapp.com",
-      projectId: "survival-f35e2",
-      storageBucket: "survival-f35e2.appspot.com",
-      messagingSenderId: "704462603548",
-      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth();
-
-    let sizes = [];
-    let editingProduct = null;
-
-    setPersistence(auth, browserLocalPersistence)
-      .then(() => {
-        console.log("Persistence set to local");
-      })
-      .catch((error) => {
-        console.error("Error setting persistence:", error);
-      });
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        user.getIdTokenResult().then((idTokenResult) => {
-          if (idTokenResult.claims.admin) {
-            console.log("User is an admin.");
-            document.getElementById('adminContainer').style.display = 'block';
-            document.getElementById('loginForm').style.display = 'none';
-            loadProducts();
-            loadPromoCodes();
-          } else {
-            console.log("User is not an admin.");
-            alert("You do not have admin privileges.");
-            window.location.href = "index.html";
-          }
-        });
-      } else {
-        console.log("No user signed in");
-      }
-    });
-
-    window.login = () => {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-
-      if (email && password) {
-        signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-            console.log("User signed in:", userCredential.user);
-          })
-          .catch((error) => {
-            console.error("Error signing in:", error);
-            alert("Failed to sign in.");
-          });
-      } else {
-        alert("Please enter both email and password.");
-      }
-    };
-
-    window.addSize = () => {
-      const sizeInput = document.getElementById("sizeInput").value.trim();
-      const priceInput = parseFloat(document.getElementById("priceInput").value.trim());
-      const colorInput = document.getElementById("colorInput").value.trim();
-
-      if (sizeInput && !isNaN(priceInput)) {
-        sizes.push({
-          size: sizeInput,
-          price: priceInput,
-          color: colorInput
-        });
-        updateSizeList();
-        document.getElementById("sizeInput").value = "";
-        document.getElementById("priceInput").value = "";
-        document.getElementById("colorInput").value = "";
-      } else {
-        alert("Please provide valid size and price.");
-      }
-    };
-
-    const updateSizeList = () => {
-      const sizesListDiv = document.getElementById("sizesList");
-      sizesListDiv.innerHTML = sizes.map((size, index) => `
-        <div>
-          Size: ${size.size}, Price: $${size.price.toFixed(2)} ${size.color ? `, Color: ${size.color}` : ""}
-          <button onclick="deleteSize(${index})">Delete</button>
-        </div>
-      `).join('');
-    };
-
-    window.deleteSize = (index) => {
-      sizes.splice(index, 1);
-      updateSizeList();
-    };
-
-    window.submitProduct = async () => {
-      const name = document.getElementById("productName").value.trim();
-      const category = document.getElementById("productCategory").value.trim();
-      const imageUrl = document.getElementById("productImage").value.trim();
-
-      if (name && category && imageUrl && sizes.length > 0) {
-        try {
-          const docRef = await addDoc(collection(db, category), {
-            name,
-            imageUrl,
-            sizes
-          });
-          alert("Product added successfully.");
-          sizes = [];
-          updateSizeList();
-        } catch (e) {
-          alert("Error adding product:", e);
-        }
-      } else {
-        alert("Please fill in all fields and add at least one size.");
-      }
-    };
-
-    const loadProducts = async () => {
-      const querySnapshot = await getDocs(collection(db, "cookies"));
-      const productList = document.getElementById("productList");
-
-      if (!querySnapshot.empty) {
-        document.getElementById("noProductsMessage").style.display = "none";
-        querySnapshot.forEach((doc) => {
-          const product = doc.data();
-          const productCard = `
-            <div class="product-card">
-              <img src="${product.imageUrl}" alt="${product.name}" />
-              <h3>${product.name}</h3>
-              <div>
-                ${product.sizes.map(size => `<p>${size.size} - $${size.price}</p>`).join('')}
-              </div>
-              <div class="actions">
-                <button onclick="editProduct('${doc.id}')">Edit</button>
-                <button onclick="deleteProduct('${doc.id}')">Delete</button>
-              </div>
-            </div>
-          `;
-          productList.innerHTML += productCard;
-        });
-      } else {
-        document.getElementById("noProductsMessage").style.display = "block";
-      }
-    };
-
-    window.editProduct = (productId) => {
-      // Implement product edit logic here
-    };
-
-    window.deleteProduct = async (productId) => {
-      try {
-        await deleteDoc(doc(db, "cookies", productId));
-        alert("Product deleted successfully.");
-        loadProducts();
-      } catch (e) {
-        console.error("Error deleting product:", e);
-      }
-    };
-
-    window.submitPromoCode = async () => {
-      const promoCode = document.getElementById("promoCodeInput").value.trim();
-      const discount = parseInt(document.getElementById("discountInput").value.trim());
-      const expirationDate = document.getElementById("expirationInput").value;
-
-      if (promoCode && !isNaN(discount) && expirationDate) {
-        try {
-          const docRef = await addDoc(collection(db, "promoCodes"), {
-            promoCode,
-            discount,
-            expirationDate
-          });
-          alert("Promo code added successfully.");
-          loadPromoCodes();
-        } catch (e) {
-          console.error("Error adding promo code:", e);
-        }
-      } else {
-        alert("Please fill in all fields.");
-      }
-    };
-
-    const loadPromoCodes = async () => {
-      const querySnapshot = await getDocs(collection(db, "promoCodes"));
-      const promoCodeList = document.getElementById("promoCodeList");
-      promoCodeList.innerHTML = "";
-      querySnapshot.forEach((doc) => {
-        const promoCode = doc.data();
-        const promoCard = `
-          <div class="promo-card">
-            <p>Code: ${promoCode.promoCode}</p>
-            <p>Discount: ${promoCode.discount}%</p>
-            <p>Expires: ${promoCode.expirationDate}</p>
-            <button onclick="deletePromoCode('${doc.id}')">Delete</button>
-          </div>
-        `;
-        promoCodeList.innerHTML += promoCard;
-      });
-    };
-
-    window.deletePromoCode = async (promoCodeId) => {
-      try {
-        await deleteDoc(doc(db, "promoCodes", promoCodeId));
-        alert("Promo code deleted successfully.");
-        loadPromoCodes();
-      } catch (e) {
-        console.error("Error deleting promo code:", e);
-      }
-    };
-  </script>
-
+  <script type="module" src="adminPanel.js"></script>
 </body>
 </html>
