@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Panel</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
       background: #f4f4f4;
     }
     header {
@@ -20,13 +18,15 @@
     }
     main {
       padding: 1rem;
+      max-width: 900px;
+      margin: auto;
     }
     .form-section, .product-list-section {
       background: white;
       padding: 1rem;
-      margin-bottom: 1rem;
+      margin-bottom: 2rem;
       border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     input, select, button {
       padding: 0.5rem;
@@ -57,7 +57,6 @@
     }
   </style>
 </head>
-
 <body>
   <header>
     <h1>Admin Panel</h1>
@@ -122,7 +121,12 @@
 
     const updateSizeList = () => {
       const sizeList = document.getElementById("sizeList");
-      sizeList.innerHTML = sizes.map((s, i) => `<div class='size-item'>${s.size} - $${s.price}${s.color ? ` - ${s.color}` : ''} <button onclick="removeSize(${i})">Remove</button></div>`).join('');
+      sizeList.innerHTML = sizes.map((s, i) => `
+        <div class='size-item'>
+          ${s.size} - $${s.price}${s.color ? ` - ${s.color}` : ''}
+          <button onclick="removeSize(${i})">Remove</button>
+        </div>
+      `).join('');
     };
 
     window.removeSize = (index) => {
@@ -144,8 +148,18 @@
         }
         sizes = [];
         updateSizeList();
+        clearForm();
         loadProducts();
       }
+    };
+
+    const clearForm = () => {
+      document.getElementById("productName").value = "";
+      document.getElementById("productImage").value = "";
+      document.getElementById("size").value = "";
+      document.getElementById("color").value = "";
+      document.getElementById("price").value = "";
+      editingProduct = null;
     };
 
     window.editProduct = async (id, category) => {
@@ -183,7 +197,9 @@
             <h3>${product.name}</h3>
             <p><strong>Category:</strong> ${category}</p>
             <div>
-              ${product.sizes.map((s) => `<p>Size: ${s.size}, Price: $${s.price.toFixed(2)}${s.color ? `, Color: ${s.color}` : ''}</p>`).join('')}
+              ${product.sizes.map((s) =>
+                `<p>Size: ${s.size}, Price: $${s.price.toFixed(2)}${s.color ? `, Color: ${s.color}` : ''}</p>`
+              ).join('')}
             </div>
             <div class="actions">
               <button onclick="editProduct('${docSnap.id}', '${category}')">Edit</button>
@@ -198,5 +214,4 @@
     loadProducts();
   </script>
 </body>
-
 </html>
