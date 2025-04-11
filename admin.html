@@ -71,13 +71,11 @@
       </select>
       <input type="text" id="productImage" placeholder="Image URL" />
 
-      <!-- Size/Price inputs -->
       <input type="text" id="sizeInput" placeholder="Enter Size (e.g., Small)" />
       <input type="number" id="priceInput" placeholder="Enter Price" />
       <button onclick="addSizePrice()">Add Size</button>
       <div id="sizePriceList"></div>
 
-      <!-- Color inputs -->
       <input type="text" id="colorInput" placeholder="Enter Color (e.g., Red)" />
       <button onclick="addColor()">Add Color</button>
       <div id="colorList"></div>
@@ -87,7 +85,7 @@
 
     <section class="product-list-section">
       <h2>Products</h2>
-      <div id="productList"></div>
+      <div id="productList">Loading...</div>
     </section>
   </main>
 
@@ -222,32 +220,41 @@
       loadProducts();
     };
 
-    const loadProducts = async () => {
+    async function loadProducts() {
       const categories = ["cookies", "bracelets"];
       const productList = document.getElementById("productList");
       productList.innerHTML = "";
 
       for (const category of categories) {
-        const querySnapshot = await getDocs(collection(db, category));
-        querySnapshot.forEach((docSnap) => {
-          const product = docSnap.data();
-          const card = document.createElement("div");
-          card.className = "product-card";
-          card.innerHTML = `
-            <img src="${product.imageUrl}" alt="${product.name}" />
-            <h3>${product.name}</h3>
-            <p><strong>Category:</strong> ${category}</p>
-            <p><strong>Sizes:</strong> ${product.sizePriceList.map(sp => `${sp.size} ($${sp.price.toFixed(2)})`).join(", ")}</p>
-            <p><strong>Colors:</strong> ${product.colorList.join(", ")}</p>
-            <div class="actions">
-              <button onclick="editProduct('${docSnap.id}', '${category}')">Edit</button>
-              <button onclick="deleteProduct('${docSnap.id}', '${category}')">Delete</button>
-            </div>
-          `;
-          productList.appendChild(card);
-        });
+        try {
+          const querySnapshot = await getDocs(collection(db, category));
+          if (querySnapshot.empty) {
+            productList.innerHTML += `<p>No products in ${category}.</p>`;
+          } else {
+            querySnapshot.forEach((docSnap) => {
+              const product = docSnap.data();
+              const card = document.createElement("div");
+              card.className = "product-card";
+              card.innerHTML = `
+                <img src="${product.imageUrl}" alt="${product.name}" />
+                <h3>${product.name}</h3>
+                <p><strong>Category:</strong> ${category}</p>
+                <p><strong>Sizes:</strong> ${product.sizePriceList?.map(sp => `${sp.size} ($${sp.price.toFixed(2)})`).join(", ") || 'N/A'}</p>
+                <p><strong>Colors:</strong> ${product.colorList?.join(", ") || 'N/A'}</p>
+                <div class="actions">
+                  <button onclick="editProduct('${docSnap.id}', '${category}')">Edit</button>
+                  <button onclick="deleteProduct('${docSnap.id}', '${category}')">Delete</button>
+                </div>
+              `;
+              productList.appendChild(card);
+            });
+          }
+        } catch (err) {
+          console.error(`Error loading category ${category}:`, err);
+          productList.innerHTML += `<p>Error loading ${category}.</p>`;
+        }
       }
-    };
+    }
 
     loadProducts();
   </script>
