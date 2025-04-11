@@ -21,7 +21,7 @@
       max-width: 900px;
       margin: auto;
     }
-    .form-section, .product-list-section {
+    .form-section, .product-list-section, .promo-code-section {
       background: white;
       padding: 1rem;
       margin-bottom: 2rem;
@@ -34,7 +34,7 @@
       width: 100%;
       box-sizing: border-box;
     }
-    .size-item {
+    .size-item, .promo-code-item {
       margin: 0.3rem 0;
       background: #eee;
       padding: 0.5rem;
@@ -62,6 +62,7 @@
     <h1>Admin Panel</h1>
   </header>
   <main>
+    <!-- Product Form Section -->
     <section class="form-section">
       <h2>Add/Edit Product</h2>
       <input type="text" id="productName" placeholder="Product Name" />
@@ -70,14 +71,38 @@
         <option value="bracelets">Bracelets</option>
       </select>
       <input type="text" id="productImage" placeholder="Image URL" />
-      <input type="text" id="size" placeholder="Size" />
-      <input type="text" id="color" placeholder="Color (optional)" />
+      
+      <select id="size">
+        <option value="">Select Size</option>
+        <option value="Small">Small</option>
+        <option value="Medium">Medium</option>
+        <option value="Large">Large</option>
+      </select>
+      
+      <select id="color">
+        <option value="">Select Color</option>
+        <option value="Red">Red</option>
+        <option value="Blue">Blue</option>
+        <option value="Green">Green</option>
+      </select>
+      
       <input type="number" id="price" placeholder="Price" />
+      
       <button onclick="addSize()">Add Size</button>
       <div id="sizeList"></div>
       <button onclick="submitProduct()">Save Product</button>
     </section>
 
+    <!-- Promo Code Section -->
+    <section class="promo-code-section">
+      <h2>Manage Promo Codes</h2>
+      <input type="text" id="promoCode" placeholder="Promo Code" />
+      <input type="number" id="discount" placeholder="Discount Percentage" />
+      <button onclick="addPromoCode()">Add Promo Code</button>
+      <div id="promoCodeList"></div>
+    </section>
+
+    <!-- Product List Section -->
     <section class="product-list-section">
       <h2>Products</h2>
       <div id="productList"></div>
@@ -92,7 +117,7 @@
     } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
     const firebaseConfig = {
-     apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
       authDomain: "survival-f35e2.firebaseapp.com",
       projectId: "survival-f35e2",
       storageBucket: "survival-f35e2.appspot.com",
@@ -105,12 +130,14 @@
 
     let sizes = [];
     let editingProduct = null;
+    let editingPromoCode = null;
 
+    // Product Size Management
     window.addSize = () => {
       const size = document.getElementById("size").value.trim();
       const color = document.getElementById("color").value.trim();
       const price = parseFloat(document.getElementById("price").value);
-      if (size && !isNaN(price)) {
+      if (size && color && !isNaN(price)) {
         sizes.push({ size, color, price });
         updateSizeList();
         document.getElementById("size").value = "";
@@ -162,25 +189,41 @@
       editingProduct = null;
     };
 
-    window.editProduct = async (id, category) => {
-      const docRef = doc(db, category, id);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const product = docSnap.data();
-        document.getElementById("productName").value = product.name;
-        document.getElementById("productCategory").value = category;
-        document.getElementById("productImage").value = product.imageUrl;
-        sizes = product.sizes || [];
-        editingProduct = { id, category };
-        updateSizeList();
+    // Promo Code Management
+    window.addPromoCode = async () => {
+      const promoCode = document.getElementById("promoCode").value.trim();
+      const discount = parseFloat(document.getElementById("discount").value);
+      if (promoCode && !isNaN(discount)) {
+        const promoData = { promoCode, discount };
+        if (editingPromoCode) {
+          await updateDoc(doc(db, "promoCodes", editingPromoCode.id), promoData);
+          editingPromoCode = null;
+        } else {
+          await addDoc(collection(db, "promoCodes"), promoData);
+        }
+        document.getElementById("promoCode").value = "";
+        document.getElementById("discount").value = "";
+        loadPromoCodes();
       }
     };
 
-    window.deleteProduct = async (id, category) => {
-      await deleteDoc(doc(db, category, id));
-      loadProducts();
+    window.editPromoCode = async (id) => {
+      const docRef = doc(db, "promoCodes", id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const promo = docSnap.data();
+        document.getElementById("promoCode").value = promo.promoCode;
+        document.getElementById("discount").value = promo.discount;
+        editingPromoCode = { id };
+      }
     };
 
+    window.deletePromoCode = async (id) => {
+      await deleteDoc(doc(db, "promoCodes", id));
+      loadPromoCodes();
+    };
+
+    // Load Products from Firestore
     const loadProducts = async () => {
       const categories = ["cookies", "bracelets"];
       const productList = document.getElementById("productList");
@@ -211,7 +254,28 @@
       }
     };
 
+    // Load Promo Codes from Firestore
+    const loadPromoCodes = async () => {
+      const promoCodeList = document.getElementById("promoCodeList");
+      promoCodeList.innerHTML = "";
+      const querySnapshot = await getDocs(collection(db, "promoCodes"));
+      querySnapshot.forEach((docSnap) => {
+        const promo = docSnap.data();
+        const promoDiv = document.createElement("div");
+        promoDiv.className = "promo-code-item";
+        promoDiv.innerHTML = `
+          <p>Code: ${promo.promoCode} - ${promo.discount}%</p>
+          <div class="actions">
+            <button onclick="editPromoCode('${docSnap.id}')">Edit</button>
+            <button onclick="deletePromoCode('${docSnap.id}')">Delete</button>
+          </div>
+        `;
+        promoCodeList.appendChild(promoDiv);
+      });
+    };
+
     loadProducts();
+    loadPromoCodes();
   </script>
 </body>
 </html>
