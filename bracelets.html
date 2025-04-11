@@ -1,113 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tactics & Treats - Bracelets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bracelets - Tactics & Treats</title>
   <style>
     body {
-      margin: 0;
-      background-color: #0a1d37;
-      color: #f1f1f1;
       font-family: 'Arial', sans-serif;
-    }
-    ul {
-      background-color: #003c5a;
-      padding: 10px 0;
-      text-align: center;
-      margin: 0;
-    }
-    ul li {
-      display: inline;
-      margin: 0 15px;
-    }
-    ul li a {
-      color: #f1f1f1;
-      text-decoration: none;
-      font-size: 18px;
-    }
-    ul li a:hover {
-      color: #00bcd4;
-    }
-    .container {
-      padding: 40px 20px;
-      text-align: center;
-    }
-    .product-list {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 30px;
-      margin-top: 30px;
-    }
-    .product {
-      background-color: #003c5a;
-      border-radius: 12px;
-      padding: 20px;
-      width: 230px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      transition: transform 0.2s ease;
-    }
-    .product:hover {
-      transform: scale(1.03);
-    }
-    .product img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 15px;
-    }
-    .product h3 {
-      margin: 10px 0 5px;
-      font-size: 20px;
-    }
-    .product p {
-      margin: 8px 0;
-    }
-    select {
-      padding: 6px;
-      margin-top: 5px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: none;
       background-color: #f1f1f1;
-      color: #003c5a;
+      color: #333;
+      margin: 0;
+      text-align: center;
+    }
+
+    .navbar {
+      background-color: #0a1d37;
+      color: white;
+      padding: 15px 0;
+      font-size: 18px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+    }
+
+    .navbar a {
+      color: white;
+      margin: 0 20px;
+      text-decoration: none;
       font-weight: bold;
     }
-    button {
-      background-color: #00bcd4;
-      border: none;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 10px;
+
+    .navbar a:hover {
+      text-decoration: underline;
     }
-    button:hover {
+
+    .navbar .auth-btn {
+      background-color: #00bcd4;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .navbar .auth-btn:hover {
+      background-color: #0097a7;
+    }
+
+    h1 {
+      padding-top: 100px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 20px;
+    }
+
+    .product {
+      width: 250px;
+      margin: 20px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .product img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .product h3 {
+      margin: 15px 0;
+      font-size: 18px;
+    }
+
+    .product p {
+      font-size: 16px;
+      color: #555;
+    }
+
+    .product select {
+      padding: 5px;
+      margin: 10px 0;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .product button {
+      background-color: #00bcd4;
+      color: white;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .product button:hover {
       background-color: #0097a7;
     }
   </style>
 </head>
-<body>
-  <ul>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="bracelets.html">Bracelets</a></li>
-    <li><a href="cookies.html">Cookies</a></li>
-    <li><a href="about.html">About</a></li>
-    <li><a href="commitments.html">Commitments</a></li>
-    <li><a href="cart.html">Cart 🛒</a></li>
-    <li><a href="admin.html">Admin Dashboard 🛒</a></li>
-  </ul>
 
-  <div class="container">
-    <h1>Bracelets</h1>
-    <p>Explore our collection of handmade bracelets!</p>
-    <div class="product-list" id="products-list"></div>
+<body>
+  <div class="navbar">
+    <a href="index.html">Home</a>
+    <a href="bracelets.html">Bracelets</a>
+    <a href="cookies.html">Cookies</a>
+    <a href="admin.html">Admin Panel</a>
+    <button id="loginButton" class="auth-btn">Login</button>
   </div>
+
+  <h1>Bracelets</h1>
+  <div class="container" id="braceletProducts"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -121,72 +139,87 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth();
 
-    async function loadBracelets() {
-      const productList = document.getElementById("products-list");
-      productList.innerHTML = "<p>Loading bracelets...</p>";
-
-      try {
-        const querySnapshot = await getDocs(collection(db, "bracelets"));
-        productList.innerHTML = "";
-
-        if (querySnapshot.empty) {
-          productList.innerHTML = "<p>No bracelets available.</p>";
-          return;
-        }
-
-        querySnapshot.forEach((doc) => {
-          const product = doc.data();
-          const id = doc.id;
-          const price = product.price || 0;
-          const colors = Array.isArray(product.colors) ? product.colors : [];
-          const sizes = Array.isArray(product.sizes) ? product.sizes : [];
-
-          const colorSelect = colors.length > 0
-            ? `<select id="color-${id}">${colors.map(c => `<option value="${c}">${c}</option>`).join("")}</select>`
-            : "<p>No colors</p>";
-
-          const sizeSelect = sizes.length > 0
-            ? `<select id="size-${id}">${sizes.map(s => `<option value="${s}">${s}</option>`).join("")}</select>`
-            : "<p>No sizes</p>";
-
-          const productHTML = `
-            <div class="product">
-              <img src="${product.imageUrl}" alt="${product.name}" />
-              <h3>${product.name}</h3>
-              <p><strong>$${price.toFixed(2)}</strong></p>
-              <p>Color:<br>${colorSelect}</p>
-              <p>Size:<br>${sizeSelect}</p>
-              <button onclick="addToCart('${id}', '${product.name}', ${price}, '${product.imageUrl}')">Add to Cart</button>
-            </div>
-          `;
-
-          productList.innerHTML += productHTML;
-        });
-      } catch (err) {
-        console.error("Error loading bracelets:", err);
-        productList.innerHTML = "<p>Failed to load bracelets.</p>";
-      }
-    }
-
-    window.addToCart = function (id, name, price, imageUrl) {
-      const colorEl = document.getElementById(`color-${id}`);
-      const sizeEl = document.getElementById(`size-${id}`);
-      const color = colorEl ? colorEl.value : null;
-      const size = sizeEl ? sizeEl.value : null;
-
-      if (!color || !size) {
-        alert("Please select a color and size before adding to cart.");
+    window.addToCart = async (productB64, selectedSize) => {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please login to add items to your cart.");
         return;
       }
 
-      const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      cart.push({ id, name, price, imageUrl, color, size });
+      const product = JSON.parse(atob(productB64));
+      const sizeInfo = product.sizes.find(s => s.size === selectedSize);
+
+      if (!sizeInfo) {
+        alert("Invalid size selected.");
+        return;
+      }
+
+      const cartItem = {
+        ...product,
+        selectedSize: selectedSize,
+        price: sizeInfo.price
+      };
+
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.push(cartItem);
       localStorage.setItem("cart", JSON.stringify(cart));
-      alert(`${name} added to cart!`);
+
+      alert(`${product.name} (${selectedSize}) added to your cart for $${sizeInfo.price}`);
+
+      window.location.href = "cart.html"; // Redirect to the cart page
     };
 
-    window.onload = loadBracelets;
+    const fetchBracelets = async () => {
+      const snap = await getDocs(collection(db, "bracelets"));
+      const container = document.getElementById("braceletProducts");
+
+      if (snap.empty) {
+        container.innerHTML = "<p>No bracelets available at the moment.</p>";
+        return;
+      }
+
+      snap.forEach(doc => {
+        const product = doc.data();
+        const imageUrl = product.imageUrl || "default.jpg";
+        const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+
+        const options = sizes.map(size => {
+          return `<option value="${size.size}">${size.size} - $${size.price}</option>`;
+        }).join("");
+
+        const encodedProduct = btoa(JSON.stringify(product));
+
+        const div = document.createElement("div");
+        div.className = "product";
+        div.innerHTML = `
+          <img src="${imageUrl}" alt="${product.name || "Bracelet"}">
+          <h3>${product.name || "Unnamed Bracelet"}</h3>
+          <p>Select Size:</p>
+          <select id="size-${doc.id}">
+            <option value="" disabled selected>Select Size</option>
+            ${options}
+          </select>
+          <button onclick="addToCart('${encodedProduct}', document.getElementById('size-${doc.id}').value)">Add to Cart</button>
+        `;
+        container.appendChild(div);
+      });
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      const btn = document.getElementById("loginButton");
+      if (user) {
+        btn.innerText = "Logout";
+        btn.onclick = () => signOut(auth);
+      } else {
+        btn.innerText = "Login";
+        btn.onclick = () => window.location.href = "login.html";
+      }
+    });
+
+    fetchBracelets();
   </script>
 </body>
+
 </html>
