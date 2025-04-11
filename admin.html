@@ -21,20 +21,20 @@
       max-width: 900px;
       margin: auto;
     }
-    .form-section, .product-list-section, .promo-code-section {
+    .form-section, .product-list-section {
       background: white;
       padding: 1rem;
       margin-bottom: 2rem;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    input, button {
+    input, select, button {
       padding: 0.5rem;
       margin: 0.5rem 0;
       width: 100%;
       box-sizing: border-box;
     }
-    .size-item, .promo-code-item {
+    .size-item {
       margin: 0.3rem 0;
       background: #eee;
       padding: 0.5rem;
@@ -62,7 +62,6 @@
     <h1>Admin Panel</h1>
   </header>
   <main>
-    <!-- Product Form Section -->
     <section class="form-section">
       <h2>Add/Edit Product</h2>
       <input type="text" id="productName" placeholder="Product Name" />
@@ -72,30 +71,20 @@
       </select>
       <input type="text" id="productImage" placeholder="Image URL" />
       
-      <!-- Manually adding size and price together -->
-      <input type="text" id="sizeInput" placeholder="Enter Size (e.g., Small)" />
-      <input type="number" id="priceInput" placeholder="Enter Price" />
-      <button onclick="addSizePrice()">Add Size/Price</button>
-      <div id="sizePriceList"></div>
+      <!-- Separate input for size/price and color -->
+      <input type="text" id="size" placeholder="Size" />
+      <input type="number" id="price" placeholder="Price" />
+      <input type="text" id="color" placeholder="Color" />
       
-      <!-- Manually adding color -->
-      <input type="text" id="colorInput" placeholder="Enter Color (e.g., Red)" />
+      <button onclick="addSizePrice()">Add Size & Price</button>
       <button onclick="addColor()">Add Color</button>
+
+      <div id="sizePriceList"></div>
       <div id="colorList"></div>
 
       <button onclick="submitProduct()">Save Product</button>
     </section>
 
-    <!-- Promo Code Section -->
-    <section class="promo-code-section">
-      <h2>Manage Promo Codes</h2>
-      <input type="text" id="promoCode" placeholder="Promo Code" />
-      <input type="number" id="discount" placeholder="Discount Percentage" />
-      <button onclick="addPromoCode()">Add Promo Code</button>
-      <div id="promoCodeList"></div>
-    </section>
-
-    <!-- Product List Section -->
     <section class="product-list-section">
       <h2>Products</h2>
       <div id="productList"></div>
@@ -124,21 +113,18 @@
     let sizePriceList = [];
     let colorList = [];
     let editingProduct = null;
-    let editingPromoCode = null;
 
-    // Add size and price together in a pair
     window.addSizePrice = () => {
-      const size = document.getElementById("sizeInput").value.trim();
-      const price = parseFloat(document.getElementById("priceInput").value);
+      const size = document.getElementById("size").value.trim();
+      const price = parseFloat(document.getElementById("price").value);
       if (size && !isNaN(price)) {
         sizePriceList.push({ size, price });
         updateSizePriceList();
-        document.getElementById("sizeInput").value = "";
-        document.getElementById("priceInput").value = "";
+        document.getElementById("size").value = "";
+        document.getElementById("price").value = "";
       }
     };
 
-    // Update the size and price list
     const updateSizePriceList = () => {
       const sizePriceListDiv = document.getElementById("sizePriceList");
       sizePriceListDiv.innerHTML = sizePriceList.map((sp, i) => `
@@ -149,23 +135,20 @@
       `).join('');
     };
 
-    // Remove size/price pair
     window.removeSizePrice = (index) => {
       sizePriceList.splice(index, 1);
       updateSizePriceList();
     };
 
-    // Add color
     window.addColor = () => {
-      const color = document.getElementById("colorInput").value.trim();
+      const color = document.getElementById("color").value.trim();
       if (color) {
         colorList.push(color);
         updateColorList();
-        document.getElementById("colorInput").value = "";
+        document.getElementById("color").value = "";
       }
     };
 
-    // Update the color list
     const updateColorList = () => {
       const colorListDiv = document.getElementById("colorList");
       colorListDiv.innerHTML = colorList.map((color, i) => `
@@ -176,13 +159,11 @@
       `).join('');
     };
 
-    // Remove color
     window.removeColor = (index) => {
       colorList.splice(index, 1);
       updateColorList();
     };
 
-    // Submit the product to Firestore
     window.submitProduct = async () => {
       const name = document.getElementById("productName").value.trim();
       const category = document.getElementById("productCategory").value.trim();
@@ -207,13 +188,12 @@
     const clearForm = () => {
       document.getElementById("productName").value = "";
       document.getElementById("productImage").value = "";
-      document.getElementById("sizeInput").value = "";
-      document.getElementById("priceInput").value = "";
-      document.getElementById("colorInput").value = "";
+      document.getElementById("size").value = "";
+      document.getElementById("price").value = "";
+      document.getElementById("color").value = "";
       editingProduct = null;
     };
 
-    // Edit product (load existing product data)
     window.editProduct = async (id, category) => {
       const docRef = doc(db, category, id);
       const docSnap = await getDoc(docRef);
@@ -230,7 +210,6 @@
       }
     };
 
-    // Delete product
     window.deleteProduct = async (id, category) => {
       await deleteDoc(doc(db, category, id));
       loadProducts();
@@ -241,31 +220,41 @@
       const productList = document.getElementById("productList");
       productList.innerHTML = "";
 
-      for (const category of categories) {
-        const querySnapshot = await getDocs(collection(db, category));
-        querySnapshot.forEach((docSnap) => {
-          const product = docSnap.data();
-          const card = document.createElement("div");
-          card.className = "product-card";
-          card.innerHTML = `
-            <img src="${product.imageUrl}" alt="${product.name}" />
-            <h3>${product.name}</h3>
-            <p><strong>Category:</strong> ${category}</p>
-            <div>
-              ${product.sizePriceList.map((sp) =>
-                `<p>Size: ${sp.size}, Price: $${sp.price.toFixed(2)}</p>`
-              ).join('')}
-              ${product.colorList.map((color) =>
-                `<p>Color: ${color}</p>`
-              ).join('')}
-            </div>
-            <div class="actions">
-              <button onclick="editProduct('${docSnap.id}', '${category}')">Edit</button>
-              <button onclick="deleteProduct('${docSnap.id}', '${category}')">Delete</button>
-            </div>
-          `;
-          productList.appendChild(card);
-        });
+      try {
+        for (const category of categories) {
+          const querySnapshot = await getDocs(collection(db, category));
+
+          if (querySnapshot.empty) {
+            console.log(`No products found in ${category} category.`);
+            continue;
+          }
+
+          querySnapshot.forEach((docSnap) => {
+            const product = docSnap.data();
+            const card = document.createElement("div");
+            card.className = "product-card";
+            card.innerHTML = `
+              <img src="${product.imageUrl}" alt="${product.name}" />
+              <h3>${product.name}</h3>
+              <p><strong>Category:</strong> ${category}</p>
+              <div>
+                ${product.sizePriceList.map((sp) =>
+                  `<p>Size: ${sp.size}, Price: $${sp.price.toFixed(2)}</p>`
+                ).join('')}
+                ${product.colorList.map((color) =>
+                  `<p>Color: ${color}</p>`
+                ).join('')}
+              </div>
+              <div class="actions">
+                <button onclick="editProduct('${docSnap.id}', '${category}')">Edit</button>
+                <button onclick="deleteProduct('${docSnap.id}', '${category}')">Delete</button>
+              </div>
+            `;
+            productList.appendChild(card);
+          });
+        }
+      } catch (error) {
+        console.error("Error loading products:", error);
       }
     };
 
@@ -273,4 +262,3 @@
   </script>
 </body>
 </html>
-
