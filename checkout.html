@@ -1,177 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Cart - Your Website</title>
-    <style>
-        /* Styles here (same as previous) */
-        /* You can reuse your previous CSS */
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Cart - Your Website</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f1f1f1;
+      color: #333;
+      margin: 0;
+      text-align: center;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: #0a1d37;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+    }
+
+    .profile-link {
+      margin-left: 20px;
+    }
+
+    .profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .auth-status {
+      margin-right: 20px;
+      color: white;
+    }
+
+    nav {
+      margin-top: 60px;
+      background-color: #0a1d37;
+      padding: 10px 0;
+    }
+
+    nav a {
+      color: white;
+      margin: 0 20px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    h1 {
+      padding-top: 40px;
+    }
+
+    .content {
+      max-width: 800px;
+      margin: 100px auto 40px;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .cart-item {
+      background: #fafafa;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .promo-code {
+      margin: 20px 0;
+    }
+
+    .promo-code input {
+      padding: 10px;
+      width: 60%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .promo-code button {
+      background-color: #00bcd4;
+      color: white;
+      padding: 10px 20px;
+      margin-left: 10px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .promo-code button:hover {
+      background-color: #0097a7;
+    }
+
+    footer {
+      background-color: #0a1d37;
+      color: white;
+      text-align: center;
+      padding: 15px 0;
+      margin-top: 40px;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <a href="index.html" class="profile-link">
-            <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
-        </a>
-        <div class="auth-status" id="auth-status"></div>
-    </header>
+  <header>
+    <a href="index.html" class="profile-link">
+      <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
+    </a>
+    <div class="auth-status" id="auth-status"></div>
+  </header>
 
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="shop.html">Shop</a>
-        <a href="cart.html">Cart</a>
-        <a href="checkout.html">Checkout</a>
-    </nav>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="cart.html">Cart</a>
+    <a href="checkout.html">Checkout</a>
+  </nav>
 
-    <div class="content">
-        <h1>Your Cart</h1>
-        <div class="cart-items" id="cart-items"></div>
-        <p id="total-price">Total: $0.00</p>
-        
-        <!-- Promo Code Section -->
-        <div class="promo-code">
-            <input type="text" id="promo-code-input" placeholder="Enter promo code">
-            <button id="apply-promo-btn">Apply Promo Code</button>
-            <p id="promo-message"></p>
-        </div>
+  <div class="content">
+    <h1>Your Cart</h1>
+    <div class="cart-items" id="cart-items"></div>
+    <p id="total-price">Total: $0.00</p>
 
-        <div id="paypal-button-container"></div>
-        <p id="result-message"></p>
-
-        <!-- PayPal button script -->
-        <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD&components=buttons&enable-funding=venmo,paylater,card"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const cartItemsElement = document.getElementById('cart-items');
-                const totalPriceElement = document.getElementById('total-price');
-                const cart = getCartFromLocalStorage() || [];
-                
-                let totalPrice = 0;
-
-                if (cart.length === 0) {
-                    cartItemsElement.innerHTML = '<p>Your cart is empty!</p>';
-                } else {
-                    cart.forEach(item => {
-                        const itemDiv = document.createElement('div');
-                        itemDiv.classList.add('cart-item');
-                        itemDiv.innerHTML = `
-                            <h3>${item.name}</h3>
-                            <p>Size: ${item.selectedSize}</p>
-                            <p>Color: ${item.selectedColor}</p>
-                            <p>Price: $${item.price.toFixed(2)}</p>
-                        `;
-                        cartItemsElement.appendChild(itemDiv);
-                        totalPrice += item.price;
-                    });
-                }
-
-                totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
-
-                // PayPal Button
-                paypal.Buttons({
-                    createOrder: function(data, actions) {
-                        return actions.order.create({
-                            purchase_units: [{
-                                amount: {
-                                    value: totalPrice.toFixed(2)
-                                }
-                            }]
-                        });
-                    },
-                    onApprove: function(data, actions) {
-                        return actions.order.capture().then(function(details) {
-                            document.getElementById('result-message').textContent = 'Transaction completed by ' + details.payer.name.given_name;
-                            // Optionally clear cart after successful transaction
-                            localStorage.removeItem('cart');
-                        });
-                    }
-                }).render('#paypal-button-container');
-            });
-
-            // Helper function to get cart from localStorage
-            function getCartFromLocalStorage() {
-                return JSON.parse(localStorage.getItem('cart'));
-            }
-
-            // Function to apply the promo code
-            function applyPromoCode(promoCodeInput) {
-                const promoCode = promoCodeInput.trim().toUpperCase(); // Format the input
-                const promoCodeRef = firebase.firestore().collection("promoCodes");
-
-                promoCodeRef.where("code", "==", promoCode).get()
-                    .then(snapshot => {
-                        if (!snapshot.empty) {
-                            const promo = snapshot.docs[0].data();
-                            const currentDate = new Date();
-                            const expiresAt = new Date(promo.expiresAt);
-
-                            if (currentDate > expiresAt) {
-                                document.getElementById('promo-message').textContent = 'This promo code has expired.';
-                                return;
-                            }
-
-                            if (promo.usageLimit && promo.usedCount >= promo.usageLimit) {
-                                document.getElementById('promo-message').textContent = 'This promo code has reached its usage limit.';
-                                return;
-                            }
-
-                            applyDiscount(promo);
-                            promoCodeRef.doc(snapshot.docs[0].id).update({
-                                usedCount: firebase.firestore.FieldValue.increment(1)
-                            });
-
-                        } else {
-                            document.getElementById('promo-message').textContent = 'Invalid promo code.';
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error applying promo code: ", error);
-                        document.getElementById('promo-message').textContent = 'Error applying promo code.';
-                    });
-            }
-
-            // Function to apply the discount
-            function applyDiscount(promo) {
-                let totalPrice = calculateTotalPrice();
-
-                if (promo.discountType === "percentage") {
-                    totalPrice -= (totalPrice * promo.discountValue / 100);
-                } else if (promo.discountType === "fixed") {
-                    totalPrice -= promo.discountValue;
-                }
-
-                updateCartTotal(totalPrice);
-            }
-
-            // Function to calculate the total price (replace with your own logic)
-            function calculateTotalPrice() {
-                const cart = getCartFromLocalStorage() || [];
-                let totalPrice = 0;
-
-                cart.forEach(item => {
-                    totalPrice += item.price;
-                });
-
-                return totalPrice;
-            }
-
-            // Function to update the cart total display
-            function updateCartTotal(totalPrice) {
-                const totalPriceElement = document.getElementById('total-price');
-                totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
-            }
-
-            // Event listener for applying promo code
-            document.getElementById('apply-promo-btn').addEventListener('click', function() {
-                const promoCodeInput = document.getElementById('promo-code-input').value;
-                applyPromoCode(promoCodeInput); // Call the function to apply the promo code
-            });
-        </script>
+    <!-- Promo Code Section -->
+    <div class="promo-code">
+      <input type="text" id="promo-code-input" placeholder="Enter promo code">
+      <button id="apply-promo-btn">Apply Promo Code</button>
+      <p id="promo-message"></p>
     </div>
 
-    <footer>
-        <p>&copy; 2025 Your Website</p>
-    </footer>
+    <div id="paypal-button-container"></div>
+    <p id="result-message"></p>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Your Website</p>
+  </footer>
+
+  <!-- PayPal Button Script -->
+  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD&components=buttons&enable-funding=venmo,paylater,card"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const cartItemsElement = document.getElementById('cart-items');
+      const totalPriceElement = document.getElementById('total-price');
+      const cart = getCartFromLocalStorage() || [];
+      let totalPrice = 0;
+
+      if (cart.length === 0) {
+        cartItemsElement.innerHTML = '<p>Your cart is empty!</p>';
+      } else {
+        cart.forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.classList.add('cart-item');
+          itemDiv.innerHTML = `
+            <h3>${item.name}</h3>
+            <p>Size: ${item.selectedSize}</p>
+            <p>Color: ${item.selectedColor}</p>
+            <p>Price: $${item.price.toFixed(2)}</p>
+          `;
+          cartItemsElement.appendChild(itemDiv);
+          totalPrice += item.price;
+        });
+      }
+
+      totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
+
+      paypal.Buttons({
+        createOrder: function(data, actions) {
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: totalPrice.toFixed(2)
+              }
+            }]
+          });
+        },
+        onApprove: function(data, actions) {
+          return actions.order.capture().then(function(details) {
+            document.getElementById('result-message').textContent =
+              'Transaction completed by ' + details.payer.name.given_name;
+            localStorage.removeItem('cart');
+          });
+        }
+      }).render('#paypal-button-container');
+    });
+
+    function getCartFromLocalStorage() {
+      return JSON.parse(localStorage.getItem('cart'));
+    }
+
+    function applyPromoCode(promoCodeInput) {
+      const promoCode = promoCodeInput.trim().toUpperCase();
+      const promoCodeRef = firebase.firestore().collection("promoCodes");
+
+      promoCodeRef.where("code", "==", promoCode).get()
+        .then(snapshot => {
+          if (!snapshot.empty) {
+            const promo = snapshot.docs[0].data();
+            const currentDate = new Date();
+            const expiresAt = new Date(promo.expiresAt);
+
+            if (currentDate > expiresAt) {
+              document.getElementById('promo-message').textContent = 'This promo code has expired.';
+              return;
+            }
+
+            if (promo.usageLimit && promo.usedCount >= promo.usageLimit) {
+              document.getElementById('promo-message').textContent = 'This promo code has reached its usage limit.';
+              return;
+            }
+
+            applyDiscount(promo);
+            promoCodeRef.doc(snapshot.docs[0].id).update({
+              usedCount: firebase.firestore.FieldValue.increment(1)
+            });
+          } else {
+            document.getElementById('promo-message').textContent = 'Invalid promo code.';
+          }
+        })
+        .catch(error => {
+          console.error("Error applying promo code: ", error);
+          document.getElementById('promo-message').textContent = 'Error applying promo code.';
+        });
+    }
+
+    function applyDiscount(promo) {
+      let totalPrice = calculateTotalPrice();
+
+      if (promo.discountType === "percentage") {
+        totalPrice -= (totalPrice * promo.discountValue / 100);
+      } else if (promo.discountType === "fixed") {
+        totalPrice -= promo.discountValue;
+      }
+
+      updateCartTotal(totalPrice);
+    }
+
+    function calculateTotalPrice() {
+      const cart = getCartFromLocalStorage() || [];
+      let totalPrice = 0;
+
+      cart.forEach(item => {
+        totalPrice += item.price;
+      });
+
+      return totalPrice;
+    }
+
+    function updateCartTotal(totalPrice) {
+      const totalPriceElement = document.getElementById('total-price');
+      totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
+    }
+
+    document.getElementById('apply-promo-btn').addEventListener('click', function() {
+      const promoCodeInput = document.getElementById('promo-code-input').value;
+      applyPromoCode(promoCodeInput);
+    });
+  </script>
 </body>
 </html>
