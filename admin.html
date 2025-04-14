@@ -4,158 +4,321 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
   <style>
-    /* styles.css */
-    body {
-      font-family: 'Roboto', sans-serif;
+    /* Basic reset */
+    * {
       margin: 0;
       padding: 0;
-      background-color: #f4f4f9;
+      box-sizing: border-box;
     }
 
+    /* Overall page styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    /* Navbar styles */
+    nav {
+      background-color: #003366; /* Navy Blue */
+      padding: 10px 20px;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-size: 18px;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    /* Main admin content */
     .admin-container {
-      width: 80%;
-      margin: 30px auto;
+      margin: 20px;
+    }
+
+    .admin-panel {
       background-color: white;
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-
-    .form-container {
-      margin-top: 30px;
-    }
-
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #333;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 10px;
+    .admin-panel h2 {
       margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 16px;
     }
 
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #4CAF50;
+    .admin-panel button {
+      padding: 10px 15px;
+      background-color: #003366; /* Navy Blue */
       color: white;
       border: none;
-      border-radius: 4px;
-      font-size: 18px;
+      border-radius: 5px;
       cursor: pointer;
     }
 
-    button:hover {
-      background-color: #45a049;
+    .admin-panel button:hover {
+      background-color: #002244;
     }
 
-    #error-message {
-      color: red;
-      display: none;
+    /* Product table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
     }
 
-    #success-message {
-      color: green;
+    table th, table td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+
+    table th {
+      background-color: #003366;
+      color: white;
+    }
+
+    /* Product edit form styles */
+    .edit-form {
       display: none;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+
+    .edit-form input, .edit-form button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+
+    /* Admin login */
+    .admin-login {
+      text-align: center;
+      margin-top: 100px;
+    }
+
+    .admin-login input {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+      border-radius: 5px;
+    }
+
+    .admin-login button {
+      padding: 10px 15px;
+      background-color: #003366;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .admin-login button:hover {
+      background-color: #002244;
     }
   </style>
 </head>
 <body>
-  <div class="admin-container">
-    <h1>Product Management</h1>
-    <div class="form-container">
-      <label for="product-name">Product Name:</label>
-      <input type="text" id="product-name" placeholder="Enter product name">
 
-      <label for="product-price">Product Price:</label>
-      <input type="number" id="product-price" placeholder="Enter product price">
+  <!-- Admin Login Section -->
+  <div class="admin-login" id="loginSection">
+    <h1>Admin Login</h1>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>
 
-      <label for="product-description">Product Description:</label>
-      <textarea id="product-description" placeholder="Enter product description"></textarea>
+  <!-- Admin Panel Section (Initially Hidden) -->
+  <div class="admin-container" id="adminPanel" style="display: none;">
+    <nav>
+      <a href="bracelets.html">Bracelets</a>
+      <a href="cookies.html">Cookies</a>
+      <a href="#" onclick="logout()">Logout</a>
+    </nav>
 
-      <button id="save-btn">Save Product</button>
-      <p id="error-message">Please fill out all fields.</p>
-      <p id="success-message">Product saved successfully!</p>
+    <div class="admin-panel">
+      <h2>Manage Products</h2>
+      <button onclick="manageProducts('bracelets')">Manage Bracelets</button>
+      <button onclick="manageProducts('cookies')">Manage Cookies</button>
+      <button onclick="addNewProduct()">Add New Product</button>
+
+      <div id="productTable" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- Edit Product Form -->
+    <div class="edit-form" id="editForm">
+      <h3>Edit Product</h3>
+      <label for="editName">Product Name:</label>
+      <input type="text" id="editName">
+      <label for="editPrice">Product Price:</label>
+      <input type="text" id="editPrice">
+      <button onclick="saveProduct()">Save Changes</button>
+      <button onclick="cancelEdit()">Cancel</button>
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <!-- Firebase SDK -->
   <script>
-    // Firebase configuration
+    // Firebase Config (Your Firebase configuration)
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
     };
 
     // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const db = firebase.firestore(app);
 
-    // Select elements from HTML
-    const productName = document.getElementById('product-name');
-    const productPrice = document.getElementById('product-price');
-    const productDescription = document.getElementById('product-description');
-    const saveButton = document.getElementById('save-btn');
-    const errorMessage = document.getElementById('error-message');
-    const successMessage = document.getElementById('success-message');
+    // Simulate an admin user
+    const adminUsername = "admin";
+    const adminPassword = "password123";
 
-    // Function to save product
-    const saveProduct = async () => {
-      // Clear messages
-      errorMessage.style.display = "none";
-      successMessage.style.display = "none";
+    let editingProduct = null;
 
-      // Get values
-      const name = productName.value.trim();
-      const price = productPrice.value.trim();
-      const description = productDescription.value.trim();
+    // Function to handle login
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
 
-      // Check if all fields are filled
-      if (!name || !price || !description) {
-        errorMessage.style.display = "block";
-        return;
+      if (username === adminUsername && password === adminPassword) {
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+      } else {
+        alert('Invalid username or password');
       }
+    }
 
-      // Save to Firestore
-      try {
-        await db.collection("products").add({
-          name,
-          price,
-          description,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    // Function to handle logout
+    function logout() {
+      document.getElementById('adminPanel').style.display = 'none';
+      document.getElementById('loginSection').style.display = 'block';
+    }
+
+    // Function to add a new product to Firestore
+    function addNewProduct() {
+      const productName = prompt("Enter the product name:");
+      const productPrice = prompt("Enter the product price:");
+
+      if (productName && productPrice) {
+        db.collection("products").add({
+          name: productName,
+          price: productPrice,
+          category: "bracelets" // Example, this could be dynamic
+        })
+        .then(() => {
+          alert("Product added successfully!");
+          manageProducts("bracelets");
+        })
+        .catch((error) => {
+          console.error("Error adding product: ", error);
         });
-
-        successMessage.style.display = "block"; // Display success message
-        // Clear form after successful save
-        productName.value = '';
-        productPrice.value = '';
-        productDescription.value = '';
-      } catch (error) {
-        console.error("Error adding document: ", error);
       }
-    };
+    }
 
-    // Add event listener to the save button
-    saveButton.addEventListener('click', saveProduct);
+    // Function to load products from Firestore
+    function manageProducts(category) {
+      const tableDiv = document.getElementById('productTable');
+      db.collection("products")
+        .where("category", "==", category)
+        .get()
+        .then((querySnapshot) => {
+          let tableHTML = `
+            <table>
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Price</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+          querySnapshot.forEach((doc) => {
+            const product = doc.data();
+            tableHTML += `
+              <tr>
+                <td>${product.name}</td>
+                <td>${product.price}</td>
+                <td>
+                  <button onclick="editProduct('${doc.id}', '${category}')">Edit</button>
+                  <button onclick="deleteProduct('${doc.id}')">Delete</button>
+                </td>
+              </tr>
+            `;
+          });
+          tableHTML += '</tbody></table>';
+          tableDiv.innerHTML = tableHTML;
+        });
+    }
+
+    // Function to edit a product (loads product from Firestore into the form)
+    function editProduct(productId, category) {
+      db.collection("products").doc(productId).get().then((doc) => {
+        if (doc.exists) {
+          const product = doc.data();
+          document.getElementById('editName').value = product.name;
+          document.getElementById('editPrice').value = product.price;
+          editingProduct = { id: productId, category };
+          document.getElementById('editForm').style.display = 'block';
+        }
+      });
+    }
+
+    // Function to save product changes
+    function saveProduct() {
+      const newName = document.getElementById('editName').value;
+      const newPrice = document.getElementById('editPrice').value;
+
+      if (newName && newPrice && editingProduct) {
+        db.collection("products").doc(editingProduct.id).update({
+          name: newName,
+          price: newPrice
+        })
+        .then(() => {
+          alert("Product updated successfully!");
+          manageProducts(editingProduct.category);
+          cancelEdit();
+        })
+        .catch((error) => {
+          console.error("Error updating product: ", error);
+        });
+      } else {
+        alert('Please fill in all fields');
+      }
+    }
+
+    // Function to cancel editing
+    function cancelEdit() {
+      document.getElementById('editForm').style.display = 'none';
+      editingProduct = null;
+    }
+
+    // Function to delete a product
+    function deleteProduct(productId) {
+      db.collection("products").doc(productId).delete()
+        .then(() => {
+          alert("Product deleted successfully!");
+          manageProducts("bracelets");
+        })
+        .catch((error) => {
+          console.error("Error deleting product: ", error);
+        });
+    }
   </script>
+
 </body>
 </html>
