@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cookies - Tactics & Treats</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Cart - Your Website</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -14,212 +13,258 @@
       text-align: center;
     }
 
-    .navbar {
-      background-color: #0a1d37;
-      color: white;
-      padding: 15px 0;
-      font-size: 18px;
+    header {
       position: fixed;
       top: 0;
       width: 100%;
+      background-color: #0a1d37;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       z-index: 100;
     }
 
-    .navbar a {
+    .profile-link {
+      margin-left: 20px;
+    }
+
+    .profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .auth-status {
+      margin-right: 20px;
+      color: white;
+    }
+
+    nav {
+      margin-top: 60px;
+      background-color: #0a1d37;
+      padding: 10px 0;
+    }
+
+    nav a {
       color: white;
       margin: 0 20px;
       text-decoration: none;
       font-weight: bold;
     }
 
-    .navbar a:hover {
+    nav a:hover {
       text-decoration: underline;
     }
 
-    .navbar .auth-btn {
+    h1 {
+      padding-top: 40px;
+    }
+
+    .content {
+      max-width: 800px;
+      margin: 100px auto 40px;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .cart-item {
+      background: #fafafa;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .promo-code {
+      margin: 20px 0;
+    }
+
+    .promo-code input {
+      padding: 10px;
+      width: 60%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .promo-code button {
       background-color: #00bcd4;
       color: white;
       padding: 10px 20px;
+      margin-left: 10px;
       border: none;
       cursor: pointer;
       border-radius: 5px;
     }
 
-    .navbar .auth-btn:hover {
+    .promo-code button:hover {
       background-color: #0097a7;
     }
 
-    h1 {
-      padding-top: 100px;
-    }
-
-    .container {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      padding: 20px;
-    }
-
-    .product {
-      width: 250px;
-      margin: 20px;
-      padding: 20px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
-
-    .product img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-
-    .product h3 {
-      margin: 15px 0;
-      font-size: 18px;
-    }
-
-    .product p {
-      font-size: 16px;
-      color: #555;
-    }
-
-    .product select {
-      padding: 5px;
-      margin: 10px 0;
-      font-size: 14px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    .product button {
-      background-color: #00bcd4;
+    footer {
+      background-color: #0a1d37;
       color: white;
-      border: none;
-      padding: 10px;
-      width: 100%;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    .product button:hover {
-      background-color: #0097a7;
+      text-align: center;
+      padding: 15px 0;
+      margin-top: 40px;
     }
   </style>
 </head>
-
 <body>
-  <div class="navbar">
+  <header>
+    <a href="profile.html" class="profile-link">
+      <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
+    </a>
+    <div class="auth-status" id="auth-status">Welcome!</div>
+  </header>
+
+  <nav>
     <a href="index.html">Home</a>
-    <a href="bracelets.html">Bracelets</a>
-    <a href="cookies.html">Cookies</a>
-    <a href="admin.html">Admin Panel</a>
-    <button id="loginButton" class="auth-btn">Login</button>
+    <a href="shop.html">Shop</a>
+    <a href="cart.html">Cart</a>
+    <a href="checkout.html">Checkout</a>
+  </nav>
+
+  <div class="content">
+    <h1>Your Cart</h1>
+    <div class="cart-items" id="cart-items"></div>
+    <p id="total-price">Total: $0.00</p>
+
+    <div class="promo-code">
+      <input type="text" id="promo-code-input" placeholder="Enter promo code">
+      <button id="apply-promo-btn">Apply Promo Code</button>
+      <p id="promo-message"></p>
+    </div>
+
+    <div id="paypal-button-container"></div>
+    <p id="result-message"></p>
   </div>
 
-  <h1>Cookies</h1>
-  <div class="container" id="cookiesProducts"></div>
+  <footer>
+    <p>&copy; 2025 Your Website</p>
+  </footer>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD&components=buttons&enable-funding=venmo,paylater,card"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const cartItemsElement = document.getElementById('cart-items');
+      const totalPriceElement = document.getElementById('total-price');
+      const cart = getCartFromLocalStorage() || [];
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-      authDomain: "survival-f35e2.firebaseapp.com",
-      projectId: "survival-f35e2",
-      storageBucket: "survival-f35e2.appspot.com",
-      messagingSenderId: "704462603548",
-      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-    };
+      let totalPrice = 0;
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth();
-
-    window.addToCart = async (productB64, selectedSize) => {
-      const user = auth.currentUser;
-      if (!user) {
-        alert("Please login to add items to your cart.");
-        return;
-      }
-
-      const product = JSON.parse(atob(productB64));
-      const sizeInfo = product.sizes.find(s => s.size === selectedSize);
-
-      if (!sizeInfo) {
-        alert("Invalid size selected.");
-        return;
-      }
-
-      const cartItem = {
-        ...product,
-        selectedSize: selectedSize,
-        price: sizeInfo.price
-      };
-
-      let cart = JSON.parse(localStorage.getItem("cart")) || [];
-      cart.push(cartItem);
-      localStorage.setItem("cart", JSON.stringify(cart));
-
-      alert(`${product.name} (${selectedSize}) added to your cart for $${sizeInfo.price}`);
-
-      window.location.href = "cart.html"; // Redirect to the cart page
-    };
-
-    const fetchCookies = async () => {
-      const snap = await getDocs(collection(db, "cookies"));
-      const container = document.getElementById("cookiesProducts");
-
-      if (snap.empty) {
-        container.innerHTML = "<p>No cookies available at the moment.</p>";
-        return;
-      }
-
-      snap.forEach(doc => {
-        const product = doc.data();
-        const imageUrl = product.imageUrl || "default.jpg";
-        const sizes = Array.isArray(product.sizes) ? product.sizes : [];
-
-        const options = sizes.map(size => {
-          return `<option value="${size.size}">${size.size} - $${size.price}</option>`;
-        }).join("");
-
-        const encodedProduct = btoa(JSON.stringify(product));
-
-        const div = document.createElement("div");
-        div.className = "product";
-        div.innerHTML = `
-          <img src="${imageUrl}" alt="${product.name || "Cookie"}">
-          <h3>${product.name || "Unnamed Cookie"}</h3>
-          <p>Select Size:</p>
-          <select id="size-${doc.id}">
-            <option value="" disabled selected>Select Size</option>
-            ${options}
-          </select>
-          <button onclick="addToCart('${encodedProduct}', document.getElementById('size-${doc.id}').value)">Add to Cart</button>
-        `;
-        container.appendChild(div);
-      });
-    };
-
-    onAuthStateChanged(auth, (user) => {
-      const btn = document.getElementById("loginButton");
-      if (user) {
-        btn.innerText = "Logout";
-        btn.onclick = () => signOut(auth);
+      if (cart.length === 0) {
+        cartItemsElement.innerHTML = '<p>Your cart is empty!</p>';
       } else {
-        btn.innerText = "Login";
-        btn.onclick = () => window.location.href = "login.html";
+        cart.forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.classList.add('cart-item');
+          itemDiv.innerHTML = `
+            <h3>${item.name}</h3>
+            <p>Size: ${item.selectedSize}</p>
+            <p>Color: ${item.selectedColor}</p>
+            <p>Price: $${item.price.toFixed(2)}</p>
+          `;
+          cartItemsElement.appendChild(itemDiv);
+          totalPrice += item.price;
+        });
       }
+
+      totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
+
+      paypal.Buttons({
+        createOrder: function (data, actions) {
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: totalPrice.toFixed(2)
+              }
+            }]
+          });
+        },
+        onApprove: function (data, actions) {
+          return actions.order.capture().then(function (details) {
+            document.getElementById('result-message').textContent = 'Transaction completed by ' + details.payer.name.given_name;
+            localStorage.removeItem('cart');
+          });
+        }
+      }).render('#paypal-button-container');
     });
 
-    fetchCookies();
+    function getCartFromLocalStorage() {
+      return JSON.parse(localStorage.getItem('cart'));
+    }
+
+    function applyPromoCode(promoCodeInput) {
+      const promoCode = promoCodeInput.trim().toUpperCase();
+      const promoCodeRef = firebase.firestore().collection("promoCodes");
+
+      promoCodeRef.where("code", "==", promoCode).get()
+        .then(snapshot => {
+          if (!snapshot.empty) {
+            const promo = snapshot.docs[0].data();
+            const currentDate = new Date();
+            const expiresAt = new Date(promo.expiresAt);
+
+            if (currentDate > expiresAt) {
+              document.getElementById('promo-message').textContent = 'This promo code has expired.';
+              return;
+            }
+
+            if (promo.usageLimit && promo.usedCount >= promo.usageLimit) {
+              document.getElementById('promo-message').textContent = 'This promo code has reached its usage limit.';
+              return;
+            }
+
+            applyDiscount(promo);
+            promoCodeRef.doc(snapshot.docs[0].id).update({
+              usedCount: firebase.firestore.FieldValue.increment(1)
+            });
+
+          } else {
+            document.getElementById('promo-message').textContent = 'Invalid promo code.';
+          }
+        })
+        .catch(error => {
+          console.error("Error applying promo code: ", error);
+          document.getElementById('promo-message').textContent = 'Error applying promo code.';
+        });
+    }
+
+    function applyDiscount(promo) {
+      let totalPrice = calculateTotalPrice();
+
+      if (promo.discountType === "percentage") {
+        totalPrice -= (totalPrice * promo.discountValue / 100);
+      } else if (promo.discountType === "fixed") {
+        totalPrice -= promo.discountValue;
+      }
+
+      updateCartTotal(totalPrice);
+    }
+
+    function calculateTotalPrice() {
+      const cart = getCartFromLocalStorage() || [];
+      let totalPrice = 0;
+
+      cart.forEach(item => {
+        totalPrice += item.price;
+      });
+
+      return totalPrice;
+    }
+
+    function updateCartTotal(totalPrice) {
+      const totalPriceElement = document.getElementById('total-price');
+      totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
+    }
+
+    document.getElementById('apply-promo-btn').addEventListener('click', function () {
+      const promoCodeInput = document.getElementById('promo-code-input').value;
+      applyPromoCode(promoCodeInput);
+    });
   </script>
 </body>
-
 </html>
