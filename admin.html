@@ -4,11 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel</title>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+
+  <!-- CSS Styling -->
   <style>
-    /* General Reset and Styling */
     * {
       margin: 0;
       padding: 0;
@@ -20,7 +18,6 @@
       background-color: #f4f4f4;
     }
 
-    /* Navigation Bar Styling */
     nav {
       background-color: #003366;
       padding: 10px 20px;
@@ -37,7 +34,6 @@
       text-decoration: underline;
     }
 
-    /* Admin Panel Container */
     .admin-container {
       margin: 20px;
     }
@@ -53,7 +49,6 @@
       margin-bottom: 20px;
     }
 
-    /* Buttons Styling */
     .admin-panel button {
       padding: 10px 15px;
       background-color: #003366;
@@ -67,25 +62,6 @@
       background-color: #002244;
     }
 
-    /* Table Styling */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    table th, table td {
-      padding: 10px;
-      text-align: left;
-      border: 1px solid #ddd;
-    }
-
-    table th {
-      background-color: #003366;
-      color: white;
-    }
-
-    /* Edit Product Form */
     .edit-form {
       display: none;
       background-color: white;
@@ -102,7 +78,6 @@
       border-radius: 5px;
     }
 
-    /* Login Styling */
     .admin-login {
       text-align: center;
       margin-top: 100px;
@@ -133,6 +108,168 @@
       font-size: 14px;
     }
   </style>
+  
+  <!-- Firebase JS SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js';
+
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let editingProduct = null;
+
+    // Function Definitions (login, logout, manage products)
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          document.getElementById('loginSection').style.display = 'none';
+          document.getElementById('adminPanel').style.display = 'block';
+        })
+        .catch((error) => {
+          document.getElementById('loginError').textContent = 'Invalid email or password';
+        });
+    }
+
+    function logout() {
+      signOut(auth)
+        .then(() => {
+          document.getElementById('adminPanel').style.display = 'none';
+          document.getElementById('loginSection').style.display = 'block';
+        })
+        .catch((error) => {
+          console.error("Error logging out: ", error);
+        });
+    }
+
+    function addNewProduct() {
+      const productName = prompt("Enter the product name:");
+      const productPrice = prompt("Enter the product price:");
+      const productCategory = prompt("Enter the product category:");
+
+      if (productName && productPrice && !isNaN(productPrice)) {
+        addDoc(collection(db, "products"), {
+          name: productName,
+          price: productPrice,
+          category: productCategory
+        })
+        .then(() => {
+          alert("Product added successfully!");
+          manageProducts(productCategory);
+        })
+        .catch((error) => {
+          console.error("Error adding product: ", error);
+        });
+      } else {
+        alert("Invalid input! Please check your product details.");
+      }
+    }
+
+    function manageProducts(category) {
+      const tableDiv = document.getElementById('productTable');
+      const q = query(collection(db, "products"), where("category", "==", category));
+      
+      getDocs(q)
+        .then((querySnapshot) => {
+          let tableHTML = `
+            <table>
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Price</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+          querySnapshot.forEach((doc) => {
+            const product = doc.data();
+            tableHTML += `
+              <tr>
+                <td>${product.name}</td>
+                <td>${product.price}</td>
+                <td>
+                  <button onclick="editProduct('${doc.id}', '${category}')">Edit</button>
+                  <button onclick="deleteProduct('${doc.id}')">Delete</button>
+                </td>
+              </tr>
+            `;
+          });
+          tableHTML += '</tbody></table>';
+          tableDiv.innerHTML = tableHTML;
+        });
+    }
+
+    function editProduct(productId, category) {
+      doc(db, "products", productId).get().then((docSnap) => {
+        if (docSnap.exists()) {
+          const product = docSnap.data();
+          document.getElementById('editName').value = product.name;
+          document.getElementById('editPrice').value = product.price;
+          document.getElementById('editCategory').value = product.category;
+          editingProduct = { id: productId, category };
+          document.getElementById('editForm').style.display = 'block';
+        }
+      });
+    }
+
+    function saveProduct() {
+      const newName = document.getElementById('editName').value;
+      const newPrice = document.getElementById('editPrice').value;
+      const newCategory = document.getElementById('editCategory').value;
+
+      if (newName && newPrice && !isNaN(newPrice) && editingProduct) {
+        updateDoc(doc(db, "products", editingProduct.id), {
+          name: newName,
+          price: newPrice,
+          category: newCategory
+        })
+        .then(() => {
+          alert("Product updated successfully!");
+          manageProducts(editingProduct.category);
+          cancelEdit();
+        })
+        .catch((error) => {
+          console.error("Error updating product: ", error);
+        });
+      } else {
+        alert('Please fill in all fields with valid values');
+      }
+    }
+
+    function cancelEdit() {
+      document.getElementById('editForm').style.display = 'none';
+      editingProduct = null;
+    }
+
+    function deleteProduct(productId) {
+      deleteDoc(doc(db, "products", productId))
+        .then(() => {
+          alert("Product deleted successfully!");
+          manageProducts("bracelets");
+        })
+        .catch((error) => {
+          console.error("Error deleting product: ", error);
+        });
+    }
+  </script>
+
 </head>
 <body>
 
@@ -177,167 +314,6 @@
       <button onclick="cancelEdit()">Cancel</button>
     </div>
   </div>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-      authDomain: "survival-f35e2.firebaseapp.com",
-      projectId: "survival-f35e2",
-      storageBucket: "survival-f35e2.appspot.com",
-      messagingSenderId: "704462603548",
-      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
-    };
-
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-    const auth = firebase.auth();
-
-    let editingProduct = null;
-
-    // Login Function
-    function login() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-          document.getElementById('loginSection').style.display = 'none';
-          document.getElementById('adminPanel').style.display = 'block';
-        })
-        .catch((error) => {
-          document.getElementById('loginError').textContent = 'Invalid email or password';
-        });
-    }
-
-    // Logout Function
-    function logout() {
-      auth.signOut()
-        .then(() => {
-          document.getElementById('adminPanel').style.display = 'none';
-          document.getElementById('loginSection').style.display = 'block';
-        })
-        .catch((error) => {
-          console.error("Error logging out: ", error);
-        });
-    }
-
-    // Add New Product
-    function addNewProduct() {
-      const productName = prompt("Enter the product name:");
-      const productPrice = prompt("Enter the product price:");
-      const productCategory = prompt("Enter the product category:");
-
-      if (productName && productPrice && !isNaN(productPrice)) {
-        db.collection("products").add({
-          name: productName,
-          price: productPrice,
-          category: productCategory
-        })
-        .then(() => {
-          alert("Product added successfully!");
-          manageProducts(productCategory); // Display products of added category
-        })
-        .catch((error) => {
-          console.error("Error adding product: ", error);
-        });
-      } else {
-        alert("Invalid input! Please check your product details.");
-      }
-    }
-
-    // Manage Products (Show Products Based on Category)
-    function manageProducts(category) {
-      const tableDiv = document.getElementById('productTable');
-      db.collection("products")
-        .where("category", "==", category)
-        .get()
-        .then((querySnapshot) => {
-          let tableHTML = `
-            <table>
-              <thead>
-                <tr>
-                  <th>Product Name</th>
-                  <th>Price</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-          `;
-          querySnapshot.forEach((doc) => {
-            const product = doc.data();
-            tableHTML += `
-              <tr>
-                <td>${product.name}</td>
-                <td>${product.price}</td>
-                <td>
-                  <button onclick="editProduct('${doc.id}', '${category}')">Edit</button>
-                  <button onclick="deleteProduct('${doc.id}')">Delete</button>
-                </td>
-              </tr>
-            `;
-          });
-          tableHTML += '</tbody></table>';
-          tableDiv.innerHTML = tableHTML;
-        });
-    }
-
-    // Edit Product
-    function editProduct(productId, category) {
-      db.collection("products").doc(productId).get().then((doc) => {
-        if (doc.exists) {
-          const product = doc.data();
-          document.getElementById('editName').value = product.name;
-          document.getElementById('editPrice').value = product.price;
-          document.getElementById('editCategory').value = product.category;
-          editingProduct = { id: productId, category };
-          document.getElementById('editForm').style.display = 'block';
-        }
-      });
-    }
-
-    // Save Product Changes
-    function saveProduct() {
-      const newName = document.getElementById('editName').value;
-      const newPrice = document.getElementById('editPrice').value;
-      const newCategory = document.getElementById('editCategory').value;
-
-      if (newName && newPrice && !isNaN(newPrice) && editingProduct) {
-        db.collection("products").doc(editingProduct.id).update({
-          name: newName,
-          price: newPrice,
-          category: newCategory
-        })
-        .then(() => {
-          alert("Product updated successfully!");
-          manageProducts(editingProduct.category);
-          cancelEdit();
-        })
-        .catch((error) => {
-          console.error("Error updating product: ", error);
-        });
-      } else {
-        alert('Please fill in all fields with valid values');
-      }
-    }
-
-    // Cancel Editing Product
-    function cancelEdit() {
-      document.getElementById('editForm').style.display = 'none';
-      editingProduct = null;
-    }
-
-    // Delete Product
-    function deleteProduct(productId) {
-      db.collection("products").doc(productId).delete()
-        .then(() => {
-          alert("Product deleted successfully!");
-          manageProducts("bracelets"); // Refresh table
-        })
-        .catch((error) => {
-          console.error("Error deleting product: ", error);
-        });
-    }
-  </script>
 
 </body>
 </html>
