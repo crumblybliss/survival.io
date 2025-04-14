@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Cart - Your Website</title>
     <style>
+        /* Styles here (same as previous) */
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f1f1f1;
@@ -35,71 +36,90 @@
             text-decoration: underline;
         }
 
-        .content {
-            margin-top: 80px;
-            padding: 20px;
+        .navbar .auth-btn {
+            background-color: #00bcd4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
         }
 
-        .cart-items {
+        .navbar .auth-btn:hover {
+            background-color: #0097a7;
+        }
+
+        h1 {
+            padding-top: 100px;
+        }
+
+        .container {
             display: flex;
-            flex-wrap: wrap;
             justify-content: center;
+            flex-wrap: wrap;
+            padding: 20px;
         }
 
-        .cart-item {
-            background-color: #fff;
+        .product {
+            width: 250px;
+            margin: 20px;
             padding: 20px;
-            margin: 15px;
+            background: #fff;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            width: 250px;
             text-align: center;
         }
 
-        .cart-item h3 {
-            margin: 10px 0;
+        .product img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
         }
 
-        .cart-item p {
+        .product h3 {
+            margin: 15px 0;
+            font-size: 18px;
+        }
+
+        .product p {
             font-size: 16px;
             color: #555;
         }
 
-        .promo-code {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .promo-code input {
-            padding: 10px;
-            margin-right: 10px;
-            font-size: 16px;
+        .product select {
+            padding: 5px;
+            margin: 10px 0;
+            font-size: 14px;
             border-radius: 5px;
             border: 1px solid #ccc;
         }
 
-        .promo-code button {
-            padding: 10px 20px;
-            font-size: 16px;
+        .product button {
             background-color: #00bcd4;
             color: white;
             border: none;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
             border-radius: 5px;
         }
 
-        .promo-code button:hover {
+        .product button:hover {
             background-color: #0097a7;
         }
 
-        .total-price {
-            margin-top: 20px;
+        .cart-item {
+            margin: 20px 0;
+        }
+
+        #total-price {
             font-size: 20px;
-            font-weight: bold;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-
     <header>
         <a href="index.html" class="profile-link">
             <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
@@ -107,7 +127,7 @@
         <div class="auth-status" id="auth-status"></div>
     </header>
 
-    <nav class="navbar">
+    <nav>
         <a href="index.html">Home</a>
         <a href="shop.html">Shop</a>
         <a href="cart.html">Cart</a>
@@ -117,8 +137,8 @@
     <div class="content">
         <h1>Your Cart</h1>
         <div class="cart-items" id="cart-items"></div>
-        <p id="total-price" class="total-price">Total: $0.00</p>
-        
+        <p id="total-price">Total: $0.00</p>
+
         <!-- Promo Code Section -->
         <div class="promo-code">
             <input type="text" id="promo-code-input" placeholder="Enter promo code">
@@ -126,145 +146,175 @@
             <p id="promo-message"></p>
         </div>
 
-        <div id="paypal-button-container"></div>
-        <p id="result-message"></p>
+        <!-- PayPal button script -->
+        <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD&components=buttons&enable-funding=venmo,paylater,card"></script>
+        <script>
+            const firebaseConfig = {
+                apiKey: "YOUR_API_KEY",
+                authDomain: "YOUR_AUTH_DOMAIN",
+                projectId: "YOUR_PROJECT_ID",
+                storageBucket: "YOUR_STORAGE_BUCKET",
+                messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+                appId: "YOUR_APP_ID"
+            };
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+
+            const db = firebase.firestore();
+            const auth = firebase.auth();
+
+            auth.onAuthStateChanged(async (user) => {
+                const cartItemsElement = document.getElementById('cart-items');
+                const totalPriceElement = document.getElementById('total-price');
+
+                if (!user) {
+                    cartItemsElement.innerHTML = '<p>Please log in to view your cart.</p>';
+                    return;
+                }
+
+                const cartRef = db.collection('carts').doc(user.uid);
+                try {
+                    const doc = await cartRef.get();
+                    console.log("Cart document:", doc.data()); // Debug: Log the cart data
+                    if (!doc.exists || !doc.data().items) {
+                        cartItemsElement.innerHTML = '<p>Your cart is empty.</p>';
+                        totalPriceElement.textContent = 'Total: $0.00';
+                        return;
+                    }
+
+                    const data = doc.data();
+                    const cart = data.items || [];
+
+                    if (cart.length === 0) {
+                        cartItemsElement.innerHTML = '<p>Your cart is empty!</p>';
+                        totalPriceElement.textContent = 'Total: $0.00';
+                        return;
+                    }
+
+                    let totalPrice = 0;
+                    cartItemsElement.innerHTML = '';
+                    cart.forEach(item => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.classList.add('cart-item');
+                        itemDiv.innerHTML = `
+                            <h3>${item.name}</h3>
+                            <p>Size: ${item.selectedSize}</p>
+                            <p>Color: ${item.selectedColor}</p>
+                            <p>Price: $${item.price.toFixed(2)}</p>
+                        `;
+                        cartItemsElement.appendChild(itemDiv);
+                        totalPrice += item.price;
+                    });
+
+                    totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
+                    renderPayPal(totalPrice);
+
+                } catch (err) {
+                    console.error("Error loading cart from Firebase:", err);
+                    cartItemsElement.innerHTML = '<p>Error loading your cart.</p>';
+                }
+            });
+
+            function renderPayPal(totalPrice) {
+                paypal.Buttons({
+                    createOrder: function(data, actions) {
+                        return actions.order.create({
+                            purchase_units: [{
+                                amount: {
+                                    value: totalPrice.toFixed(2)
+                                }
+                            }]
+                        });
+                    },
+                    onApprove: function(data, actions) {
+                        return actions.order.capture().then(function(details) {
+                            document.getElementById('result-message').textContent = 'Transaction completed by ' + details.payer.name.given_name;
+                            // Optionally clear cart after successful transaction
+                            auth.currentUser && db.collection('carts').doc(auth.currentUser.uid).update({
+                                items: []
+                            });
+                        });
+                    }
+                }).render('#paypal-button-container');
+            }
+
+            // Promo Code functionality
+            document.getElementById('apply-promo-btn').addEventListener('click', function() {
+                const promoCodeInput = document.getElementById('promo-code-input').value;
+                applyPromoCode(promoCodeInput); // Call the function to apply the promo code
+            });
+
+            function applyPromoCode(promoCodeInput) {
+                const promoCode = promoCodeInput.trim().toUpperCase();
+                const promoCodeRef = firebase.firestore().collection("promoCodes");
+
+                promoCodeRef.where("code", "==", promoCode).get()
+                    .then(snapshot => {
+                        if (!snapshot.empty) {
+                            const promo = snapshot.docs[0].data();
+                            const currentDate = new Date();
+                            const expiresAt = new Date(promo.expiresAt);
+
+                            if (currentDate > expiresAt) {
+                                document.getElementById('promo-message').textContent = 'This promo code has expired.';
+                                return;
+                            }
+
+                            if (promo.usageLimit && promo.usedCount >= promo.usageLimit) {
+                                document.getElementById('promo-message').textContent = 'This promo code has reached its usage limit.';
+                                return;
+                            }
+
+                            applyDiscount(promo);
+                            promoCodeRef.doc(snapshot.docs[0].id).update({
+                                usedCount: firebase.firestore.FieldValue.increment(1)
+                            });
+
+                        } else {
+                            document.getElementById('promo-message').textContent = 'Invalid promo code.';
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error applying promo code: ", error);
+                        document.getElementById('promo-message').textContent = 'Error applying promo code.';
+                    });
+            }
+
+            function applyDiscount(promo) {
+                let totalPrice = calculateTotalPrice();
+
+                if (promo.discountType === "percentage") {
+                    totalPrice -= (totalPrice * promo.discountValue / 100);
+                } else if (promo.discountType === "fixed") {
+                    totalPrice -= promo.discountValue;
+                }
+
+                updateCartTotal(totalPrice);
+            }
+
+            function calculateTotalPrice() {
+                const cart = getCartFromLocalStorage() || [];
+                let totalPrice = 0;
+
+                cart.forEach(item => {
+                    totalPrice += item.price;
+                });
+
+                return totalPrice;
+            }
+
+            function updateCartTotal(totalPrice) {
+                const totalPriceElement = document.getElementById('total-price');
+                totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
+            }
+
+        </script>
     </div>
 
     <footer>
         <p>&copy; 2025 Your Website</p>
     </footer>
-
-    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD&components=buttons&enable-funding=venmo,paylater,card"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
-
-        auth.onAuthStateChanged(async (user) => {
-            const cartItemsElement = document.getElementById('cart-items');
-            const totalPriceElement = document.getElementById('total-price');
-
-            if (!user) {
-                cartItemsElement.innerHTML = '<p>Please log in to view your cart.</p>';
-                return;
-            }
-
-            const cartRef = db.collection('carts').doc(user.uid);
-            try {
-                const doc = await cartRef.get();
-                if (!doc.exists) {
-                    cartItemsElement.innerHTML = '<p>Your cart is empty.</p>';
-                    return;
-                }
-
-                const data = doc.data();
-                const cart = data.items || [];
-
-                if (cart.length === 0) {
-                    cartItemsElement.innerHTML = '<p>Your cart is empty!</p>';
-                    totalPriceElement.textContent = 'Total: $0.00';
-                    return;
-                }
-
-                let totalPrice = 0;
-                cartItemsElement.innerHTML = '';
-                cart.forEach(item => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.classList.add('cart-item');
-                    itemDiv.innerHTML = `
-                        <h3>${item.name}</h3>
-                        <p>Size: ${item.selectedSize}</p>
-                        <p>Color: ${item.selectedColor}</p>
-                        <p>Price: $${item.price.toFixed(2)}</p>
-                    `;
-                    cartItemsElement.appendChild(itemDiv);
-                    totalPrice += item.price;
-                });
-
-                totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
-                renderPayPal(totalPrice);
-
-            } catch (err) {
-                console.error("Error loading cart from Firebase:", err);
-                cartItemsElement.innerHTML = '<p>Error loading your cart.</p>';
-            }
-        });
-
-        function renderPayPal(totalPrice) {
-            paypal.Buttons({
-                createOrder: function(data, actions) {
-                    return actions.order.create({
-                        purchase_units: [{
-                            amount: {
-                                value: totalPrice.toFixed(2)
-                            }
-                        }]
-                    });
-                },
-                onApprove: function(data, actions) {
-                    return actions.order.capture().then(function(details) {
-                        document.getElementById('result-message').textContent = 'Transaction completed by ' + details.payer.name.given_name;
-                        // Optionally clear cart after successful transaction
-                        auth.currentUser && db.collection('carts').doc(auth.currentUser.uid).update({ items: [] });
-                    });
-                }
-            }).render('#paypal-button-container');
-        }
-
-        document.getElementById('apply-promo-btn').addEventListener('click', function() {
-            const promoCodeInput = document.getElementById('promo-code-input').value;
-            applyPromoCode(promoCodeInput);
-        });
-
-        function applyPromoCode(promoCodeInput) {
-            const promoCode = promoCodeInput.trim().toUpperCase();
-            const promoCodeRef = db.collection("promoCodes");
-
-            promoCodeRef.where("code", "==", promoCode).get().then(snapshot => {
-                if (!snapshot.empty) {
-                    const promo = snapshot.docs[0].data();
-                    const currentDate = new Date();
-                    const expiresAt = new Date(promo.expiresAt);
-
-                    if (currentDate > expiresAt) {
-                        document.getElementById('promo-message').textContent = 'This promo code has expired.';
-                        return;
-                    }
-
-                    applyDiscount(promo);
-                    promoCodeRef.doc(snapshot.docs[0].id).update({
-                        usedCount: firebase.firestore.FieldValue.increment(1)
-                    });
-                } else {
-                    document.getElementById('promo-message').textContent = 'Invalid promo code.';
-                }
-            }).catch(error => {
-                console.error("Error applying promo code: ", error);
-                document.getElementById('promo-message').textContent = 'Error applying promo code.';
-            });
-        }
-
-        function applyDiscount(promo) {
-            const totalPriceElement = document.getElementById('total-price');
-            let totalPrice = parseFloat(totalPriceElement.textContent.replace('Total: $', ''));
-            if (promo.discountType === "percentage") {
-                totalPrice -= (totalPrice * promo.discountValue / 100);
-            } else if (promo.discountType === "fixed") {
-                totalPrice -= promo.discountValue;
-            }
-            totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
-        }
-    </script>
-
 </body>
 </html>
+
