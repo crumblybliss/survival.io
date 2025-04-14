@@ -197,7 +197,9 @@
           <img src="${imageUrl}" alt="${product.name || "Bracelet"}">
           <h3>${product.name || "Unnamed Bracelet"}</h3>
           <p>Select Size:</p>
+           <p>Select color:</p>
           <select id="size-${doc.id}">
+          <select id="color-${doc.id}">
             <option value="" disabled selected>Select Size</option>
             ${options}
           </select>
