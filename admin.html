@@ -3,169 +3,159 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel - Manage Products</title>
-  <script src="https://www.gstatic.com/firebasejs/9.8.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.8.0/firebase-firestore.js"></script>
+  <title>Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* styles.css */
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+
+    .admin-container {
+      width: 80%;
+      margin: 30px auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .form-container {
+      margin-top: 30px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #error-message {
+      color: red;
+      display: none;
+    }
+
+    #success-message {
+      color: green;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <h1>Admin Panel - Product Management</h1>
+  <div class="admin-container">
+    <h1>Product Management</h1>
+    <div class="form-container">
+      <label for="product-name">Product Name:</label>
+      <input type="text" id="product-name" placeholder="Enter product name">
 
-  <!-- Add Product Form -->
-  <div id="product-form">
-    <h2>Add Product</h2>
-    <form id="add-product-form">
-      <label for="productName">Product Name:</label>
-      <input type="text" id="productName" required>
-      <br>
+      <label for="product-price">Product Price:</label>
+      <input type="number" id="product-price" placeholder="Enter product price">
 
-      <label for="productPrice">Product Price:</label>
-      <input type="number" id="productPrice" required>
-      <br>
+      <label for="product-description">Product Description:</label>
+      <textarea id="product-description" placeholder="Enter product description"></textarea>
 
-      <button type="button" onclick="addProduct()">Add Product</button>
-    </form>
+      <button id="save-btn">Save Product</button>
+      <p id="error-message">Please fill out all fields.</p>
+      <p id="success-message">Product saved successfully!</p>
+    </div>
   </div>
 
-  <hr>
-
-  <!-- Display Product List -->
-  <div id="product-list">
-    <h2>Product List</h2>
-    <table id="productsTable">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Price</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <script type="module">
-    // Firebase Configuration
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script>
+    // Firebase configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-      authDomain: "survival-f35e2.firebaseapp.com",
-      projectId: "survival-f35e2",
-      storageBucket: "survival-f35e2.appspot.com",
-      messagingSenderId: "704462603548",
-      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
 
+    // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
+    const db = firebase.firestore();
 
-    // Add Product Function
-    function addProduct() {
-      const productName = document.getElementById("productName").value;
-      const productPrice = document.getElementById("productPrice").value;
+    // Select elements from HTML
+    const productName = document.getElementById('product-name');
+    const productPrice = document.getElementById('product-price');
+    const productDescription = document.getElementById('product-description');
+    const saveButton = document.getElementById('save-btn');
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
 
-      if (!productName || !productPrice) {
-        alert("Please fill in all fields");
+    // Function to save product
+    const saveProduct = async () => {
+      // Clear messages
+      errorMessage.style.display = "none";
+      successMessage.style.display = "none";
+
+      // Get values
+      const name = productName.value.trim();
+      const price = productPrice.value.trim();
+      const description = productDescription.value.trim();
+
+      // Check if all fields are filled
+      if (!name || !price || !description) {
+        errorMessage.style.display = "block";
         return;
       }
 
-      const productData = {
-        name: productName,
-        price: parseFloat(productPrice),
-        timestamp: new Date(),
-      };
-
-      db.collection("products").add(productData)
-        .then(() => {
-          alert("Product added successfully!");
-          fetchProducts();  // Refresh the product list
-          document.getElementById("add-product-form").reset();
-        })
-        .catch((error) => {
-          console.error("Error adding product: ", error);
-          alert("Error adding product");
+      // Save to Firestore
+      try {
+        await db.collection("products").add({
+          name,
+          price,
+          description,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-    }
 
-    // Fetch and display products
-    function fetchProducts() {
-      db.collection("products").get()
-        .then((snapshot) => {
-          const productsTable = document.getElementById("productsTable").getElementsByTagName('tbody')[0];
-          productsTable.innerHTML = "";  // Clear the table first
-
-          snapshot.forEach(doc => {
-            const product = doc.data();
-            const row = productsTable.insertRow();
-            row.setAttribute('data-id', doc.id);  // Store the document ID for later
-
-            row.insertCell(0).textContent = product.name;
-            row.insertCell(1).textContent = `$${product.price.toFixed(2)}`;
-
-            // Edit and Delete buttons
-            const actionsCell = row.insertCell(2);
-            actionsCell.innerHTML = `
-              <button onclick="editProduct('${doc.id}')">Edit</button>
-              <button onclick="deleteProduct('${doc.id}')">Delete</button>
-            `;
-          });
-        })
-        .catch((error) => {
-          console.error("Error fetching products: ", error);
-          alert("Error fetching products");
-        });
-    }
-
-    // Edit Product
-    function editProduct(id) {
-      const productRef = db.collection("products").doc(id);
-      
-      productRef.get()
-        .then((doc) => {
-          if (doc.exists) {
-            const product = doc.data();
-            const newName = prompt("Edit Product Name:", product.name);
-            const newPrice = prompt("Edit Product Price:", product.price);
-
-            if (newName && newPrice) {
-              productRef.update({
-                name: newName,
-                price: parseFloat(newPrice),
-              })
-              .then(() => {
-                alert("Product updated successfully!");
-                fetchProducts();  // Refresh the product list
-              })
-              .catch((error) => {
-                console.error("Error updating product: ", error);
-                alert("Error updating product");
-              });
-            }
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching product: ", error);
-          alert("Error fetching product");
-        });
-    }
-
-    // Delete Product
-    function deleteProduct(id) {
-      const confirmation = confirm("Are you sure you want to delete this product?");
-      if (confirmation) {
-        db.collection("products").doc(id).delete()
-          .then(() => {
-            alert("Product deleted successfully!");
-            fetchProducts();  // Refresh the product list
-          })
-          .catch((error) => {
-            console.error("Error deleting product: ", error);
-            alert("Error deleting product");
-          });
+        successMessage.style.display = "block"; // Display success message
+        // Clear form after successful save
+        productName.value = '';
+        productPrice.value = '';
+        productDescription.value = '';
+      } catch (error) {
+        console.error("Error adding document: ", error);
       }
-    }
+    };
 
-    // Fetch products when the page loads
-    fetchProducts();
+    // Add event listener to the save button
+    saveButton.addEventListener('click', saveProduct);
   </script>
-
 </body>
 </html>
