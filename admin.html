@@ -78,41 +78,15 @@
       border-radius: 5px;
     }
 
-    .admin-login {
-      text-align: center;
-      margin-top: 100px;
-    }
-
-    .admin-login input {
-      padding: 10px;
-      font-size: 16px;
-      margin: 10px;
-      border-radius: 5px;
-    }
-
-    .admin-login button {
-      padding: 10px 15px;
-      background-color: #003366;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .admin-login button:hover {
-      background-color: #002244;
-    }
-
     .error-message {
       color: red;
       font-size: 14px;
     }
   </style>
-  
+
   <!-- Firebase JS SDK -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
     import { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js';
 
     // Firebase Configuration
@@ -127,60 +101,11 @@
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
 
     let editingProduct = null;
 
-    // Function Definitions (login, logout, manage products)
-    function login() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          document.getElementById('loginSection').style.display = 'none';
-          document.getElementById('adminPanel').style.display = 'block';
-        })
-        .catch((error) => {
-          document.getElementById('loginError').textContent = 'Invalid email or password';
-        });
-    }
-
-    function logout() {
-      signOut(auth)
-        .then(() => {
-          document.getElementById('adminPanel').style.display = 'none';
-          document.getElementById('loginSection').style.display = 'block';
-        })
-        .catch((error) => {
-          console.error("Error logging out: ", error);
-        });
-    }
-
-    function addNewProduct() {
-      const productName = prompt("Enter the product name:");
-      const productPrice = prompt("Enter the product price:");
-      const productCategory = prompt("Enter the product category:");
-
-      if (productName && productPrice && !isNaN(productPrice)) {
-        addDoc(collection(db, "products"), {
-          name: productName,
-          price: productPrice,
-          category: productCategory
-        })
-        .then(() => {
-          alert("Product added successfully!");
-          manageProducts(productCategory);
-        })
-        .catch((error) => {
-          console.error("Error adding product: ", error);
-        });
-      } else {
-        alert("Invalid input! Please check your product details.");
-      }
-    }
-
+    // Function Definitions (manage products)
     function manageProducts(category) {
       const tableDiv = document.getElementById('productTable');
       const q = query(collection(db, "products"), where("category", "==", category));
@@ -214,6 +139,29 @@
           tableHTML += '</tbody></table>';
           tableDiv.innerHTML = tableHTML;
         });
+    }
+
+    function addNewProduct() {
+      const productName = prompt("Enter the product name:");
+      const productPrice = prompt("Enter the product price:");
+      const productCategory = prompt("Enter the product category:");
+
+      if (productName && productPrice && !isNaN(productPrice)) {
+        addDoc(collection(db, "products"), {
+          name: productName,
+          price: productPrice,
+          category: productCategory
+        })
+        .then(() => {
+          alert("Product added successfully!");
+          manageProducts(productCategory);
+        })
+        .catch((error) => {
+          console.error("Error adding product: ", error);
+        });
+      } else {
+        alert("Invalid input! Please check your product details.");
+      }
     }
 
     function editProduct(productId, category) {
@@ -273,21 +221,11 @@
 </head>
 <body>
 
-  <!-- Admin Login Section -->
-  <div class="admin-login" id="loginSection">
-    <h1>Admin Login</h1>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-    <div class="error-message" id="loginError"></div>
-  </div>
-
   <!-- Admin Panel Section -->
-  <div class="admin-container" id="adminPanel" style="display: none;">
+  <div class="admin-container" id="adminPanel">
     <nav>
       <a href="bracelets.html">Bracelets</a>
       <a href="cookies.html">Cookies</a>
-      <a href="#" onclick="logout()">Logout</a>
     </nav>
 
     <div class="admin-panel">
