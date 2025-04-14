@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Checkout - CrumblyBliss</title>
+  <title>Your Cart - CrumblyBliss</title>
+  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -13,114 +17,239 @@
       text-align: center;
     }
 
-    .navbar {
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       background-color: #0a1d37;
-      color: white;
-      padding: 15px 0;
-      font-size: 18px;
+      padding: 10px 20px;
       position: fixed;
       top: 0;
       width: 100%;
-      z-index: 100;
+      z-index: 10;
     }
 
-    .navbar a {
+    .profile-pic {
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    nav {
+      margin-top: 70px;
+      background-color: #0a1d37;
+      padding: 10px 0;
+    }
+
+    nav a {
       color: white;
-      margin: 0 20px;
+      margin: 0 15px;
       text-decoration: none;
       font-weight: bold;
     }
 
-    .navbar a:hover {
+    nav a:hover {
       text-decoration: underline;
     }
 
-    h1 {
-      padding-top: 100px;
-    }
-
-    .checkout-container {
-      max-width: 500px;
-      margin: 0 auto;
+    .content {
       padding: 20px;
+    }
+
+    .cart-item {
       background: #fff;
+      margin: 15px auto;
+      max-width: 400px;
+      padding: 15px;
       border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .checkout-summary {
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       text-align: left;
-      margin-bottom: 30px;
     }
 
-    .checkout-summary h3 {
-      margin-top: 0;
+    .promo-code input {
+      padding: 10px;
+      width: 200px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
 
-    .paypal-button {
-      margin-top: 20px;
+    .promo-code button {
+      padding: 10px 15px;
+      background-color: #00bcd4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    .promo-code button:hover {
+      background-color: #0097a7;
     }
   </style>
-
-  <!-- PayPal Mini Cart SDK -->
-  <script src="https://www.paypalobjects.com/ncp/cart/cart.js" data-merchant-id="YZBS9R98C23HG"></script>
 </head>
 <body>
+  <header>
+    <a href="index.html">
+      <img src="profile.jpg" alt="Profile Picture" class="profile-pic" />
+    </a>
+    <div id="auth-status">Checking login...</div>
+  </header>
 
-  <div class="navbar">
+  <nav>
     <a href="index.html">Home</a>
     <a href="shop.html">Shop</a>
     <a href="cart.html">Cart</a>
     <a href="checkout.html">Checkout</a>
-  </div>
+  </nav>
 
-  <div class="checkout-container">
-    <h1>Checkout</h1>
-    <div class="checkout-summary" id="checkout-summary"></div>
+  <div class="content">
+    <h1>Your Cart</h1>
+    <div id="cart-items"></div>
+    <p id="total-price">Total: $0.00</p>
 
-    <!-- PayPal Checkout Button -->
-    <div class="paypal-button">
-      <paypal-cart-button data-id="pp-checkout-button" data-type="checkout"></paypal-cart-button>
+    <div class="promo-code">
+      <input type="text" id="promo-code-input" placeholder="Enter promo code" />
+      <button onclick="applyPromo()">Apply Promo Code</button>
+      <p id="promo-message"></p>
     </div>
+
+    <div id="paypal-button-container"></div>
+    <p id="result-message"></p>
   </div>
+
+  <footer>
+    <p>&copy; 2025 CrumblyBliss</p>
+  </footer>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const summary = document.getElementById("checkout-summary");
-      const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      let totalPrice = 0;
+    // Firebase config with your project values
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
 
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentUser = null;
+    let totalPrice = 0;
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        document.getElementById("auth-status").textContent = `Logged in as ${user.email}`;
+      } else {
+        currentUser = null;
+        document.getElementById("auth-status").innerHTML = `<a href="login.html" style="color:#00bcd4;">Login</a>`;
+      }
+    });
+
+    const cartContainer = document.getElementById("cart-items");
+    const totalPriceElement = document.getElementById("total-price");
+
+    function displayCart() {
       if (cart.length === 0) {
-        summary.innerHTML = "<p>Your cart is empty.</p>";
+        cartContainer.innerHTML = "<p>Your cart is empty!</p>";
         return;
       }
 
-      let summaryHTML = "<h3>Order Summary</h3><ul>";
-      cart.forEach((item, index) => {
-        summaryHTML += `
-          <li>
-            ${item.name} (${item.selectedSize || "Default"} - ${item.selectedColor || "Default"}) - $${item.price.toFixed(2)}
-          </li>
-        `;
-
-        // Add item to PayPal Mini Cart
-        cartPaypal.Item({
-          id: item.id || `item-${index}`,
-          name: item.name,
-          quantity: 1,
-          unitAmount: item.price.toFixed(2),
-          category: "PHYSICAL"
-        });
-
+      totalPrice = 0;
+      cartContainer.innerHTML = "";
+      cart.forEach(item => {
         totalPrice += item.price;
+        cartContainer.innerHTML += `
+          <div class="cart-item">
+            <h3>${item.name}</h3>
+            <p>Size: ${item.selectedSize}</p>
+            <p>Color: ${item.selectedColor}</p>
+            <p>Price: $${item.price.toFixed(2)}</p>
+          </div>
+        `;
       });
 
-      summaryHTML += `</ul><p><strong>Total: $${totalPrice.toFixed(2)}</strong></p>`;
-      summary.innerHTML = summaryHTML;
+      updateTotal();
+    }
 
-      // Initialize PayPal checkout button
-      cartPaypal.Cart({ id: "pp-checkout-button" });
-    });
+    function updateTotal() {
+      totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
+    }
+
+    function applyPromo() {
+      const code = document.getElementById("promo-code-input").value.trim().toUpperCase();
+      const messageEl = document.getElementById("promo-message");
+
+      db.collection("promoCodes").where("code", "==", code).get().then(snapshot => {
+        if (snapshot.empty) {
+          messageEl.textContent = "Invalid promo code.";
+          return;
+        }
+
+        const promo = snapshot.docs[0].data();
+        const now = new Date();
+        const expiry = new Date(promo.expiresAt);
+
+        if (now > expiry) {
+          messageEl.textContent = "Promo code expired.";
+          return;
+        }
+
+        if (promo.usageLimit && promo.usedCount >= promo.usageLimit) {
+          messageEl.textContent = "Promo code limit reached.";
+          return;
+        }
+
+        if (promo.discountType === "percentage") {
+          totalPrice -= totalPrice * promo.discountValue / 100;
+        } else if (promo.discountType === "fixed") {
+          totalPrice -= promo.discountValue;
+        }
+
+        updateTotal();
+        messageEl.textContent = `Promo applied!`;
+        db.collection("promoCodes").doc(snapshot.docs[0].id).update({
+          usedCount: firebase.firestore.FieldValue.increment(1)
+        });
+      }).catch(err => {
+        console.error(err);
+        messageEl.textContent = "Error checking promo.";
+      });
+    }
+
+    // PayPal Button
+    paypal.Buttons({
+      createOrder: (data, actions) => {
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: totalPrice.toFixed(2)
+            }
+          }]
+        });
+      },
+      onApprove: (data, actions) => {
+        return actions.order.capture().then(details => {
+          document.getElementById("result-message").textContent = `Payment completed by ${details.payer.name.given_name}.`;
+          if (currentUser) {
+            db.collection("orders").add({
+              uid: currentUser.uid,
+              email: currentUser.email,
+              cart,
+              total: totalPrice,
+              createdAt: new Date()
+            });
+          }
+          localStorage.removeItem("cart");
+        });
+      }
+    }).render('#paypal-button-container');
+
+    displayCart();
   </script>
 </body>
 </html>
