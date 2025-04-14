@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -93,6 +92,7 @@
       font-size: 14px;
       border-radius: 5px;
       border: 1px solid #ccc;
+      width: 100%;
     }
 
     .product button {
@@ -110,7 +110,6 @@
     }
   </style>
 </head>
-
 <body>
   <div class="navbar">
     <a href="index.html">Home</a>
@@ -141,7 +140,7 @@
     const db = getFirestore(app);
     const auth = getAuth();
 
-    window.addToCart = async (productB64, selectedSize) => {
+    window.addToCart = async (productB64, sizeId, colorId) => {
       const user = auth.currentUser;
       if (!user) {
         alert("Please login to add items to your cart.");
@@ -149,8 +148,20 @@
       }
 
       const product = JSON.parse(atob(productB64));
-      const sizeInfo = product.sizes.find(s => s.size === selectedSize);
+      const selectedSize = document.getElementById(sizeId).value;
+      const selectedColor = document.getElementById(colorId).value;
 
+      if (!selectedSize) {
+        alert("Please select a size.");
+        return;
+      }
+
+      if (!selectedColor) {
+        alert("Please select a color.");
+        return;
+      }
+
+      const sizeInfo = product.sizes.find(s => s.size === selectedSize);
       if (!sizeInfo) {
         alert("Invalid size selected.");
         return;
@@ -158,7 +169,8 @@
 
       const cartItem = {
         ...product,
-        selectedSize: selectedSize,
+        selectedSize,
+        selectedColor,
         price: sizeInfo.price
       };
 
@@ -166,9 +178,8 @@
       cart.push(cartItem);
       localStorage.setItem("cart", JSON.stringify(cart));
 
-      alert(`${product.name} (${selectedSize}) added to your cart for $${sizeInfo.price}`);
-
-      window.location.href = "cart.html"; // Redirect to the cart page
+      alert(`${product.name} (${selectedSize}, ${selectedColor}) added to your cart for $${sizeInfo.price}`);
+      window.location.href = "cart.html";
     };
 
     const fetchBracelets = async () => {
@@ -184,12 +195,14 @@
         const product = doc.data();
         const imageUrl = product.imageUrl || "default.jpg";
         const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+        const colors = Array.isArray(product.colors) ? product.colors : ["Black", "Red", "Green"];
 
-        const options = sizes.map(size => {
-          return `<option value="${size.size}">${size.size} - $${size.price}</option>`;
-        }).join("");
+        const options = sizes.map(size => `<option value="${size.size}">${size.size} - $${size.price}</option>`).join("");
+        const colorOptions = colors.map(color => `<option value="${color}">${color}</option>`).join("");
 
         const encodedProduct = btoa(JSON.stringify(product));
+        const sizeId = `size-${doc.id}`;
+        const colorId = `color-${doc.id}`;
 
         const div = document.createElement("div");
         div.className = "product";
@@ -197,13 +210,16 @@
           <img src="${imageUrl}" alt="${product.name || "Bracelet"}">
           <h3>${product.name || "Unnamed Bracelet"}</h3>
           <p>Select Size:</p>
-           <p>Select color:</p>
-          <select id="size-${doc.id}">
-          <select id="color-${doc.id}">
+          <select id="${sizeId}">
             <option value="" disabled selected>Select Size</option>
             ${options}
           </select>
-          <button onclick="addToCart('${encodedProduct}', document.getElementById('size-${doc.id}').value)">Add to Cart</button>
+          <p>Select Color:</p>
+          <select id="${colorId}">
+            <option value="" disabled selected>Select Color</option>
+            ${colorOptions}
+          </select>
+          <button onclick="addToCart('${encodedProduct}', '${sizeId}', '${colorId}')">Add to Cart</button>
         `;
         container.appendChild(div);
       });
@@ -223,5 +239,4 @@
     fetchBracelets();
   </script>
 </body>
-
 </html>
