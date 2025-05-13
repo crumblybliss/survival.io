@@ -6,121 +6,130 @@
   <title>Bracelets - Tactics & Treats</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f1f1f1;
-      color: #333;
+      font-family: Arial, sans-serif;
       margin: 0;
-      text-align: center;
+      padding-top: 70px;
+      background-color: #f4f4f4;
+      color: #222;
     }
 
     .navbar {
-      background-color: #0a1d37;
-      color: white;
-      padding: 15px 0;
-      font-size: 18px;
       position: fixed;
       top: 0;
       width: 100%;
-      z-index: 100;
+      background-color: #0a1d37;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      z-index: 1000;
     }
 
-    .navbar a {
+    .navbar .left a,
+    .navbar .right button {
       color: white;
-      margin: 0 20px;
       text-decoration: none;
+      margin: 0 10px;
       font-weight: bold;
     }
 
-    .navbar a:hover {
-      text-decoration: underline;
+    .navbar .right {
+      display: flex;
+      align-items: center;
     }
 
-    .navbar .auth-btn {
+    .auth-btn {
       background-color: #00bcd4;
-      color: white;
-      padding: 10px 20px;
       border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
       cursor: pointer;
-      border-radius: 5px;
     }
 
-    .navbar .auth-btn:hover {
-      background-color: #0097a7;
+    .profile-circle {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-left: 10px;
     }
 
-    h1 {
-      padding-top: 100px;
+    .profile-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .main-content {
+      padding: 20px;
+      text-align: center;
     }
 
     .container {
       display: flex;
-      justify-content: center;
       flex-wrap: wrap;
-      padding: 20px;
+      justify-content: center;
+      gap: 20px;
     }
 
     .product {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
       width: 250px;
-      margin: 20px;
-      padding: 20px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      text-align: center;
     }
 
     .product img {
       width: 100%;
       height: 200px;
       object-fit: cover;
-      border-radius: 10px;
+      border-radius: 6px;
     }
 
     .product h3 {
-      margin: 15px 0;
-      font-size: 18px;
+      margin: 10px 0 5px;
     }
 
-    .product p {
-      font-size: 16px;
-      color: #555;
-    }
-
-    .product select {
-      padding: 5px;
-      margin: 10px 0;
-      font-size: 14px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+    .product select,
+    .product button {
       width: 100%;
+      margin-top: 5px;
+      padding: 8px;
+      font-size: 14px;
     }
 
     .product button {
       background-color: #00bcd4;
-      color: white;
       border: none;
-      padding: 10px;
-      width: 100%;
+      color: white;
+      border-radius: 4px;
       cursor: pointer;
-      border-radius: 5px;
-    }
-
-    .product button:hover {
-      background-color: #0097a7;
     }
   </style>
 </head>
 <body>
   <div class="navbar">
-    <a href="index.html">Home</a>
-    <a href="bracelets.html">Bracelets</a>
-    <a href="cookies.html">Cookies</a>
-    <a href="admin.html">Admin Panel</a>
-    <button id="loginButton" class="auth-btn">Login</button>
+    <div class="left">
+      <a href="index.html">Tactics & Treats</a>
+      <a href="bracelets.html">Bracelets</a>
+      <a href="cookies.html">Cookies</a>
+      <a href="admin.html">Admin Panel</a>
+    </div>
+    <div class="right">
+      <button id="loginButton" class="auth-btn">Login</button>
+      <a id="profileLink" href="profile.html" style="display: none;">
+        <div class="profile-circle">
+          <img id="profilePic" src="default-profile.png" alt="Profile">
+        </div>
+      </a>
+    </div>
   </div>
 
-  <h1>Bracelets</h1>
-  <div class="container" id="braceletProducts"></div>
+  <div class="main-content">
+    <h1>Bracelets</h1>
+    <div class="container" id="braceletsProducts"></div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -140,7 +149,7 @@
     const db = getFirestore(app);
     const auth = getAuth();
 
-    window.addToCart = async (productB64, sizeId, colorId) => {
+    window.addToCart = async (productB64, selectedSize, selectedColor) => {
       const user = auth.currentUser;
       if (!user) {
         alert("Please login to add items to your cart.");
@@ -148,22 +157,11 @@
       }
 
       const product = JSON.parse(atob(productB64));
-      const selectedSize = document.getElementById(sizeId).value;
-      const selectedColor = document.getElementById(colorId).value;
+      const sizePrice = product.sizes ? product.sizes[selectedSize] : null;
+      const colorExists = product.colors?.includes(selectedColor);
 
-      if (!selectedSize) {
-        alert("Please select a size.");
-        return;
-      }
-
-      if (!selectedColor) {
-        alert("Please select a color.");
-        return;
-      }
-
-      const sizeInfo = product.sizes.find(s => s.size === selectedSize);
-      if (!sizeInfo) {
-        alert("Invalid size selected.");
+      if (!sizePrice && !colorExists) {
+        alert("Please select a valid size or color.");
         return;
       }
 
@@ -171,20 +169,20 @@
         ...product,
         selectedSize,
         selectedColor,
-        price: sizeInfo.price
+        price: sizePrice || product.price || 0
       };
 
       let cart = JSON.parse(localStorage.getItem("cart")) || [];
       cart.push(cartItem);
       localStorage.setItem("cart", JSON.stringify(cart));
 
-      alert(`${product.name} (${selectedSize}, ${selectedColor}) added to your cart for $${sizeInfo.price}`);
+      alert(`${product.name} (${selectedSize || selectedColor}) added to cart for $${cartItem.price}`);
       window.location.href = "cart.html";
     };
 
     const fetchBracelets = async () => {
       const snap = await getDocs(collection(db, "bracelets"));
-      const container = document.getElementById("braceletProducts");
+      const container = document.getElementById("braceletsProducts");
 
       if (snap.empty) {
         container.innerHTML = "<p>No bracelets available at the moment.</p>";
@@ -193,33 +191,47 @@
 
       snap.forEach(doc => {
         const product = doc.data();
-        const imageUrl = product.imageUrl || "default.jpg";
-        const sizes = Array.isArray(product.sizes) ? product.sizes : [];
-        const colors = Array.isArray(product.colors) ? product.colors : ["Black", "Red", "Green"];
+        const id = doc.id;
+        const imageUrl = product.image || "default.jpg";
+        const sizes = product.sizes || {};
+        const colors = product.colors || [];
 
-        const options = sizes.map(size => `<option value="${size.size}">${size.size} - $${size.price}</option>`).join("");
-        const colorOptions = colors.map(color => `<option value="${color}">${color}</option>`).join("");
+        const sizeOptions = Object.entries(sizes).map(([key, price]) =>
+          `<option value="${key}">${key} - $${price}</option>`).join("");
+
+        const colorOptions = colors.map(color =>
+          `<option value="${color}">${color}</option>`).join("");
 
         const encodedProduct = btoa(JSON.stringify(product));
-        const sizeId = `size-${doc.id}`;
-        const colorId = `color-${doc.id}`;
 
         const div = document.createElement("div");
         div.className = "product";
         div.innerHTML = `
           <img src="${imageUrl}" alt="${product.name || "Bracelet"}">
           <h3>${product.name || "Unnamed Bracelet"}</h3>
-          <p>Select Size:</p>
-          <select id="${sizeId}">
-            <option value="" disabled selected>Select Size</option>
-            ${options}
-          </select>
-          <p>Select Color:</p>
-          <select id="${colorId}">
-            <option value="" disabled selected>Select Color</option>
-            ${colorOptions}
-          </select>
-          <button onclick="addToCart('${encodedProduct}', '${sizeId}', '${colorId}')">Add to Cart</button>
+          <p>${product.description || ""}</p>
+
+          ${sizeOptions ? `
+            <label for="size-${id}">Select Size:</label>
+            <select id="size-${id}">
+              <option value="" disabled selected>Select Size</option>
+              ${sizeOptions}
+            </select>
+          ` : ""}
+
+          ${colorOptions ? `
+            <label for="color-${id}">Select Color:</label>
+            <select id="color-${id}">
+              <option value="" disabled selected>Select Color</option>
+              ${colorOptions}
+            </select>
+          ` : ""}
+
+          <button onclick="addToCart('${encodedProduct}', 
+            document.getElementById('size-${id}')?.value || '', 
+            document.getElementById('color-${id}')?.value || '')">
+            Add to Cart
+          </button>
         `;
         container.appendChild(div);
       });
@@ -227,12 +239,18 @@
 
     onAuthStateChanged(auth, (user) => {
       const btn = document.getElementById("loginButton");
+      const profileLink = document.getElementById("profileLink");
+      const profilePic = document.getElementById("profilePic");
+
       if (user) {
         btn.innerText = "Logout";
         btn.onclick = () => signOut(auth);
+        profileLink.style.display = "block";
+        profilePic.src = user.photoURL || "default-profile.png";
       } else {
         btn.innerText = "Login";
         btn.onclick = () => window.location.href = "login.html";
+        profileLink.style.display = "none";
       }
     });
 
