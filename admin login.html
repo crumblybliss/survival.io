@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login - Tactics & Treats</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0a1d37;
+      margin: 0;
+      color: #f1f1f1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background-color: #003c5a;
+      padding: 15px 20px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .navbar strong {
+      font-size: 1.2rem;
+    }
+
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .container {
+      margin-top: 80px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 40px 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      background-color: #ffffffdd;
+      color: #333;
+    }
+
+    .password-toggle {
+      position: relative;
+      width: 100%;
+    }
+
+    .password-toggle input {
+      padding-right: 40px;
+    }
+
+    .toggle-btn {
+      position: absolute;
+      right: 10px;
+      top: 12px;
+      background: none;
+      border: none;
+      color: #333;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 12px 20px;
+      background-color: #00bcd4;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #0198aa;
+    }
+
+    .message {
+      margin-top: 15px;
+      color: #ff9999;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <strong>Tactics & Treats</strong>
+    <a href="index.html">Back to Home</a>
+  </div>
+
+  <div class="container">
+    <h2>Admin Login</h2>
+    <input type="email" id="email" placeholder="Admin Email" autocomplete="email" />
+
+    <div class="password-toggle">
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+      <button type="button" class="toggle-btn" onclick="togglePassword()">👁</button>
+    </div>
+
+    <button onclick="login()">Login</button>
+    <div class="message" id="message"></div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    function login() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const messageDiv = document.getElementById("message");
+
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(() => {
+          window.location.href = "admin-dashboard.html";
+        })
+        .catch(error => {
+          messageDiv.textContent = "Login failed: " + error.message;
+        });
+    }
+
+    function togglePassword() {
+      const passwordInput = document.getElementById("password");
+      passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+    }
+  </script>
+</body>
+</html>
