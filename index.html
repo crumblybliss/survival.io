@@ -1,58 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactics & Treats - Home</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #0a1d37;
-            color: #f1f1f1;
-            text-align: center;
-            margin: 0;
-        }
-        ul {
-            background-color: #003c5a;
-            padding: 10px;
-            list-style: none;
-            margin: 0;
-        }
-        ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-        ul li a {
-            color: #f1f1f1;
-            text-decoration: none;
-            font-size: 18px;
-        }
-        ul li a:hover {
-            color: #00bcd4;
-        }
-        .container {
-            padding: 50px;
-            background: rgba(0, 0, 0, 0.7);
-            margin: 20px;
-            border-radius: 8px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tactics & Treats</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      background-color: #f1f1f1;
+      color: #333;
+      text-align: center;
+    }
+
+    .navbar {
+      background-color: #0a1d37;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .navbar .left a {
+      color: white;
+      margin-right: 20px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: text-decoration 0.2s;
+    }
+
+    .navbar .left a:hover {
+      text-decoration: underline;
+    }
+
+    .navbar .right {
+      display: flex;
+      align-items: center;
+    }
+
+    .auth-btn {
+      background-color: #00bcd4;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 10px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .auth-btn:hover {
+      background-color: #0097a7;
+    }
+
+    .profile-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-left: 10px;
+      border: 2px solid white;
+      transition: transform 0.3s ease;
+    }
+
+    .profile-circle:hover {
+      transform: scale(1.1);
+    }
+
+    .profile-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .main-content {
+      padding-top: 100px;
+      padding-bottom: 40px;
+    }
+
+    .sponsor-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .sponsor-gallery img {
+      width: 200px;
+      height: 100px;
+      object-fit: contain;
+      background-color: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .sponsor-gallery img:hover {
+      transform: scale(1.05);
+    }
+
+    .sponsor-cta {
+      margin-top: 40px;
+    }
+
+    .sponsor-cta a {
+      color: #00bcd4;
+      font-weight: bold;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .sponsor-cta a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .sponsor-gallery img {
+        width: 80%;
+        height: auto;
+      }
+
+      .navbar .left a {
+        margin-right: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="bracelets.html">Bracelets</a></li>
-        <li><a href="cookies.html">Cookies</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="commitments.html">Commitments</a></li>
-        <li><a href="cart.html">Cart 🛒</a></li>
-        <li><a href="admin.html">Admin Dashboard 🛒</a></li>
-    </ul>
-
-    <div class="container">
-        <h1>Welcome to Tactics & Treats!</h1>
-        <p>Explore our delicious cookies and beautiful bracelets.</p>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="left">
+      <a href="index.html">Tactics & Treats</a>
+      <a href="bracelets.html">Bracelets</a>
+      <a href="cookies.html">Cookies</a>
+      <a href="admin login.html">Admin Panel</a>
     </div>
+    <div class="right">
+      <button id="loginButton" class="auth-btn">Login</button>
+      <a id="profileLink" href="profile.html" style="display: none;">
+        <div class="profile-circle">
+          <img id="profilePic" src="default-profile.png" alt="Profile">
+        </div>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <h1>Welcome to Tactics & Treats</h1>
+    <p>Explore our delicious treats, handmade accessories — and meet the sponsors who help us grow!</p>
+
+    <section class="sponsor-gallery" aria-label="Sponsors">
+      <img src="sponsor1.png" alt="Sponsor 1 Logo">
+      <img src="sponsor2.png" alt="Sponsor 2 Logo">
+      <img src="sponsor3.png" alt="Sponsor 3 Logo">
+      <!-- Add more sponsors as needed -->
+    </section>
+
+    <div class="sponsor-cta">
+      <a href="sponsor-us.html">Interested in becoming a sponsor? Click here!</a>
+    </div>
+  </main>
+
+  <!-- Firebase Auth Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+
+    const loginBtn = document.getElementById("loginButton");
+    const profileLink = document.getElementById("profileLink");
+    const profilePic = document.getElementById("profilePic");
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginBtn.innerText = "Logout";
+        loginBtn.onclick = () => signOut(auth);
+        profileLink.style.display = "block";
+        if (user.photoURL) {
+          profilePic.src = user.photoURL;
+        }
+      } else {
+        loginBtn.innerText = "Login";
+        loginBtn.onclick = () => window.location.href = "login.html";
+        profileLink.style.display = "none";
+        profilePic.src = "default-profile.png";
+      }
+    });
+  </script>
 </body>
 </html>
-
