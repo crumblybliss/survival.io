@@ -1,149 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout with PayPal</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            padding: 20px;
-        }
-        .checkout-container {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .payment-button {
-            display: inline-block;
-            padding: 15px 30px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #00bcd4;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Your Cart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #0a1d37;
+      color: #f1f1f1;
+    }
+
+    header, footer, nav {
+      background: #1c2b47;
+      color: white;
+      padding: 10px;
+      text-align: center;
+    }
+
+    nav a {
+      color: #f1f1f1;
+      margin: 0 10px;
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      color: #00bcd4;
+    }
+
+    .content {
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #00bcd4;
+      text-align: center;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1c2b47;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .cart-details {
+      flex-grow: 1;
+    }
+
+    .cart-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .cart-controls button {
+      padding: 5px 10px;
+      border: none;
+      background: #00bcd4;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .cart-controls button:hover {
+      background: #0097a7;
+    }
+
+    #total-price {
+      text-align: center;
+      font-size: 20px;
+      margin-top: 20px;
+    }
+
+    #promo-code-section {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    input[type="text"] {
+      padding: 8px;
+      border-radius: 4px;
+      border: none;
+      width: 180px;
+    }
+
+    #apply-promo-btn {
+      padding: 8px 16px;
+      margin-left: 8px;
+      border: none;
+      background: #00bcd4;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #apply-promo-btn:hover {
+      background: #0097a7;
+    }
+
+    #promo-message {
+      margin-top: 10px;
+    }
+
+    #paypal-button-container {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #00bcd4;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
 </head>
 <body>
-    <div class="checkout-container">
-        <h2>Checkout</h2>
 
-        <!-- Order Summary -->
-        <div class="order-summary">
-            <h3>Order Details</h3>
-            <p>Item: Chocolate Chip Cookies</p>
-            <p>Price: $15.00</p>
+<header>
+  <h2>Your Cart</h2>
+</header>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="shop.html">Shop</a>
+  <a href="cart.html">Cart</a>
+</nav>
+
+<div class="content">
+  <div id="cart-items"></div>
+  <p id="total-price">Total: $0.00</p>
+
+  <div id="promo-code-section">
+    <input type="text" id="promo-code-input" placeholder="Enter promo code" />
+    <button id="apply-promo-btn">Apply</button>
+    <p id="promo-message"></p>
+  </div>
+
+  <div id="paypal-button-container"></div>
+  <p id="result-message"></p>
+</div>
+
+<footer>&copy; 2025 Your Website</footer>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://www.paypal.com/sdk/js?client-id=Aa4LfD1dnj8w9ytQpxXQMmZqauIm7dQr0l6-JxOHJLqQpIXSvI6QRILuBv0MRrMVx7zI0C761uO_QPaS&currency=USD"></script>
+<script>
+  const cartContainer = document.getElementById('cart-items');
+  const totalDisplay = document.getElementById('total-price');
+  const promoInput = document.getElementById('promo-code-input');
+  const promoMsg = document.getElementById('promo-message');
+  const toast = document.getElementById('toast');
+  const paypalContainer = document.getElementById('paypal-button-container');
+  const resultMsg = document.getElementById('result-message');
+
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  let discount = 0;
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  function saveCart() {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }
+
+  function renderCart() {
+    cartContainer.innerHTML = '';
+    if (cart.length === 0) {
+      cartContainer.innerHTML = '<p>Your cart is empty!</p>';
+      totalDisplay.textContent = 'Total: $0.00';
+      paypalContainer.innerHTML = '';
+      return;
+    }
+
+    cart.forEach((item, i) => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'cart-item';
+      itemDiv.innerHTML = `
+        <div class="cart-details">
+          <h3>${item.name}</h3>
+          <p>Size: ${item.selectedSize}</p>
+          <p>Color: ${item.selectedColor}</p>
+          <p>Price: $${item.price.toFixed(2)}</p>
         </div>
-
-        <!-- PayPal Cart Button -->
-        <div>
-            <h3>Pay with PayPal</h3>
-            <div id="paypal-cart-button"></div>
+        <div class="cart-controls">
+          <button onclick="removeItem(${i})">Remove</button>
         </div>
+      `;
+      cartContainer.appendChild(itemDiv);
+    });
 
-    </div>
+    updateTotal();
+    renderPaypal();
+  }
 
-    <!-- PayPal SDK -->
-    <script src="https://www.paypal.com/sdk/js?client-id=yourPayPalClientID&components=buttons"></script>
-    <script>
-        paypal.Buttons({
-            // Creates the order when the PayPal button is clicked
-            createOrder: function(data, actions) {
-                return actions.order.create({
-                    purchase_units: [{
-                        amount: {
-                            value: '15.00',  // The price of the item
-                        },
-                        description: 'Chocolate Chip Cookies',  // Item description
-                    }],
-                });
-            },
-            // Executes the transaction when the buyer approves the transaction
-            onApprove: function(data, actions) {
-                return actions.order.capture().then(function(details) {
-                    // Send order details to the backend for email and processing
-                    const orderDetails = {
-                        item: 'Chocolate Chip Cookies',
-                        price: '$15.00',
-                        transactionId: details.id,
-                        email: 'carr.isaiah@lposd.org'
-                    };
+  function updateTotal() {
+    let total = cart.reduce((sum, i) => sum + i.price, 0);
+    const discounted = total * (1 - discount);
+    totalDisplay.textContent = `Total: $${discounted.toFixed(2)}`;
+  }
 
-                    // Send the order to your server to handle the email and confirmation
-                    fetch('/send-order-email', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(orderDetails),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        alert('Transaction completed by ' + details.payer.name.given_name);
-                    })
-                    .catch((error) => {
-                        alert('Error sending email');
-                    });
-                });
-            }
-        }).render('#paypal-cart-button'); // Renders the PayPal button
-    </script>
+  function removeItem(index) {
+    cart.splice(index, 1);
+    saveCart();
+    renderCart();
+    showToast('Item removed');
+  }
 
-    <!-- Backend (Node.js example for sending email) -->
-    <script>
-        // Note: This script below should be hosted on your server, not part of frontend code.
-        // It handles the email sending when the order is approved. You need to implement it server-side.
+  document.getElementById('apply-promo-btn').onclick = () => {
+    const code = promoInput.value.trim().toUpperCase();
+    if (code === 'DISCOUNT10') {
+      discount = 0.10;
+      promoMsg.textContent = '10% discount applied!';
+      promoMsg.style.color = '#00bcd4';
+    } else if (code === 'DISCOUNT20') {
+      discount = 0.20;
+      promoMsg.textContent = '20% discount applied!';
+      promoMsg.style.color = '#00bcd4';
+    } else {
+      discount = 0;
+      promoMsg.textContent = 'Invalid promo code.';
+      promoMsg.style.color = '#ff4c4c';
+    }
+    updateTotal();
+    renderPaypal();
+  };
 
-        // Backend (Node.js example):
-        const express = require('express');
-        const nodemailer = require('nodemailer');
-        const app = express();
+  function renderPaypal() {
+    paypalContainer.innerHTML = '';
+    if (cart.length === 0) return;
 
-        app.use(express.json());  // To parse JSON data
+    const total = cart.reduce((sum, i) => sum + i.price, 0) * (1 - discount);
 
-        // Your email configuration
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: 'your-email@gmail.com',  // Your Gmail account
-                pass: 'your-email-password',   // Your Gmail password (or app password)
-            },
-        });
+    paypal.Buttons({
+      createOrder: (data, actions) => actions.order.create({
+        purchase_units: [{ amount: { value: total.toFixed(2) } }]
+      }),
+      onApprove: (data, actions) => actions.order.capture().then(details => {
+        showToast(`Thanks, ${details.payer.name.given_name}!`);
+        resultMsg.textContent = 'Payment complete!';
+        cart = [];
+        saveCart();
+        renderCart();
+      })
+    }).render('#paypal-button-container');
+  }
 
-        // Endpoint for sending email
-        app.post('/send-order-email', (req, res) => {
-            const { item, price, email, transactionId } = req.body;
-
-            // Email setup
-            const mailOptions = {
-                from: 'your-email@gmail.com',   // Your email
-                to: email,                      // Recipient's email
-                subject: 'New Order Received',
-                text: `New Order:\n\nItem: ${item}\nPrice: ${price}\nTransaction ID: ${transactionId}\nEmail: ${email}`,
-            };
-
-            // Send email
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    return res.status(500).send('Error sending email');
-                }
-                return res.status(200).send('Email sent');
-            });
-        });
-
-        // Start server (for demonstration purposes, not part of the frontend code)
-        const port = process.env.PORT || 3000;
-        app.listen(port, () => {
-            console.log(`Server running on port ${port}`);
-        });
-    </script>
+  renderCart();
+</script>
 </body>
 </html>
