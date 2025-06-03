@@ -1,205 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart</title>
-    <style>
-        /* Base Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Cart - CrumblyBliss</title>
+  <style>
+    :root {
+      --navy: #0a1d37;
+      --accent: #00bcd4;
+      --light: #f4f7fc;
+    }
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7fc;
-            color: #333;
-            padding: 20px;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        .container {
-            width: 80%;
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--light);
+      color: #333;
+      padding: 20px;
+    }
 
-        h2 {
-            font-size: 2.5rem;
-            color: #0a1d37;
-            text-align: center;
-            margin-bottom: 30px;
-            font-weight: 600;
-        }
+    .container {
+      width: 90%;
+      max-width: 1100px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
 
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            background-color: #f9fafb;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-        }
+    h2 {
+      text-align: center;
+      font-size: 2.5rem;
+      color: var(--navy);
+      margin-bottom: 30px;
+    }
 
-        .cart-item:hover {
-            transform: translateY(-5px);
-            background-color: #e8eff5;
-        }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      background-color: #eef3f9;
+      transition: transform 0.3s;
+    }
 
-        .cart-item img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-right: 20px;
-        }
+    .cart-item:hover {
+      transform: translateY(-4px);
+    }
 
-        .item-info {
-            flex-grow: 1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .item-details {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex: 1;
+    }
 
-        .item-info span {
-            font-size: 1.2rem;
-            color: #444;
-            font-weight: 500;
-        }
+    .cart-item img {
+      width: 70px;
+      height: 70px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
 
-        .remove-btn {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.3s ease;
-        }
+    .item-info span {
+      display: block;
+      font-size: 1.1rem;
+      color: #222;
+    }
 
-        .remove-btn:hover {
-            background-color: #c0392b;
-        }
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
 
-        .empty-cart {
-            text-align: center;
-            color: #888;
-            font-size: 1.2rem;
-            margin-top: 40px;
-        }
+    .quantity-controls button {
+      padding: 4px 10px;
+      background: var(--accent);
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+    }
 
-        .checkout-btn {
-            display: block;
-            width: 100%;
-            background-color: #0a1d37;
-            color: white;
-            padding: 15px 0;
-            font-size: 1.5rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            margin-top: 30px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+    .remove-btn {
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
 
-        .checkout-btn:hover {
-            background-color: #34495e;
-        }
+    .remove-btn:hover {
+      background: #c0392b;
+    }
 
-        @media (max-width: 768px) {
-            .container {
-                width: 90%;
-                padding: 20px;
-            }
+    .empty-cart {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #666;
+      margin-top: 40px;
+    }
 
-            h2 {
-                font-size: 2rem;
-            }
+    .checkout-btn {
+      width: 100%;
+      background-color: var(--navy);
+      color: #fff;
+      font-size: 1.4rem;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
 
-            .cart-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+    .checkout-btn:hover {
+      background-color: #122b50;
+    }
 
-            .cart-item img {
-                width: 60px;
-                height: 60px;
-            }
+    #cart-total {
+      text-align: center;
+      font-size: 1.5rem;
+      color: var(--navy);
+      margin-top: 20px;
+    }
 
-            .item-info {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+    @media (max-width: 768px) {
+      .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
 
-            .item-info span {
-                margin-bottom: 10px;
-            }
-        }
-    </style>
+      .item-details {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h2>Your Shopping Cart</h2>
-        <div id="cart-items"></div>
-        <p id="empty-message" class="empty-cart">Your cart is empty.</p>
-        <button id="checkout-btn" class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
-    </div>
+  <div class="container">
+    <h2>Your Shopping Cart</h2>
+    <div id="cart-items"></div>
+    <p id="empty-message" class="empty-cart">Your cart is empty.</p>
+    <h3 id="cart-total"></h3>
+    <button id="checkout-btn" class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+  </div>
 
-    <script>
-        function loadCart() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const cartItemsContainer = document.getElementById('cart-items');
-            const emptyMessage = document.getElementById('empty-message');
-            const checkoutBtn = document.getElementById('checkout-btn');
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-            cartItemsContainer.innerHTML = '';
+    async function loadCart() {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please log in to view your cart.");
+        document.getElementById("checkout-btn").style.display = "none";
+        return;
+      }
 
-            if (cart.length === 0) {
-                emptyMessage.style.display = 'block';
-                checkoutBtn.style.display = 'none';
-                return;
-            }
+      const cartRef = db.collection("carts").doc(user.uid);
+      const doc = await cartRef.get();
 
-            emptyMessage.style.display = 'none';
-            checkoutBtn.style.display = 'block';
+      const cartContainer = document.getElementById("cart-items");
+      const emptyMsg = document.getElementById("empty-message");
+      const totalDisplay = document.getElementById("cart-total");
 
-            cart.forEach((item, index) => {
-                const cartItem = document.createElement('div');
-                cartItem.classList.add('cart-item');
-                cartItem.innerHTML = `
-                    <div class="item-info">
-                        <img src="${item.image ? item.image : 'placeholder.jpg'}" alt="${item.name}">
-                        <span>${item.name} - $${item.price.toFixed(2)}</span>
-                    </div>
-                    <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
-                `;
-                cartItemsContainer.appendChild(cartItem);
-            });
-        }
+      cartContainer.innerHTML = "";
+      totalDisplay.innerText = "";
 
-        function removeFromCart(index) {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            cart.splice(index, 1);
-            localStorage.setItem('cart', JSON.stringify(cart));
-            loadCart();
-        }
+      if (!doc.exists || !doc.data().items || doc.data().items.length === 0) {
+        emptyMsg.style.display = "block";
+        document.getElementById("checkout-btn").style.display = "none";
+        return;
+      }
 
-        function checkout() {
-            alert("Proceeding to checkout!");
-            // Redirect to a checkout page or handle checkout logic here
-            window.location.href = 'checkout.html';
-        }
+      const cart = doc.data().items;
+      let cartTotal = 0;
 
-        document.addEventListener('DOMContentLoaded', loadCart);
-    </script>
+      emptyMsg.style.display = "none";
+      document.getElementById("checkout-btn").style.display = "block";
+
+      cart.forEach((item, index) => {
+        const quantity = item.quantity || 1;
+        const total = item.price * quantity;
+        cartTotal += total;
+
+        const itemEl = document.createElement("div");
+        itemEl.classList.add("cart-item");
+
+        itemEl.innerHTML = `
+          <div class="item-details">
+            <img src="${item.image || 'placeholder.jpg'}" alt="${item.name}">
+            <div class="item-info">
+              <span><strong>${item.name}</strong> - ${item.category || 'Uncategorized'}</span>
+              <span>$${item.price.toFixed(2)} × ${quantity} = <strong>$${total.toFixed(2)}</strong></span>
+              <div class="quantity-controls">
+                <button onclick="updateQuantity(${index}, -1)">−</button>
+                <span>${quantity}</span>
+                <button onclick="updateQuantity(${index}, 1)">+</button>
+              </div>
+            </div>
+          </div>
+          <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
+        `;
+
+        cartContainer.appendChild(itemEl);
+      });
+
+      totalDisplay.innerText = `Cart Total: $${cartTotal.toFixed(2)}`;
+    }
+
+    async function updateQuantity(index, delta) {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const cartRef = db.collection("carts").doc(user.uid);
+      const doc = await cartRef.get();
+      if (!doc.exists) return;
+
+      const cart = doc.data().items;
+      cart[index].quantity = (cart[index].quantity || 1) + delta;
+      if (cart[index].quantity < 1) cart[index].quantity = 1;
+
+      await cartRef.set({ items: cart });
+      loadCart();
+    }
+
+    async function removeFromCart(index) {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const cartRef = db.collection("carts").doc(user.uid);
+      const doc = await cartRef.get();
+      if (!doc.exists) return;
+
+      const cart = doc.data().items;
+      cart.splice(index, 1);
+
+      await cartRef.set({ items: cart });
+      loadCart();
+    }
+
+    function checkout() {
+      window.location.href = "checkout.html";
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) loadCart();
+    });
+  </script>
 </body>
 </html>
