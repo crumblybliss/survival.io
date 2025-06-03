@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign Up - CrumblyBliss</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: #f4f4f4;
+    }
+    nav {
+      background-color: #0a1d37;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .container {
+      max-width: 400px;
+      margin: 50px auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #0a1d37;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.8rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    label {
+      font-size: 0.9rem;
+      user-select: none;
+    }
+    .checkbox {
+      display: flex;
+      align-items: center;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #333;
+    }
+    .checkbox input {
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 1rem;
+      border: none;
+      background-color: #0a1d37;
+      color: white;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0d284f;
+    }
+    .google-btn {
+      background-color: #4285F4;
+      margin-top: 0.5rem;
+    }
+    .link {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+    .link a {
+      color: #0077cc;
+      text-decoration: none;
+      transition: text-decoration 0.3s ease;
+    }
+    .link a:hover {
+      text-decoration: underline;
+    }
+    .error, .success {
+      font-size: 0.9rem;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+    .error { color: #d93025; }
+    .success { color: #188038; }
+
+    /* Terms and Privacy Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(10, 29, 55, 0.85);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background: #ffffff;
+      margin: 5% auto;
+      padding: 1.5rem 2rem 2rem 2rem;
+      border-radius: 14px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 75vh;
+      overflow-y: auto;
+      box-shadow: 0 6px 18px rgba(10,29,55,0.25);
+      position: relative;
+      font-size: 0.95rem;
+      color: #333;
+      line-height: 1.5;
+    }
+    .modal-header {
+      background-color: #0a1d37;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.3rem;
+      padding: 0.8rem 1.2rem;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      user-select: none;
+    }
+    .modal-header span.cookie-icon {
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+    .modal-body {
+      margin-top: 1rem;
+      max-height: 60vh;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .modal-body h4 {
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #0a1d37;
+    }
+    .modal-body ul {
+      margin-left: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #eee;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+    .close:hover {
+      color: #ffbb00;
+    }
+    .terms-link {
+      color: #0a1d37;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-left: 4px;
+      font-weight: 600;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+    .terms-link:hover {
+      color: #ffbb00;
+    }
+  </style>
+</head>
+<body>
+  <nav>Create Account - CrumblyBliss</nav>
+  <div class="container">
+    <h2>Sign Up</h2>
+    <form id="signupForm">
+      <input type="email" id="email" placeholder="Email" required autocomplete="email" />
+      <input type="password" id="password" placeholder="Password" required autocomplete="new-password" />
+      <input type="password" id="confirmPassword" placeholder="Confirm Password" required autocomplete="new-password" />
+      <div class="checkbox">
+        <input type="checkbox" id="terms" required />
+        <label for="terms">I agree to the 
+          <span class="terms-link" id="showTerms">Terms of Service & Privacy Policy</span>
+        </label>
+      </div>
+      <button type="submit">Create Account</button>
+    </form>
+    <button class="google-btn" id="googleSignupBtn">Sign Up with Google</button>
+    <div class="error" id="errorMsg"></div>
+    <div class="success" id="successMsg"></div>
+    <div class="link">
+      <a href="login.html">Already have an account? Log In</a>
+    </div>
+  </div>
+
+  <!-- Terms & Privacy Modal -->
+  <div id="termsModal" class="modal" aria-hidden="true" aria-labelledby="modalTitle" role="dialog">
+    <div class="modal-content" role="document">
+      <div class="modal-header">
+        <span class="cookie-icon" aria-hidden="true">🍪</span>
+        <div id="modalTitle">CrumblyBliss Terms of Service & Privacy Policy</div>
+      </div>
+      <span class="close" id="closeModal" aria-label="Close modal">&times;</span>
+      <div class="modal-body">
+        <h4>Terms of Service</h4>
+        <p>Welcome to CrumblyBliss! By creating an account, you agree to the following terms:</p>
+        <ul>
+          <li>You are responsible for all activity under your account.</li>
+          <li>All purchases are final unless otherwise stated.</li>
+          <li>Respectful behavior is expected in all comments and interactions.</li>
+          <li>We reserve the right to suspend accounts that violate our guidelines.</li>
+          <li>Your data is handled according to our privacy policy.</li>
+        </ul>
+        <p>These terms may be updated at any time. Continued use implies acceptance of changes.</p>
+
+        <h4>Privacy Policy</h4>
+        <p>At CrumblyBliss, we respect your privacy and are committed to protecting your personal data. This policy explains what data we collect, how we use it, and your rights.</p>
+        <ul>
+          <li><strong>Data We Collect:</strong> Email, password (secured by Firebase), and any purchase data.</li>
+          <li><strong>Usage:</strong> We use your data to provide services, process orders, and improve user experience.</li>
+          <li><strong>Storage:</strong> Your data is stored securely in Firebase with strong encryption.</li>
+          <li><strong>Sharing:</strong> We do not sell or share your personal information with third parties, except when required by law.</li>
+          <li><strong>Your Rights:</strong> You may request to view, update, or delete your personal information by contacting us.</li>
+        </ul>
+        <p>For more details, contact us at <a href="mailto:cheapbraclets@outlook.com">cheapbraclets@outlook.com</a>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase + JS -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      sendEmailVerification,
+      signInWithPopup,
+      GoogleAuthProvider
+    } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+
+    const firebaseConfig = {
+     apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    // Modal controls
+    const termsModal = document.getElementById('termsModal');
+    const showTerms = document.getElementById('showTerms');
+    const closeModal = document.getElementById('closeModal');
+
+    showTerms.onclick = () => {
+      termsModal.style.display = 'block';
+      termsModal.setAttribute('aria-hidden', 'false');
+      closeModal.focus();
+    };
+    closeModal.onclick = () => {
+      termsModal.style.display = 'none';
+      termsModal.setAttribute('aria-hidden', 'true');
+      showTerms.focus();
+    };
+    window.onclick = (event) => {
+      if (event.target === termsModal) {
+        termsModal.style.display = 'none';
+        termsModal.setAttribute('aria-hidden', 'true');
+        showTerms.focus();
+      }
+    };
+
+    // Signup form logic
+    const form = document.getElementById('signupForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.textContent = '';
+      successMsg.textContent = '';
+
+      const email = form.email.value.trim();
+      const password = form.password.value;
+      const confirmPassword = form.confirmPassword.value;
+      const termsChecked = form.terms.checked;
+
+      if (!termsChecked) {
+        errorMsg.textContent = 'You must agree to the Terms of Service & Privacy Policy.';
+        return;
+      }
+      if (password !== confirmPassword) {
+        errorMsg.textContent = 'Passwords do not match.';
+        return;
+      }
+      if (password.length < 6) {
+        errorMsg.textContent = 'Password should be at least 6 characters.';
+        return;
+      }
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(userCredential.user);
+        successMsg.textContent = 'Account created! Please check your email to verify your account.';
+        form.reset();
+      } catch (error) {
+        errorMsg.textContent = error.message;
+      }
+    });
+
+    // Google signup button
+    document.getElementById('googleSignupBtn').addEventListener('click', async () => {
+      errorMsg.textContent = '';
+      successMsg.textContent = '';
+      try {
+        await signInWithPopup(auth, googleProvider);
+        successMsg.textContent = 'Signed in with Google successfully!';
+      } catch (error) {
+        errorMsg.textContent = error.message;
+      }
+    });
+  </script>
+</body>
+</html>
