@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Comments - Tactics & Treats</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f4f7fc;
+      color: #333;
+    }
+    .navbar {
+      background-color: #0a1d37;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .navbar h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+    .container {
+      max-width: 700px;
+      margin: 30px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+    textarea, input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #00bcd4;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 100%;
+    }
+    button:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+    button:hover:enabled {
+      background-color: #009eb3;
+    }
+    .stars {
+      display: flex;
+      gap: 8px;
+      cursor: pointer;
+      margin-bottom: 15px;
+      justify-content: center;
+    }
+    .star {
+      font-size: 28px;
+      color: lightgray;
+      transition: color 0.2s;
+      user-select: none;
+    }
+    .star.selected,
+    .star:hover,
+    .star:hover ~ .star {
+      color: gold;
+    }
+    .comment {
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+    .comment strong {
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+    .rating-summary {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 20px;
+      font-size: 1.1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>Tactics & Treats - Comments</h1>
+  </div>
+
+  <div class="container">
+    <h2>Leave a Comment</h2>
+    <div class="rating-summary" id="rating-summary">Average Rating: 0 (0 votes)</div>
+
+    <input type="text" id="name" placeholder="Your Name" />
+    <textarea id="comment" rows="4" placeholder="Your Comment"></textarea>
+
+    <div class="stars" id="star-container" aria-label="Star rating">
+      <span class="star" data-value="1" role="button" tabindex="0">&#9733;</span>
+      <span class="star" data-value="2" role="button" tabindex="0">&#9733;</span>
+      <span class="star" data-value="3" role="button" tabindex="0">&#9733;</span>
+      <span class="star" data-value="4" role="button" tabindex="0">&#9733;</span>
+      <span class="star" data-value="5" role="button" tabindex="0">&#9733;</span>
+    </div>
+
+    <button id="submitBtn" onclick="submitComment()" disabled>Submit</button>
+
+    <div id="comments-section"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const commentsRef = collection(db, "comments");
+
+    const nameInput = document.getElementById("name");
+    const commentInput = document.getElementById("comment");
+    const submitBtn = document.getElementById("submitBtn");
+    const stars = document.querySelectorAll(".star");
+    let selectedRating = 0;
+
+    function updateSubmitButton() {
+      submitBtn.disabled = !(nameInput.value.trim() && commentInput.value.trim() && selectedRating > 0);
+    }
+
+    nameInput.addEventListener("input", updateSubmitButton);
+    commentInput.addEventListener("input", updateSubmitButton);
+
+    stars.forEach(star => {
+      star.addEventListener("click", () => {
+        selectedRating = parseInt(star.dataset.value);
+        updateStarUI();
+        updateSubmitButton();
+      });
+      star.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          selectedRating = parseInt(star.dataset.value);
+          updateStarUI();
+          updateSubmitButton();
+        }
+      });
+    });
+
+    function updateStarUI() {
+      stars.forEach(star => {
+        star.classList.toggle("selected", parseInt(star.dataset.value) <= selectedRating);
+      });
+    }
+
+    async function submitComment() {
+      const name = nameInput.value.trim();
+      const comment = commentInput.value.trim();
+
+      if (!name || !comment || selectedRating === 0) {
+        alert("Please fill out all fields and select a rating.");
+        return;
+      }
+
+      try {
+        await addDoc(commentsRef, {
+          name,
+          comment,
+          rating: selectedRating,
+          timestamp: Date.now()
+        });
+
+        nameInput.value = "";
+        commentInput.value = "";
+        selectedRating = 0;
+        updateStarUI();
+        updateSubmitButton();
+        loadComments();
+      } catch (error) {
+        alert("Error submitting comment: " + error.message);
+      }
+    }
+
+    async function loadComments() {
+      const q = query(commentsRef, orderBy("timestamp", "desc"));
+      const snapshot = await getDocs(q);
+      const section = document.getElementById("comments-section");
+      section.innerHTML = "";
+
+      let total = 0, count = 0;
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        total += data.rating;
+        count++;
+
+        const div = document.createElement("div");
+        div.className = "comment";
+        div.innerHTML = `
+          <strong>${escapeHTML(data.name)}</strong> - ${"★".repeat(data.rating)}<br>
+          <p>${escapeHTML(data.comment)}</p>
+        `;
+        section.appendChild(div);
+      });
+
+      const avg = count ? (total / count).toFixed(1) : 0;
+      document.getElementById("rating-summary").textContent = `Average Rating: ${avg} (${count} vote${count !== 1 ? "s" : ""})`;
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>"']/g, (m) => ({
+        '&': "&amp;",
+        '<': "&lt;",
+        '>': "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[m]);
+    }
+
+    loadComments();
+  </script>
+</body>
+</html>
