@@ -3,15 +3,16 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Comments - Tactics & Treats</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: Arial, sans-serif;
       background-color: #f1f1f1;
       color: #333;
       margin: 0;
       text-align: center;
+      padding-top: 60px; /* Added padding for fixed navbar */
     }
 
     .navbar {
@@ -35,24 +36,35 @@
       color: white;
       text-decoration: none;
       font-weight: bold;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .navbar a:hover,
+    .navbar button:hover {
+      text-decoration: underline;
     }
 
     .navbar .auth-btn {
       background-color: #00bcd4;
       color: white;
       padding: 10px 20px;
-      border: none;
-      cursor: pointer;
       border-radius: 5px;
-      text-decoration: none;
+      /* Keep as button for accessibility */
     }
 
     .navbar .auth-btn:hover {
       background-color: #0097a7;
+      text-decoration: none;
     }
 
     h1 {
-      padding-top: 100px;
+      /* Removed padding-top to rely on body padding */
+      margin-top: 0;
     }
 
     .comments-container {
@@ -81,6 +93,7 @@
 
     .comment .text {
       margin-top: 5px;
+      white-space: pre-wrap; /* Keep line breaks */
     }
 
     #commentForm {
@@ -95,6 +108,18 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
+    /* Visually hidden label for accessibility */
+    label.visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
     #commentForm textarea {
       resize: vertical;
       min-height: 80px;
@@ -102,6 +127,7 @@
       font-size: 16px;
       border-radius: 5px;
       border: 1px solid #ccc;
+      font-family: inherit;
     }
 
     #commentForm button {
@@ -121,37 +147,26 @@
 </head>
 
 <body>
-  <div class="navbar">
+  <nav class="navbar" role="navigation" aria-label="Main Navigation">
     <a href="index.html">Home</a>
     <a href="bracelets.html">Bracelets</a>
     <a href="cookies.html">Cookies</a>
-    <a href="comments.html">Comments</a>
+    <a href="comments.html" aria-current="page">Comments</a>
     <a href="cart.html">Cart</a>
-    <button id="loginButton" class="auth-btn">Login</button>
-  </div>
+    <button id="loginButton" class="auth-btn" aria-live="polite" disabled>Loading...</button>
+  </nav>
 
   <h1>Comments</h1>
 
-  <div class="comments-container" id="commentsList">
-    <!-- Comments will be loaded here -->
-  </div>
+  <div class="comments-container" id="commentsList" aria-live="polite" aria-relevant="additions"></div>
 
   <form id="commentForm">
+    <label for="commentInput" class="visually-hidden">Write your comment here</label>
     <textarea id="commentInput" placeholder="Write your comment here..." required></textarea>
     <button type="submit">Post Comment</button>
   </form>
 
   <script type="module">
-    document.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById("loginButton");
-    if (!btn) {
-      console.log("Login button not found!");
-      return;
-    }
-    console.log("Login button found:", btn);
-    btn.textContent = "Test Button";
-    btn.onclick = () => alert("Button clicked!");
-  });
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import {
       getAuth,
@@ -186,8 +201,12 @@
     const commentForm = document.getElementById("commentForm");
     const commentInput = document.getElementById("commentInput");
 
+    // Disable login button initially until auth state is resolved
+    loginBtn.disabled = true;
+
     // Update login/logout button based on auth state
     onAuthStateChanged(auth, (user) => {
+      loginBtn.disabled = false; // Enable button after auth state resolves
       if (user) {
         loginBtn.textContent = "Logout";
         loginBtn.onclick = () => signOut(auth);
@@ -199,24 +218,36 @@
 
     // Load comments from Firestore
     async function loadComments() {
-      commentsList.innerHTML = "Loading comments...";
-      const q = query(collection(db, "comments"), orderBy("timestamp", "desc"));
-      const snapshot = await getDocs(q);
-      if (snapshot.empty) {
-        commentsList.innerHTML = "<p>No comments yet. Be the first to comment!</p>";
-        return;
+      commentsList.textContent = "Loading comments...";
+      try {
+        const q = query(collection(db, "comments"), orderBy("timestamp", "desc"));
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) {
+          commentsList.innerHTML = "<p>No comments yet. Be the first to comment!</p>";
+          return;
+        }
+        commentsList.innerHTML = "";
+        snapshot.forEach(doc => {
+          const comment = doc.data();
+          const div = document.createElement("div");
+          div.className = "comment";
+
+          const authorDiv = document.createElement("div");
+          authorDiv.className = "author";
+          authorDiv.textContent = comment.author || "Anonymous";
+
+          const textDiv = document.createElement("div");
+          textDiv.className = "text";
+          textDiv.textContent = comment.text;
+
+          div.appendChild(authorDiv);
+          div.appendChild(textDiv);
+          commentsList.appendChild(div);
+        });
+      } catch (error) {
+        commentsList.textContent = "Failed to load comments.";
+        console.error("Error loading comments:", error);
       }
-      commentsList.innerHTML = "";
-      snapshot.forEach(doc => {
-        const comment = doc.data();
-        const div = document.createElement("div");
-        div.className = "comment";
-        div.innerHTML = `
-          <div class="author">${comment.author || "Anonymous"}</div>
-          <div class="text">${comment.text}</div>
-        `;
-        commentsList.appendChild(div);
-      });
     }
 
     // Submit comment
@@ -230,14 +261,18 @@
       const text = commentInput.value.trim();
       if (!text) return;
 
-      await addDoc(collection(db, "comments"), {
-        author: user.email || "User",
-        text: text,
-        timestamp: serverTimestamp()
-      });
-
-      commentInput.value = "";
-      loadComments();
+      try {
+        await addDoc(collection(db, "comments"), {
+          author: user.email || "User",
+          text: text,
+          timestamp: serverTimestamp()
+        });
+        commentInput.value = "";
+        loadComments();
+      } catch (error) {
+        alert("Failed to post comment. Please try again.");
+        console.error("Error adding comment:", error);
+      }
     });
 
     loadComments();
