@@ -142,6 +142,16 @@
   </form>
 
   <script type="module">
+    document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("loginButton");
+    if (!btn) {
+      console.log("Login button not found!");
+      return;
+    }
+    console.log("Login button found:", btn);
+    btn.textContent = "Test Button";
+    btn.onclick = () => alert("Button clicked!");
+  });
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import {
       getAuth,
