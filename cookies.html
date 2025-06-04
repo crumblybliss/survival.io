@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -23,17 +22,18 @@
       top: 0;
       width: 100%;
       z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
-    .navbar a {
+    .navbar a,
+    .navbar button {
       color: white;
-      margin: 0 20px;
       text-decoration: none;
       font-weight: bold;
-    }
-
-    .navbar a:hover {
-      text-decoration: underline;
     }
 
     .navbar .auth-btn {
@@ -108,6 +108,33 @@
     .product button:hover {
       background-color: #0097a7;
     }
+
+    /* Donate Modal */
+    #donateModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #donateModal .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      position: relative;
+    }
+
+    #closeDonate {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -116,12 +143,28 @@
     <a href="index.html">Home</a>
     <a href="bracelets.html">Bracelets</a>
     <a href="cookies.html">Cookies</a>
-    <a href="cart.html">cart</a>
+    <a href="cart.html">Cart</a>
+    <a href="#" id="donateBtn" class="auth-btn">Donate</a>
     <button id="loginButton" class="auth-btn">Login</button>
   </div>
 
   <h1>Cookies</h1>
   <div class="container" id="cookiesProducts"></div>
+
+  <!-- Donate Modal -->
+  <div id="donateModal">
+    <div class="modal-content">
+      <span id="closeDonate">&times;</span>
+      <iframe
+        src="https://www.paypal.com/giving/campaigns?campaign_id=XXFHKMCPVQ5FN"
+        title="PayPal donate campaign card"
+        frameborder="0"
+        width="382"
+        height="550"
+        scrolling="no"
+      ></iframe>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -167,8 +210,7 @@
       localStorage.setItem("cart", JSON.stringify(cart));
 
       alert(`${product.name} (${selectedSize}) added to your cart for $${sizeInfo.price}`);
-
-      window.location.href = "cart.html"; // Redirect to the cart page
+      window.location.href = "cart.html";
     };
 
     const fetchCookies = async () => {
@@ -185,12 +227,11 @@
         const imageUrl = product.imageUrl || "default.jpg";
         const sizes = Array.isArray(product.sizes) ? product.sizes : [];
 
-        const options = sizes.map(size => {
-          return `<option value="${size.size}">${size.size} - $${size.price}</option>`;
-        }).join("");
+        const options = sizes.map(size =>
+          `<option value="${size.size}">${size.size} - $${size.price}</option>`
+        ).join("");
 
         const encodedProduct = btoa(JSON.stringify(product));
-
         const div = document.createElement("div");
         div.className = "product";
         div.innerHTML = `
@@ -220,6 +261,26 @@
 
     fetchCookies();
   </script>
-</body>
 
+  <script>
+    const donateModal = document.getElementById("donateModal");
+    const donateBtn = document.getElementById("donateBtn");
+    const closeDonate = document.getElementById("closeDonate");
+
+    donateBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      donateModal.style.display = "flex";
+    });
+
+    closeDonate.addEventListener("click", function () {
+      donateModal.style.display = "none";
+    });
+
+    window.addEventListener("click", function (event) {
+      if (event.target === donateModal) {
+        donateModal.style.display = "none";
+      }
+    });
+  </script>
+</body>
 </html>
