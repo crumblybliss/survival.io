@@ -1,160 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Comments - Tactics & Treats</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #f4f7fc;
+      font-family: 'Arial', sans-serif;
+      background-color: #f1f1f1;
       color: #333;
+      margin: 0;
+      text-align: center;
     }
+
     .navbar {
       background-color: #0a1d37;
       color: white;
-      padding: 15px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .navbar h1 {
-      margin: 0;
-      font-size: 22px;
-    }
-    .container {
-      max-width: 700px;
-      margin: 30px auto;
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    }
-    h2 {
-      text-align: center;
-      margin-top: 0;
-    }
-    textarea, input {
+      padding: 15px 0;
+      font-size: 18px;
+      position: fixed;
+      top: 0;
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
-    button {
+
+    .navbar a,
+    .navbar button {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .navbar .auth-btn {
+      background-color: #00bcd4;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      text-decoration: none;
+    }
+
+    .navbar .auth-btn:hover {
+      background-color: #0097a7;
+    }
+
+    h1 {
+      padding-top: 100px;
+    }
+
+    .comments-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: left;
+    }
+
+    .comment {
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+    }
+
+    .comment:last-child {
+      border-bottom: none;
+    }
+
+    .comment .author {
+      font-weight: bold;
+      color: #0a1d37;
+    }
+
+    .comment .text {
+      margin-top: 5px;
+    }
+
+    #commentForm {
+      max-width: 600px;
+      margin: 20px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    #commentForm textarea {
+      resize: vertical;
+      min-height: 80px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    #commentForm button {
       background-color: #00bcd4;
       color: white;
       border: none;
-      padding: 12px 20px;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 5px;
       font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s;
-      width: 100%;
     }
-    button:disabled {
-      background-color: #aaa;
-      cursor: not-allowed;
-    }
-    button:hover:enabled {
-      background-color: #009eb3;
-    }
-    .stars {
-      display: flex;
-      gap: 8px;
-      cursor: pointer;
-      margin-bottom: 15px;
-      justify-content: center;
-    }
-    .star {
-      font-size: 36px;
-      color: lightgray;
-      transition: color 0.2s;
-      user-select: none;
-    }
-    .star.selected {
-      color: gold;
-    }
-    .comment {
-      border-top: 1px solid #ccc;
-      padding-top: 10px;
-      margin-top: 10px;
-    }
-    .comment strong {
-      font-weight: bold;
-      font-size: 1.1em;
-    }
-    .rating-summary {
-      text-align: center;
-      font-weight: bold;
-      margin-bottom: 20px;
-      font-size: 1.1em;
-    }
-    .success {
-      color: green;
-      text-align: center;
-      margin: 10px 0;
-    }
-    .error {
-      color: red;
-      text-align: center;
-      margin: 10px 0;
-    }
-    /* Login/logout buttons container */
-    #auth-container {
-      text-align: right;
-      margin-bottom: 15px;
-    }
-    #user-info {
-      margin-left: 10px;
-      font-weight: bold;
+
+    #commentForm button:hover {
+      background-color: #0097a7;
     }
   </style>
 </head>
+
 <body>
   <div class="navbar">
-    <h1>Tactics & Treats - Comments</h1>
+    <a href="index.html">Home</a>
+    <a href="bracelets.html">Bracelets</a>
+    <a href="cookies.html">Cookies</a>
+    <a href="comments.html">Comments</a>
+    <a href="cart.html">Cart</a>
+    <button id="loginButton" class="auth-btn">Login</button>
   </div>
 
-  <div class="container">
-    <div id="auth-container">
-      <button id="login-btn">Log in with Google</button>
-      <button id="logout-btn" style="display:none;">Log out</button>
-      <span id="user-info"></span>
-    </div>
+  <h1>Comments</h1>
 
-    <h2>Leave a Comment</h2>
-    <div class="rating-summary" id="rating-summary">Average Rating: 0 (0 votes)</div>
-
-    <div class="success" id="success-msg" style="display: none;">Comment submitted!</div>
-    <div class="error" id="error-msg" style="display: none;"></div>
-
-    <label for="name">Your Name</label>
-    <input type="text" id="name" maxlength="100" placeholder="Your Name" aria-label="Your Name" disabled />
-
-    <label for="comment">Your Comment</label>
-    <textarea id="comment" rows="4" maxlength="500" placeholder="Your Comment" aria-label="Your Comment" disabled></textarea>
-
-    <div class="stars" id="star-container" aria-label="Star rating">
-      <span class="star" data-value="1" role="button" tabindex="0" aria-label="1 star">&#9733;</span>
-      <span class="star" data-value="2" role="button" tabindex="0" aria-label="2 stars">&#9733;</span>
-      <span class="star" data-value="3" role="button" tabindex="0" aria-label="3 stars">&#9733;</span>
-      <span class="star" data-value="4" role="button" tabindex="0" aria-label="4 stars">&#9733;</span>
-      <span class="star" data-value="5" role="button" tabindex="0" aria-label="5 stars">&#9733;</span>
-    </div>
-
-    <button id="submitBtn" onclick="submitComment()" disabled>Submit</button>
-
-    <div id="comments-section"></div>
+  <div class="comments-container" id="commentsList">
+    <!-- Comments will be loaded here -->
   </div>
+
+  <form id="commentForm">
+    <textarea id="commentInput" placeholder="Write your comment here..." required></textarea>
+    <button type="submit">Post Comment</button>
+  </form>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      addDoc,
+      serverTimestamp,
+      query,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -167,190 +169,69 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+    const auth = getAuth();
 
-    const commentsRef = collection(db, "comments");
+    const loginBtn = document.getElementById("loginButton");
+    const commentsList = document.getElementById("commentsList");
+    const commentForm = document.getElementById("commentForm");
+    const commentInput = document.getElementById("commentInput");
 
-    const loginBtn = document.getElementById("login-btn");
-    const logoutBtn = document.getElementById("logout-btn");
-    const userInfo = document.getElementById("user-info");
-
-    const nameInput = document.getElementById("name");
-    const commentInput = document.getElementById("comment");
-    const submitBtn = document.getElementById("submitBtn");
-    const stars = document.querySelectorAll(".star");
-    const successMsg = document.getElementById("success-msg");
-    const errorMsg = document.getElementById("error-msg");
-
-    let selectedRating = 0;
-    let currentUser = null;
-
-    function updateSubmitButton() {
-      const ready = currentUser && commentInput.value.trim() && selectedRating > 0;
-      submitBtn.disabled = !ready;
-    }
-
-    function clearFeedback() {
-      successMsg.style.display = "none";
-      errorMsg.style.display = "none";
-    }
-
-    function updateStarUI() {
-      stars.forEach(star => {
-        const value = parseInt(star.dataset.value);
-        star.classList.toggle("selected", value <= selectedRating);
-      });
-    }
-
-    stars.forEach(star => {
-      star.addEventListener("click", () => {
-        if (!currentUser) return; // prevent rating if not logged in
-        selectedRating = parseInt(star.dataset.value);
-        updateStarUI();
-        updateSubmitButton();
-      });
-      star.addEventListener("keydown", (e) => {
-        if (!currentUser) return;
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          selectedRating = parseInt(star.dataset.value);
-          updateStarUI();
-          updateSubmitButton();
-        }
-      });
-    });
-
-    nameInput.addEventListener("input", () => {
-      // name input is disabled for logged in users, but keep handler for consistency
-      updateSubmitButton();
-    });
-
-    commentInput.addEventListener("input", updateSubmitButton);
-
-    loginBtn.addEventListener("click", async () => {
-      clearFeedback();
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (error) {
-        errorMsg.textContent = "Login failed: " + error.message;
-        errorMsg.style.display = "block";
-      }
-    });
-
-    logoutBtn.addEventListener("click", () => {
-      signOut(auth);
-    });
-
+    // Update login/logout button based on auth state
     onAuthStateChanged(auth, (user) => {
-      currentUser = user;
-
       if (user) {
-        userInfo.textContent = `Logged in as ${user.displayName || user.email}`;
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-        nameInput.value = user.displayName || "";
-        nameInput.disabled = true;
-        commentInput.disabled = false;
-        submitBtn.disabled = false; // Will be controlled by updateSubmitButton()
+        loginBtn.textContent = "Logout";
+        loginBtn.onclick = () => signOut(auth);
       } else {
-        userInfo.textContent = "";
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-        nameInput.value = "";
-        nameInput.disabled = true;  // Disabled to prevent entering name manually when logged out
-        commentInput.disabled = true;
-        submitBtn.disabled = true;
-        selectedRating = 0;
-        updateStarUI();
+        loginBtn.textContent = "Login";
+        loginBtn.onclick = () => window.location.href = "login.html";
       }
-
-      updateSubmitButton();
     });
 
-    function escapeHTML(str) {
-      return str.replace(/[&<>"']/g, (m) => ({
-        '&': "&amp;",
-        '<': "&lt;",
-        '>': "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-      })[m]);
-    }
-
-    async function submitComment() {
-      clearFeedback();
-
-      if (!currentUser) {
-        errorMsg.textContent = "You must be logged in to submit a comment.";
-        errorMsg.style.display = "block";
-        return;
-      }
-
-      const comment = commentInput.value.trim();
-
-      if (!comment || selectedRating === 0 || comment.length > 500) {
-        errorMsg.textContent = "Please fill out all fields correctly.";
-        errorMsg.style.display = "block";
-        return;
-      }
-
-      try {
-        await addDoc(commentsRef, {
-          uid: currentUser.uid,
-          name: currentUser.displayName || "Anonymous",
-          email: currentUser.email,
-          comment,
-          rating: selectedRating,
-          timestamp: Timestamp.now()
-        });
-
-        commentInput.value = "";
-        selectedRating = 0;
-        updateStarUI();
-        updateSubmitButton();
-
-        successMsg.style.display = "block";
-
-        loadComments();
-      } catch (error) {
-        errorMsg.textContent = "Failed to submit: " + error.message;
-        errorMsg.style.display = "block";
-      }
-    }
-
+    // Load comments from Firestore
     async function loadComments() {
-      try {
-        const q = query(commentsRef, orderBy("timestamp", "desc"));
-        const snapshot = await getDocs(q);
-        const section = document.getElementById("comments-section");
-        section.innerHTML = "";
-
-        let total = 0, count = 0;
-
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          total += data.rating;
-          count++;
-          const div = document.createElement("div");
-          div.className = "comment";
-          div.innerHTML = `
-            <strong>${escapeHTML(data.name)}</strong> - ${"★".repeat(data.rating)}<br>
-            <p>${escapeHTML(data.comment)}</p>
-          `;
-          section.appendChild(div);
-        });
-
-        const avg = count ? (total / count).toFixed(1) : 0;
-        document.getElementById("rating-summary").textContent = `Average Rating: ${avg} (${count} vote${count !== 1 ? "s" : ""})`;
-      } catch (err) {
-        document.getElementById("comments-section").innerHTML = "<p class='error'>Failed to load comments.</p>";
+      commentsList.innerHTML = "Loading comments...";
+      const q = query(collection(db, "comments"), orderBy("timestamp", "desc"));
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) {
+        commentsList.innerHTML = "<p>No comments yet. Be the first to comment!</p>";
+        return;
       }
+      commentsList.innerHTML = "";
+      snapshot.forEach(doc => {
+        const comment = doc.data();
+        const div = document.createElement("div");
+        div.className = "comment";
+        div.innerHTML = `
+          <div class="author">${comment.author || "Anonymous"}</div>
+          <div class="text">${comment.text}</div>
+        `;
+        commentsList.appendChild(div);
+      });
     }
 
-    // Init
-    updateSubmitButton();
+    // Submit comment
+    commentForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please login to post comments.");
+        return;
+      }
+      const text = commentInput.value.trim();
+      if (!text) return;
+
+      await addDoc(collection(db, "comments"), {
+        author: user.email || "User",
+        text: text,
+        timestamp: serverTimestamp()
+      });
+
+      commentInput.value = "";
+      loadComments();
+    });
+
     loadComments();
   </script>
 </body>
+
 </html>
