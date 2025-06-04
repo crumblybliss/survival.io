@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bracelets - Tactics & Treats</title>
   <style>
-    /* Same styles as before */
     body {
       font-family: 'Arial', sans-serif;
       background-color: #f1f1f1;
@@ -110,6 +109,15 @@
     .product button:hover {
       background-color: #0097a7;
     }
+
+    /* Color preview square */
+    .color-preview {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #ccc;
+      margin: 5px auto 10px;
+      border-radius: 5px;
+    }
   </style>
 </head>
 
@@ -142,6 +150,9 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth();
+
+    // Store loaded products in memory for lookup in color preview
+    const loadedProducts = {};
 
     window.addToCart = async (productB64, selectedSize, selectedColor) => {
       const user = auth.currentUser;
@@ -184,6 +195,19 @@
       window.location.href = "cart.html";
     };
 
+    // Update color preview square when color dropdown changes
+    window.updateColorPreview = (docId) => {
+      const select = document.getElementById(`color-${docId}`);
+      const preview = document.getElementById(`colorPreview-${docId}`);
+      const selectedColorName = select.value;
+
+      const product = loadedProducts[docId];
+      if (!product) return;
+
+      const colorObj = product.colors.find(c => c.name === selectedColorName);
+      preview.style.backgroundColor = colorObj ? colorObj.hex : "transparent";
+    };
+
     const fetchBracelets = async () => {
       const snap = await getDocs(collection(db, "bracelets"));
       const container = document.getElementById("braceletsProducts");
@@ -195,6 +219,8 @@
 
       snap.forEach(doc => {
         const product = doc.data();
+        loadedProducts[doc.id] = product;  // store product for preview lookup
+
         const imageUrl = product.imageUrl || "default.jpg";
 
         // sizes dropdown options
@@ -203,10 +229,11 @@
           return `<option value="${size.size}">${size.size} - $${size.price}</option>`;
         }).join("");
 
-        // colors dropdown options
+        // colors dropdown options (with name & hex)
         const colors = Array.isArray(product.colors) ? product.colors : [];
-        const colorOptions = colors.map(color => {
-          return `<option value="${color}">${color}</option>`;
+        const colorOptions = colors.map(colorObj => {
+          const colorName = colorObj.name || "Color";
+          return `<option value="${colorName}">${colorName}</option>`;
         }).join("");
 
         const encodedProduct = btoa(JSON.stringify(product));
@@ -222,10 +249,11 @@
             ${sizeOptions}
           </select>
           <p>Select Color:</p>
-          <select id="color-${doc.id}">
+          <select id="color-${doc.id}" onchange="updateColorPreview('${doc.id}')">
             <option value="" disabled selected>Select Color</option>
             ${colorOptions}
           </select>
+          <div id="colorPreview-${doc.id}" class="color-preview"></div>
           <button onclick="addToCart(
             '${encodedProduct}', 
             document.getElementById('size-${doc.id}').value,
