@@ -70,14 +70,12 @@
       justify-content: center;
     }
     .star {
-      font-size: 28px;
+      font-size: 36px;
       color: lightgray;
       transition: color 0.2s;
       user-select: none;
     }
-    .star.selected,
-    .star:hover,
-    .star:hover ~ .star {
+    .star.selected {
       color: gold;
     }
     .comment {
@@ -95,6 +93,25 @@
       margin-bottom: 20px;
       font-size: 1.1em;
     }
+    .success {
+      color: green;
+      text-align: center;
+      margin: 10px 0;
+    }
+    .error {
+      color: red;
+      text-align: center;
+      margin: 10px 0;
+    }
+    /* Login/logout buttons container */
+    #auth-container {
+      text-align: right;
+      margin-bottom: 15px;
+    }
+    #user-info {
+      margin-left: 10px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -103,18 +120,30 @@
   </div>
 
   <div class="container">
+    <div id="auth-container">
+      <button id="login-btn">Log in with Google</button>
+      <button id="logout-btn" style="display:none;">Log out</button>
+      <span id="user-info"></span>
+    </div>
+
     <h2>Leave a Comment</h2>
     <div class="rating-summary" id="rating-summary">Average Rating: 0 (0 votes)</div>
 
-    <input type="text" id="name" placeholder="Your Name" />
-    <textarea id="comment" rows="4" placeholder="Your Comment"></textarea>
+    <div class="success" id="success-msg" style="display: none;">Comment submitted!</div>
+    <div class="error" id="error-msg" style="display: none;"></div>
+
+    <label for="name">Your Name</label>
+    <input type="text" id="name" maxlength="100" placeholder="Your Name" aria-label="Your Name" disabled />
+
+    <label for="comment">Your Comment</label>
+    <textarea id="comment" rows="4" maxlength="500" placeholder="Your Comment" aria-label="Your Comment" disabled></textarea>
 
     <div class="stars" id="star-container" aria-label="Star rating">
-      <span class="star" data-value="1" role="button" tabindex="0">&#9733;</span>
-      <span class="star" data-value="2" role="button" tabindex="0">&#9733;</span>
-      <span class="star" data-value="3" role="button" tabindex="0">&#9733;</span>
-      <span class="star" data-value="4" role="button" tabindex="0">&#9733;</span>
-      <span class="star" data-value="5" role="button" tabindex="0">&#9733;</span>
+      <span class="star" data-value="1" role="button" tabindex="0" aria-label="1 star">&#9733;</span>
+      <span class="star" data-value="2" role="button" tabindex="0" aria-label="2 stars">&#9733;</span>
+      <span class="star" data-value="3" role="button" tabindex="0" aria-label="3 stars">&#9733;</span>
+      <span class="star" data-value="4" role="button" tabindex="0" aria-label="4 stars">&#9733;</span>
+      <span class="star" data-value="5" role="button" tabindex="0" aria-label="5 stars">&#9733;</span>
     </div>
 
     <button id="submitBtn" onclick="submitComment()" disabled>Submit</button>
@@ -124,7 +153,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -137,28 +167,51 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
     const commentsRef = collection(db, "comments");
+
+    const loginBtn = document.getElementById("login-btn");
+    const logoutBtn = document.getElementById("logout-btn");
+    const userInfo = document.getElementById("user-info");
 
     const nameInput = document.getElementById("name");
     const commentInput = document.getElementById("comment");
     const submitBtn = document.getElementById("submitBtn");
     const stars = document.querySelectorAll(".star");
+    const successMsg = document.getElementById("success-msg");
+    const errorMsg = document.getElementById("error-msg");
+
     let selectedRating = 0;
+    let currentUser = null;
 
     function updateSubmitButton() {
-      submitBtn.disabled = !(nameInput.value.trim() && commentInput.value.trim() && selectedRating > 0);
+      const ready = currentUser && commentInput.value.trim() && selectedRating > 0;
+      submitBtn.disabled = !ready;
     }
 
-    nameInput.addEventListener("input", updateSubmitButton);
-    commentInput.addEventListener("input", updateSubmitButton);
+    function clearFeedback() {
+      successMsg.style.display = "none";
+      errorMsg.style.display = "none";
+    }
+
+    function updateStarUI() {
+      stars.forEach(star => {
+        const value = parseInt(star.dataset.value);
+        star.classList.toggle("selected", value <= selectedRating);
+      });
+    }
 
     stars.forEach(star => {
       star.addEventListener("click", () => {
+        if (!currentUser) return; // prevent rating if not logged in
         selectedRating = parseInt(star.dataset.value);
         updateStarUI();
         updateSubmitButton();
       });
       star.addEventListener("keydown", (e) => {
+        if (!currentUser) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           selectedRating = parseInt(star.dataset.value);
@@ -168,65 +221,52 @@
       });
     });
 
-    function updateStarUI() {
-      stars.forEach(star => {
-        star.classList.toggle("selected", parseInt(star.dataset.value) <= selectedRating);
-      });
-    }
+    nameInput.addEventListener("input", () => {
+      // name input is disabled for logged in users, but keep handler for consistency
+      updateSubmitButton();
+    });
 
-    async function submitComment() {
-      const name = nameInput.value.trim();
-      const comment = commentInput.value.trim();
+    commentInput.addEventListener("input", updateSubmitButton);
 
-      if (!name || !comment || selectedRating === 0) {
-        alert("Please fill out all fields and select a rating.");
-        return;
-      }
-
+    loginBtn.addEventListener("click", async () => {
+      clearFeedback();
       try {
-        await addDoc(commentsRef, {
-          name,
-          comment,
-          rating: selectedRating,
-          timestamp: Date.now()
-        });
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        errorMsg.textContent = "Login failed: " + error.message;
+        errorMsg.style.display = "block";
+      }
+    });
 
+    logoutBtn.addEventListener("click", () => {
+      signOut(auth);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+
+      if (user) {
+        userInfo.textContent = `Logged in as ${user.displayName || user.email}`;
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
+        nameInput.value = user.displayName || "";
+        nameInput.disabled = true;
+        commentInput.disabled = false;
+        submitBtn.disabled = false; // Will be controlled by updateSubmitButton()
+      } else {
+        userInfo.textContent = "";
+        loginBtn.style.display = "inline-block";
+        logoutBtn.style.display = "none";
         nameInput.value = "";
-        commentInput.value = "";
+        nameInput.disabled = true;  // Disabled to prevent entering name manually when logged out
+        commentInput.disabled = true;
+        submitBtn.disabled = true;
         selectedRating = 0;
         updateStarUI();
-        updateSubmitButton();
-        loadComments();
-      } catch (error) {
-        alert("Error submitting comment: " + error.message);
       }
-    }
 
-    async function loadComments() {
-      const q = query(commentsRef, orderBy("timestamp", "desc"));
-      const snapshot = await getDocs(q);
-      const section = document.getElementById("comments-section");
-      section.innerHTML = "";
-
-      let total = 0, count = 0;
-
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        total += data.rating;
-        count++;
-
-        const div = document.createElement("div");
-        div.className = "comment";
-        div.innerHTML = `
-          <strong>${escapeHTML(data.name)}</strong> - ${"★".repeat(data.rating)}<br>
-          <p>${escapeHTML(data.comment)}</p>
-        `;
-        section.appendChild(div);
-      });
-
-      const avg = count ? (total / count).toFixed(1) : 0;
-      document.getElementById("rating-summary").textContent = `Average Rating: ${avg} (${count} vote${count !== 1 ? "s" : ""})`;
-    }
+      updateSubmitButton();
+    });
 
     function escapeHTML(str) {
       return str.replace(/[&<>"']/g, (m) => ({
@@ -238,6 +278,78 @@
       })[m]);
     }
 
+    async function submitComment() {
+      clearFeedback();
+
+      if (!currentUser) {
+        errorMsg.textContent = "You must be logged in to submit a comment.";
+        errorMsg.style.display = "block";
+        return;
+      }
+
+      const comment = commentInput.value.trim();
+
+      if (!comment || selectedRating === 0 || comment.length > 500) {
+        errorMsg.textContent = "Please fill out all fields correctly.";
+        errorMsg.style.display = "block";
+        return;
+      }
+
+      try {
+        await addDoc(commentsRef, {
+          uid: currentUser.uid,
+          name: currentUser.displayName || "Anonymous",
+          email: currentUser.email,
+          comment,
+          rating: selectedRating,
+          timestamp: Timestamp.now()
+        });
+
+        commentInput.value = "";
+        selectedRating = 0;
+        updateStarUI();
+        updateSubmitButton();
+
+        successMsg.style.display = "block";
+
+        loadComments();
+      } catch (error) {
+        errorMsg.textContent = "Failed to submit: " + error.message;
+        errorMsg.style.display = "block";
+      }
+    }
+
+    async function loadComments() {
+      try {
+        const q = query(commentsRef, orderBy("timestamp", "desc"));
+        const snapshot = await getDocs(q);
+        const section = document.getElementById("comments-section");
+        section.innerHTML = "";
+
+        let total = 0, count = 0;
+
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          total += data.rating;
+          count++;
+          const div = document.createElement("div");
+          div.className = "comment";
+          div.innerHTML = `
+            <strong>${escapeHTML(data.name)}</strong> - ${"★".repeat(data.rating)}<br>
+            <p>${escapeHTML(data.comment)}</p>
+          `;
+          section.appendChild(div);
+        });
+
+        const avg = count ? (total / count).toFixed(1) : 0;
+        document.getElementById("rating-summary").textContent = `Average Rating: ${avg} (${count} vote${count !== 1 ? "s" : ""})`;
+      } catch (err) {
+        document.getElementById("comments-section").innerHTML = "<p class='error'>Failed to load comments.</p>";
+      }
+    }
+
+    // Init
+    updateSubmitButton();
     loadComments();
   </script>
 </body>
