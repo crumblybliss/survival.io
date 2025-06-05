@@ -139,11 +139,11 @@
   <!-- Navbar -->
   <nav class="navbar">
     <div class="left">
-    <a href="index.html">Home</a>
-    <a href="bracelets.html">Bracelets</a>
-    <a href="cookies.html">Cookies</a>
-     <a href="comments.html">comments</a>
-    <a href="cart.html">Cart</a>
+      <a href="index.html">Home</a>
+      <a href="bracelets.html">Bracelets</a>
+      <a href="cookies.html">Cookies</a>
+      <a href="comments.html">Comments</a>
+      <a href="cart.html">Cart</a>
     </div>
     <div class="right">
       <button id="loginButton" class="auth-btn">Login</button>
@@ -164,7 +164,6 @@
       <img src="sponsor1.png" alt="Sponsor 1 Logo">
       <img src="sponsor2.png" alt="Sponsor 2 Logo">
       <img src="sponsor3.png" alt="Sponsor 3 Logo">
-      <!-- Add more sponsors as needed -->
     </section>
 
     <div class="sponsor-cta">
@@ -172,10 +171,11 @@
     </div>
   </main>
 
-  <!-- Firebase Auth Logic -->
+  <!-- Firebase Auth + Maintenance Check -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -187,12 +187,26 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
     const loginBtn = document.getElementById("loginButton");
     const profileLink = document.getElementById("profileLink");
     const profilePic = document.getElementById("profilePic");
 
+    async function checkMaintenanceMode() {
+      const ref = doc(db, "config", "adminSettings");
+      const snap = await getDoc(ref);
+
+      if (snap.exists() && snap.data().maintenance === true) {
+        window.location.href = "maintenance.html"; // Redirect if maintenance mode is on
+      }
+    }
+
+    // First thing: check maintenance
+    await checkMaintenanceMode();
+
+    // Auth logic
     onAuthStateChanged(auth, (user) => {
       if (user) {
         loginBtn.innerText = "Logout";
