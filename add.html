@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Product</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7fa;
+      margin: 0;
+    }
+
+    .navbar {
+      background-color: #0a1d37;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar a, #authBtn {
+      color: white;
+      text-decoration: none;
+      margin-left: 15px;
+      font-weight: bold;
+      background-color: #00bcd4;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .navbar img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #fff;
+      padding: 25px 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #0a1d37;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background-color: #00bcd4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #009db5;
+    }
+
+    .error {
+      color: red;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <div><strong>Add Product</strong></div>
+    <div>
+      <a href="admin.html">Dashboard</a>
+      <a href="edit.html">Edit Products</a>
+      <button id="authBtn">Loading...</button>
+      <img id="profilePic" src="" alt="Profile" style="display: none;" onclick="window.location.href='profile.html'" />
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>Add New Product</h2>
+    <form id="productForm">
+      <input type="text" id="name" placeholder="Product Name" required />
+      <textarea id="description" placeholder="Description"></textarea>
+      <input type="text" id="colors" placeholder="Colors (comma-separated)" />
+      <input type="text" id="sizes" placeholder="Sizes with prices (e.g. S:5.99, M:6.99)" />
+      <input type="text" id="image" placeholder="Image URL (must end in .jpg, .png, etc.)" />
+      <select id="category" required>
+        <option value="">Select Category</option>
+        <option value="cookies">Cookies</option>
+        <option value="bracelets">Bracelets</option>
+      </select>
+      <button type="submit">Add Product</button>
+    </form>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    const authBtn = document.getElementById('authBtn');
+    const profilePic = document.getElementById('profilePic');
+    const form = document.getElementById('productForm');
+    const adminUIDs = ['iPZTwMlAlpRAoxM2Q7g49a1HwiJ2'];
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        authBtn.textContent = "Logout";
+        authBtn.onclick = () => auth.signOut().then(() => location.reload());
+
+        if (user.photoURL) {
+          profilePic.src = user.photoURL;
+          profilePic.style.display = 'inline';
+        }
+
+        if (!adminUIDs.includes(user.uid)) {
+          alert("Access denied: Admins only");
+          window.location.href = "index.html";
+        }
+      } else {
+        authBtn.textContent = "Login";
+        authBtn.onclick = () => window.location.href = "login.html";
+        alert("Please log in as an admin to continue.");
+        window.location.href = "login.html";
+      }
+    });
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const colors = document.getElementById('colors').value.split(',').map(c => c.trim()).filter(c => c);
+      const sizesStr = document.getElementById('sizes').value.trim();
+      const image = document.getElementById('image').value.trim();
+      const category = document.getElementById('category').value;
+
+      if (!name || !category) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+
+      const sizes = {};
+      if (sizesStr) {
+        const sizePairs = sizesStr.split(',');
+        for (let pair of sizePairs) {
+          const [size, price] = pair.trim().split(':');
+          if (!size || isNaN(price)) {
+            alert("Invalid size:price format. Example: S:5.99, M:6.99");
+            return;
+          }
+          sizes[size.trim()] = parseFloat(price.trim());
+        }
+      }
+
+      if (!image.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+        alert("Please enter a valid image URL ending in .jpg, .png, etc.");
+        return;
+      }
+
+      const productData = { name, description, colors, sizes, image };
+
+      db.collection(category).add(productData)
+        .then(() => {
+          alert("✅ Product added successfully!");
+          form.reset();
+        })
+        .catch(error => {
+          console.error("Error adding product:", error);
+          alert("❌ Failed to add product.");
+        });
+    });
+  </script>
+</body>
+</html>
