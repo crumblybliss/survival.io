@@ -23,18 +23,17 @@
       top: 0;
       width: 100%;
       z-index: 100;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
     }
 
-    .navbar a,
-    .navbar button {
+    .navbar a {
       color: white;
+      margin: 0 20px;
       text-decoration: none;
       font-weight: bold;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
     }
 
     .navbar .auth-btn {
@@ -44,7 +43,6 @@
       border: none;
       cursor: pointer;
       border-radius: 5px;
-      text-decoration: none;
     }
 
     .navbar .auth-btn:hover {
@@ -87,15 +85,18 @@
     .product p {
       font-size: 16px;
       color: #555;
+      margin: 8px 0;
     }
 
     .product select {
       padding: 5px;
-      margin: 10px 0;
+      margin: 0 8px 0 0;
       font-size: 14px;
       border-radius: 5px;
       border: 1px solid #ccc;
-      width: 100%;
+      width: 140px;
+      vertical-align: middle;
+      cursor: pointer;
     }
 
     .product button {
@@ -106,47 +107,23 @@
       width: 100%;
       cursor: pointer;
       border-radius: 5px;
+      margin-top: 10px;
     }
 
     .product button:hover {
       background-color: #0097a7;
     }
 
-    .color-preview {
-      width: 30px;
-      height: 30px;
+    /* Color indicator circle next to color select */
+    .color-indicator {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      vertical-align: middle;
       border: 1px solid #ccc;
-      margin: 5px auto 10px;
-      border-radius: 5px;
-    }
-
-    /* Donate Modal */
-    #donateModal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #donateModal .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      position: relative;
-    }
-
-    #closeDonate {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 24px;
-      cursor: pointer;
+      background-color: transparent;
+      transition: background-color 0.3s ease;
     }
   </style>
 </head>
@@ -156,29 +133,12 @@
     <a href="index.html">Home</a>
     <a href="bracelets.html">Bracelets</a>
     <a href="cookies.html">Cookies</a>
-     <a href="comments.html">comments</a>
     <a href="cart.html">Cart</a>
-    <a href="#" id="donateBtn" class="auth-btn">Donate</a>
     <button id="loginButton" class="auth-btn">Login</button>
   </div>
 
   <h1>Bracelets</h1>
   <div class="container" id="braceletsProducts"></div>
-
-  <!-- Donate Modal -->
-  <div id="donateModal">
-    <div class="modal-content">
-      <span id="closeDonate">&times;</span>
-      <iframe
-        src="https://www.paypal.com/giving/campaigns?campaign_id=XXFHKMCPVQ5FN"
-        title="PayPal donate campaign card"
-        frameborder="0"
-        width="382"
-        height="550"
-        scrolling="no"
-      ></iframe>
-    </div>
-  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -197,7 +157,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth();
-    const loadedProducts = {};
 
     window.addToCart = async (productB64, selectedSize, selectedColor) => {
       const user = auth.currentUser;
@@ -218,6 +177,7 @@
 
       const product = JSON.parse(atob(productB64));
       const sizeInfo = product.sizes.find(s => s.size === selectedSize);
+
       if (!sizeInfo) {
         alert("Invalid size selected.");
         return;
@@ -225,8 +185,8 @@
 
       const cartItem = {
         ...product,
-        selectedSize,
-        selectedColor,
+        selectedSize: selectedSize,
+        selectedColor: selectedColor,
         price: sizeInfo.price
       };
 
@@ -235,17 +195,8 @@
       localStorage.setItem("cart", JSON.stringify(cart));
 
       alert(`${product.name} (${selectedSize}, ${selectedColor}) added to your cart for $${sizeInfo.price}`);
-      window.location.href = "cart.html";
-    };
 
-    window.updateColorPreview = (docId) => {
-      const select = document.getElementById(`color-${docId}`);
-      const preview = document.getElementById(`colorPreview-${docId}`);
-      const selectedColorName = select.value;
-      const product = loadedProducts[docId];
-      if (!product) return;
-      const colorObj = product.colors.find(c => c.name === selectedColorName);
-      preview.style.backgroundColor = colorObj ? colorObj.hex : "transparent";
+      window.location.href = "cart.html";
     };
 
     const fetchBracelets = async () => {
@@ -259,12 +210,20 @@
 
       snap.forEach(doc => {
         const product = doc.data();
-        loadedProducts[doc.id] = product;
         const imageUrl = product.imageUrl || "default.jpg";
+
+        // sizes dropdown options
         const sizes = Array.isArray(product.sizes) ? product.sizes : [];
-        const sizeOptions = sizes.map(size => `<option value="${size.size}">${size.size} - $${size.price}</option>`).join("");
+        const sizeOptions = sizes.map(size => {
+          return `<option value="${size.size}">${size.size} - $${size.price}</option>`;
+        }).join("");
+
+        // colors dropdown options
         const colors = Array.isArray(product.colors) ? product.colors : [];
-        const colorOptions = colors.map(c => `<option value="${c.name}">${c.name}</option>`).join("");
+        const colorOptions = colors.map(color => {
+          return `<option value="${color}">${color}</option>`;
+        }).join("");
+
         const encodedProduct = btoa(JSON.stringify(product));
 
         const div = document.createElement("div");
@@ -277,12 +236,13 @@
             <option value="" disabled selected>Select Size</option>
             ${sizeOptions}
           </select>
-          <p>Select Color:</p>
-          <select id="color-${doc.id}" onchange="updateColorPreview('${doc.id}')">
-            <option value="" disabled selected>Select Color</option>
-            ${colorOptions}
-          </select>
-          <div id="colorPreview-${doc.id}" class="color-preview"></div>
+          <p>Select Color:
+            <select id="color-${doc.id}" class="color-select">
+              <option value="" disabled selected>Select Color</option>
+              ${colorOptions}
+            </select>
+            <span id="color-indicator-${doc.id}" class="color-indicator"></span>
+          </p>
           <button onclick="addToCart(
             '${encodedProduct}', 
             document.getElementById('size-${doc.id}').value,
@@ -290,6 +250,19 @@
           )">Add to Cart</button>
         `;
         container.appendChild(div);
+
+        // Update color indicator when color changes
+        const colorSelect = div.querySelector(`#color-${doc.id}`);
+        const indicator = div.querySelector(`#color-indicator-${doc.id}`);
+
+        colorSelect.addEventListener('change', () => {
+          const color = colorSelect.value;
+          if (color) {
+            indicator.style.backgroundColor = color;
+          } else {
+            indicator.style.backgroundColor = 'transparent';
+          }
+        });
       });
     };
 
@@ -305,27 +278,6 @@
     });
 
     fetchBracelets();
-  </script>
-
-  <script>
-    const donateModal = document.getElementById("donateModal");
-    const donateBtn = document.getElementById("donateBtn");
-    const closeDonate = document.getElementById("closeDonate");
-
-    donateBtn.addEventListener("click", function (e) {
-      e.preventDefault();
-      donateModal.style.display = "flex";
-    });
-
-    closeDonate.addEventListener("click", function () {
-      donateModal.style.display = "none";
-    });
-
-    window.addEventListener("click", function (event) {
-      if (event.target === donateModal) {
-        donateModal.style.display = "none";
-      }
-    });
   </script>
 </body>
 
