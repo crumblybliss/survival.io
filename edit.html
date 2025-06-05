@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edit Products - Tactics & Treats</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css"/>
+
+  <style>
+    :root {
+      --navy: #0a1d37;
+      --accent: #00bcd4;
+      --light: #f1f1f1;
+    }
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: var(--light);
+      color: #333;
+      margin: 0;
+      padding-top: 70px;
+      text-align: center;
+    }
+    .navbar {
+      background-color: var(--navy);
+      color: white;
+      padding: 15px 0;
+      font-size: 18px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .navbar a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+    .auth-btn {
+      background-color: var(--accent);
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .auth-btn:hover {
+      background-color: #0097a7;
+    }
+    h1, h2 {
+      margin: 20px 0;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 20px;
+    }
+    .product {
+      width: 300px;
+      background: white;
+      border-radius: 10px;
+      margin: 15px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: left;
+      position: relative;
+    }
+    .product img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    .product input, .product select, .product button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    .product button {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .product button:hover {
+      background-color: #0097a7;
+    }
+    .subsection {
+      background-color: #fafafa;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    .inline-row {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .remove-btn {
+      background-color: #f44336;
+      color: white;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      align-self: flex-start;
+      width: 40px;
+    }
+    .remove-btn:hover {
+      background-color: #c62828;
+    }
+    .color-chip {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid #aaa;
+      flex-shrink: 0;
+      margin-right: 8px;
+    }
+    .color-label {
+      font-size: 13px;
+      width: 100px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    @media (max-width: 768px) {
+      .product {
+        width: 90%;
+      }
+      .navbar {
+        flex-direction: column;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div>
+      <a href="index.html">Home</a>
+      <a href="bracelets.html">Bracelets</a>
+      <a href="cookies.html">Cookies</a>
+      <a href="admin.html">Admin Panel</a>
+    </div>
+    <button id="loginButton" class="auth-btn">Login</button>
+  </div>
+
+  <h1>Edit Products</h1>
+  <h2>Bracelets</h2>
+  <div class="container" id="editBracelets"></div>
+
+  <h2>Cookies</h2>
+  <div class="container" id="editCookies"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs, updateDoc, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+    const colorPickrs = new Map();
+
+    // Helper to hash a string with SHA-256
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Check if admin password exists; if not, prompt to create and save it
+    async function ensureAdminPasswordExists() {
+      const configRef = doc(db, "config", "adminSettings");
+      const configSnap = await getDoc(configRef);
+
+      if (!configSnap.exists()) {
+        let newPassword = "";
+        while (!newPassword) {
+          newPassword = prompt("No admin password found. Please set a new admin password (min 6 chars):");
+          if (newPassword === null) {
+            alert("Admin password setup is required to proceed.");
+            throw new Error("Admin password not set.");
+          }
+          if (newPassword.trim().length < 6) {
+            alert("Password must be at least 6 characters. Try again.");
+            newPassword = "";
+          }
+        }
+
+        const hashed = await hashPassword(newPassword);
+        await setDoc(configRef, { adminPasswordHash: hashed });
+        alert("Admin password has been set successfully.");
+      }
+    }
+
+    // Get the stored admin password hash
+    async function getAdminPasswordHash() {
+      const configRef = doc(db, "config", "adminSettings");
+      const configSnap = await getDoc(configRef);
+      if (configSnap.exists()) {
+        const data = configSnap.data();
+        return data.adminPasswordHash || null;
+      }
+      return null;
+    }
+
+    function getColorName(hex) {
+      const names = {
+        "#000000": "Black", "#ffffff": "White", "#ff0000": "Red", "#00ff00": "Lime", "#0000ff": "Blue",
+        "#ffff00": "Yellow", "#00ffff": "Cyan", "#ff00ff": "Magenta", "#c0c0c0": "Silver", "#808080": "Gray",
+        "#800000": "Maroon", "#808000": "Olive", "#008000": "Green", "#800080": "Purple",
+        "#008080": "Teal", "#000080": "Navy"
+      };
+      return names[hex.toLowerCase()] || hex.toUpperCase();
+    }
+
+    function createPickr(container, initialHex, onChange) {
+      return Pickr.create({
+        el: container,
+        theme: 'classic',
+        default: initialHex || '#ffffff',
+        components: {
+          preview: true,
+          opacity: true,
+          hue: true,
+          interaction: { input: true, save: true }
+        }
+      }).on('change', (color) => {
+        const hex = color.toHEXA().toString();
+        onChange(hex);
+      });
+    }
+
+    function generateColorRow(productId, colorIndex, initialColor) {
+      const row = document.createElement('div');
+      row.className = 'inline-row';
+      row.id = `color-row-${productId}-${colorIndex}`;
+      row.style.flexDirection = "row";
+      row.style.alignItems = "center";
+
+      const chip = document.createElement('div');
+      chip.className = 'color-chip';
+      chip.style.backgroundColor = initialColor;
+
+      const label = document.createElement('div');
+      label.className = 'color-label';
+      label.textContent = getColorName(initialColor);
+
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.id = `color-${productId}-${colorIndex}`;
+      input.value = initialColor;
+
+      const pickrButton = document.createElement('button');
+      pickrButton.type = 'button';
+      pickrButton.textContent = 'Pick Color';
+      pickrButton.style.marginLeft = "auto";
+      pickrButton.style.marginRight = "8px";
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.textContent = 'X';
+      removeBtn.type = 'button';
+      removeBtn.onclick = () => {
+        const key = `${productId}-${colorIndex}`;
+        if (colorPickrs.has(key)) {
+          colorPickrs.get(key).destroy();
+          colorPickrs.delete(key);
+        }
+        row.remove();
+      };
+
+      row.appendChild(chip);
+      row.appendChild(label);
+      row.appendChild(pickrButton);
+      row.appendChild(input);
+      row.appendChild(removeBtn);
+
+      setTimeout(() => {
+        const pickr = createPickr(pickrButton, initialColor, (newHex) => {
+          chip.style.backgroundColor = newHex;
+          input.value = newHex;
+          label.textContent = getColorName(newHex);
+        });
+        colorPickrs.set(`${productId}-${colorIndex}`, pickr);
+      }, 0);
+
+      return row;
+    }
+
+    async function fetchProducts(category, containerId) {
+      const snap = await getDocs(collection(db, category));
+      const container = document.getElementById(containerId);
+      container.innerHTML = snap.empty ? "<p>No products available to edit.</p>" : "";
+
+      colorPickrs.forEach(p => p.destroy());
+      colorPickrs.clear();
+
+      snap.forEach(docData => {
+        const product = docData.data();
+        const id = docData.id;
+        const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+        const colors = Array.isArray(product.colors) ? product.colors : [];
+
+        const sizeInputs = sizes.map((s, i) => `
+          <div class="inline-row" id="size-row-${id}-${i}" style="flex-direction: row; align-items: center;">
+            <input type="text" id="size-name-${id}-${i}" value="${s.size}" placeholder="Size" style="flex: 2;" />
+            <input type="number" id="size-price-${id}-${i}" value="${s.price}" placeholder="Price" style="flex: 1; margin-left: 8px;" />
+            <button class="remove-btn" style="flex: 0;" onclick="removeSize('${id}', ${i})">X</button>
+          </div>
+        `).join("");
+
+        const colorContainerId = `colors-${id}`;
+
+        const div = document.createElement("div");
+        div.className = "product";
+        div.innerHTML = `
+          <img src="${product.imageUrl || "default.jpg"}" />
+          <input type="text" id="productName-${id}" value="${product.name || ""}" placeholder="Product Name" />
+          <input type="text" id="productImage-${id}" value="${product.imageUrl || ""}" placeholder="Image URL" />
+
+          <div class="subsection">
+            <h4>Sizes:</h4>
+            <div id="sizes-${id}">${sizeInputs}</div>
+            <button onclick="addSize('${id}')">Add Size</button>
+          </div>
+
+          <div class="subsection">
+            <h4>Colors:</h4>
+            <div id="${colorContainerId}"></div>
+            <button onclick="addColor('${id}')">Add Color</button>
+          </div>
+
+          <button onclick="updateProduct('${id}', '${category}')">Update Product</button>
+          <button onclick="confirmDeleteProduct('${id}', '${category}')" style="margin-top: 8px; background-color: #f44336;">Delete Product</button>
+        `;
+        container.appendChild(div);
+
+        const colorContainer = div.querySelector(`#${colorContainerId}`);
+        colors.forEach((color, i) => {
+          const row = generateColorRow(id, i, color);
+          colorContainer.appendChild(row);
+        });
+      });
+    }
+
+    window.updateProduct = async (productId, category) => {
+      const name = document.getElementById(`productName-${productId}`).value;
+      const image = document.getElementById(`productImage-${productId}`).value;
+
+      const sizes = [];
+      let i = 0;
+      while (document.getElementById(`size-name-${productId}-${i}`)) {
+        const size = document.getElementById(`size-name-${productId}-${i}`).value;
+        const price = parseFloat(document.getElementById(`size-price-${productId}-${i}`).value);
+        if (size && !isNaN(price)) sizes.push({ size, price });
+        i++;
+      }
+
+      const colors = [];
+      let j = 0;
+      while (document.getElementById(`color-${productId}-${j}`)) {
+        colors.push(document.getElementById(`color-${productId}-${j}`).value);
+        j++;
+      }
+
+      try {
+        await updateDoc(doc(db, category, productId), { name, imageUrl: image, sizes, colors });
+        alert("Product updated!");
+        fetchProducts(category, category === "bracelets" ? "editBracelets" : "editCookies");
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    };
+
+    window.addSize = (id) => {
+      const container = document.getElementById(`sizes-${id}`);
+      const index = container.children.length;
+      container.insertAdjacentHTML("beforeend", `
+        <div class="inline-row" id="size-row-${id}-${index}" style="flex-direction: row; align-items: center;">
+          <input type="text" id="size-name-${id}-${index}" placeholder="Size" style="flex: 2;" />
+          <input type="number" id="size-price-${id}-${index}" placeholder="Price" style="flex: 1; margin-left: 8px;" />
+          <button class="remove-btn" style="flex: 0;" onclick="removeSize('${id}', ${index})">X</button>
+        </div>
+      `);
+    };
+
+    window.removeSize = (id, i) => {
+      const el = document.getElementById(`size-row-${id}-${i}`);
+      if (el) el.remove();
+    };
+
+    window.addColor = (id) => {
+      const container = document.getElementById(`colors-${id}`);
+      const index = container.children.length;
+      container.appendChild(generateColorRow(id, index, "#ffffff"));
+    };
+
+    // Confirm delete with admin password check
+    window.confirmDeleteProduct = async (productId, category) => {
+      const adminPasswordHash = await getAdminPasswordHash();
+      if (!adminPasswordHash) {
+        alert("Admin password is not set up. Cannot delete.");
+        return;
+      }
+
+      const inputPassword = prompt("Enter admin password to confirm deletion:");
+      if (inputPassword === null) return; // cancel pressed
+
+      const inputHash = await hashPassword(inputPassword);
+
+      if (inputHash !== adminPasswordHash) {
+        alert("Incorrect admin password. Deletion cancelled.");
+        return;
+      }
+
+      if (!confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
+        return;
+      }
+
+      try {
+        await deleteDoc(doc(db, category, productId));
+        alert("Product deleted successfully.");
+        fetchProducts(category, category === "bracelets" ? "editBracelets" : "editCookies");
+      } catch (err) {
+        alert("Error deleting product: " + err.message);
+      }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      const btn = document.getElementById("loginButton");
+      btn.textContent = user ? "Logout" : "Login";
+      btn.onclick = () => user ? signOut(auth) : location.href = "login.html";
+    });
+
+    // Main init async wrapper
+    (async () => {
+      try {
+        await ensureAdminPasswordExists();
+      } catch (e) {
+        alert("Cannot proceed without admin password setup.");
+        document.body.innerHTML = "<h2>Admin password setup required. Reload to try again.</h2>";
+        return;
+      }
+      await fetchProducts("bracelets", "editBracelets");
+      await fetchProducts("cookies", "editCookies");
+    })();
+  </script>
+</body>
+</html>
