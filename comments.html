@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Comments - Tactics & Treats</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f1f1f1;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #f9f9fb;
       color: #333;
       margin: 0;
-      text-align: center;
+      padding-top: 80px;
     }
 
+    /* Navbar */
     .navbar {
       background-color: #0a1d37;
       color: white;
-      padding: 15px 0;
+      padding: 15px 20px;
       font-size: 18px;
       position: fixed;
       top: 0;
@@ -26,25 +26,30 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
+      gap: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
 
     .navbar a,
     .navbar button {
       color: white;
       text-decoration: none;
-      font-weight: bold;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .navbar a:hover {
+      opacity: 0.7;
     }
 
     .navbar .auth-btn {
       background-color: #00bcd4;
       color: white;
-      padding: 10px 20px;
+      padding: 8px 16px;
       border: none;
       cursor: pointer;
-      border-radius: 5px;
-      text-decoration: none;
+      border-radius: 6px;
+      transition: background 0.2s;
     }
 
     .navbar .auth-btn:hover {
@@ -52,22 +57,24 @@
     }
 
     h1 {
-      padding-top: 100px;
+      text-align: center;
+      margin: 10px 0 20px;
+      color: #0a1d37;
     }
 
+    /* Comments */
     .comments-container {
-      max-width: 600px;
-      margin: 20px auto;
+      max-width: 650px;
+      margin: 0 auto;
       background: #fff;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      text-align: left;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
     .comment {
-      border-bottom: 1px solid #ddd;
-      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      padding: 12px 0;
     }
 
     .comment:last-child {
@@ -80,34 +87,45 @@
     }
 
     .comment .text {
-      margin-top: 5px;
+      margin-top: 6px;
+      line-height: 1.4;
     }
 
     .comment .stars {
-      color: gold;
+      color: #ffc107;
       font-size: 18px;
-      margin: 5px 0;
+      margin: 4px 0;
     }
 
+    /* Rating Summary */
+    #ratingSummary {
+      margin-bottom: 16px;
+      background-color: #e3f7ff;
+      padding: 12px;
+      border-radius: 10px;
+      color: #0a1d37;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* Comment Form */
     #commentForm {
-      max-width: 600px;
-      margin: 20px auto 40px;
+      max-width: 650px;
+      margin: 30px auto;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       background: #fff;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
-    /* Star rating styles */
     #starRating {
       display: flex;
       justify-content: center;
-      gap: 10px;
+      gap: 6px;
       font-size: 28px;
-      user-select: none;
     }
 
     #starRating label {
@@ -116,23 +134,22 @@
       transition: color 0.2s;
     }
 
-    #starRating input[type="radio"] {
+    #starRating input {
       display: none;
     }
 
-    /* Highlight stars on hover and checked */
-    #starRating input[type="radio"]:checked ~ label,
+    #starRating input:checked ~ label,
     #starRating label:hover,
     #starRating label:hover ~ label {
-      color: gold;
+      color: #ffc107;
     }
 
     #commentForm textarea {
       resize: vertical;
-      min-height: 80px;
+      min-height: 90px;
       padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
+      font-size: 15px;
+      border-radius: 6px;
       border: 1px solid #ccc;
     }
 
@@ -140,19 +157,29 @@
       background-color: #00bcd4;
       color: white;
       border: none;
-      padding: 10px;
+      padding: 12px;
       cursor: pointer;
-      border-radius: 5px;
+      border-radius: 6px;
       font-size: 16px;
+      transition: background 0.2s;
     }
 
     #commentForm button:hover {
       background-color: #0097a7;
     }
+
+    /* Mobile */
+    @media (max-width: 600px) {
+      .navbar {
+        flex-wrap: wrap;
+        gap: 10px;
+        font-size: 16px;
+      }
+    }
   </style>
 </head>
-
 <body>
+
   <div class="navbar">
     <a href="index.html">Home</a>
     <a href="bracelets.html">Bracelets</a>
@@ -162,34 +189,24 @@
     <button id="loginButton" class="auth-btn">Login</button>
   </div>
 
-  <h1>Comments</h1>
+  <h1>Customer Comments</h1>
 
   <div class="comments-container" id="commentsList">
-    <!-- Comments will be loaded here -->
+    <div id="ratingSummary">Loading rating summary...</div>
   </div>
 
   <form id="commentForm">
-    <div id="starRating" aria-label="Rate 1 to 5 stars" role="radiogroup">
-      <label for="star1" title="1 star">
-        <input type="radio" id="star1" name="rating" value="1" required />
-        ★
-      </label>
-      <label for="star2" title="2 stars">
-        <input type="radio" id="star2" name="rating" value="2" />
-        ★★
-      </label>
-      <label for="star3" title="3 stars">
-        <input type="radio" id="star3" name="rating" value="3" />
-        ★★★
-      </label>
-      <label for="star4" title="4 stars">
-        <input type="radio" id="star4" name="rating" value="4" />
-        ★★★★
-      </label>
-      <label for="star5" title="5 stars">
-        <input type="radio" id="star5" name="rating" value="5" />
-        ★★★★★
-      </label>
+    <div id="starRating" role="radiogroup" aria-label="Rate 1 to 5 stars">
+      <input type="radio" id="star5" name="rating" value="5" required />
+      <label for="star5">★</label>
+      <input type="radio" id="star4" name="rating" value="4" />
+      <label for="star4">★</label>
+      <input type="radio" id="star3" name="rating" value="3" />
+      <label for="star3">★</label>
+      <input type="radio" id="star2" name="rating" value="2" />
+      <label for="star2">★</label>
+      <input type="radio" id="star1" name="rating" value="1" />
+      <label for="star1">★</label>
     </div>
 
     <textarea id="commentInput" placeholder="Write your comment here..." required></textarea>
@@ -228,10 +245,10 @@
 
     const loginBtn = document.getElementById("loginButton");
     const commentsList = document.getElementById("commentsList");
+    const ratingSummaryDiv = document.getElementById("ratingSummary");
     const commentForm = document.getElementById("commentForm");
     const commentInput = document.getElementById("commentInput");
 
-    // Update login/logout button based on auth state
     onAuthStateChanged(auth, (user) => {
       if (user) {
         loginBtn.textContent = "Logout";
@@ -242,59 +259,70 @@
       }
     });
 
-    // Load comments from Firestore
     async function loadComments() {
-      commentsList.innerHTML = "Loading comments...";
+      ratingSummaryDiv.textContent = "Loading comments...";
       const q = query(collection(db, "comments"), orderBy("timestamp", "desc"));
       const snapshot = await getDocs(q);
+
+      let totalRatings = 0;
+      let sumRatings = 0;
+
+      commentsList.innerHTML = "";
+      commentsList.appendChild(ratingSummaryDiv);
+
       if (snapshot.empty) {
-        commentsList.innerHTML = "<p>No comments yet. Be the first to comment!</p>";
+        ratingSummaryDiv.textContent = "No comments yet. Be the first!";
         return;
       }
-      commentsList.innerHTML = "";
+
       snapshot.forEach(doc => {
-        const comment = doc.data();
+        const data = doc.data();
+        const rating = Number(data.rating || 0);
+        totalRatings++;
+        sumRatings += rating;
+
         const div = document.createElement("div");
         div.className = "comment";
 
-        const authorDiv = document.createElement("div");
-        authorDiv.className = "author";
-        authorDiv.textContent = comment.author || "Anonymous";
-
-        const starsDiv = document.createElement("div");
-        starsDiv.className = "stars";
-        starsDiv.setAttribute("aria-label", `Rating: ${comment.rating || 0} out of 5 stars`);
-        starsDiv.textContent = "★".repeat(comment.rating || 0) + "☆".repeat(5 - (comment.rating || 0));
-
-        const textDiv = document.createElement("div");
-        textDiv.className = "text";
-        textDiv.textContent = comment.text;
-
-        div.appendChild(authorDiv);
-        div.appendChild(starsDiv);
-        div.appendChild(textDiv);
+        div.innerHTML = `
+          <div class="author">${data.author || "Anonymous"}</div>
+          <div class="stars" aria-label="Rating: ${rating} out of 5 stars">
+            ${"★".repeat(rating)}${"☆".repeat(5 - rating)}
+          </div>
+          <div class="text">${data.text}</div>
+        `;
 
         commentsList.appendChild(div);
       });
+
+      const averageRating = totalRatings > 0 ? (sumRatings / totalRatings).toFixed(1) : 0;
+
+      ratingSummaryDiv.innerHTML = `
+        Average Rating: ${averageRating} ★ (${totalRatings} reviews)
+        <div style="color:#ffc107; font-size:20px;">
+          ${"★".repeat(Math.round(averageRating))}${"☆".repeat(5 - Math.round(averageRating))}
+        </div>
+      `;
     }
 
-    // Submit comment with rating
     commentForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+
       const user = auth.currentUser;
       if (!user) {
         alert("Please login to post comments.");
         return;
       }
+
       const text = commentInput.value.trim();
       if (!text) return;
 
-      // Get selected rating
       const ratingInput = commentForm.querySelector('input[name="rating"]:checked');
       if (!ratingInput) {
         alert("Please select a star rating.");
         return;
       }
+
       const rating = Number(ratingInput.value);
 
       try {
@@ -304,8 +332,10 @@
           rating: rating,
           timestamp: serverTimestamp()
         });
+
         commentInput.value = "";
-        ratingInput.checked = false; // reset rating selection
+        ratingInput.checked = false;
+
         loadComments();
       } catch (error) {
         alert("Failed to post comment. Please try again.");
@@ -316,5 +346,4 @@
     loadComments();
   </script>
 </body>
-
 </html>
