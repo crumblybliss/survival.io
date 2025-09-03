@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sponsor Us | Tactics & Treats</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      background-color: #f9fafc;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    /* Navbar */
+    .navbar {
+      background-color: #0a1d37;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+    .navbar a {
+      color: white;
+      margin-right: 20px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: opacity 0.3s ease;
+    }
+    .navbar a:hover { opacity: 0.7; }
+
+    main {
+      max-width: 900px;
+      margin: 100px auto 50px;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 { color: #0a1d37; font-size: 2.2rem; margin-bottom: 10px; }
+    .lead { font-size: 1.2rem; color: #555; margin-bottom: 30px; }
+
+    .how-to {
+      background: #eef6fb;
+      border-left: 5px solid #00bcd4;
+      padding: 20px;
+      margin: 30px auto;
+      max-width: 700px;
+      text-align: left;
+      border-radius: 8px;
+    }
+    .how-to h2 { margin-top: 0; color: #0a1d37; font-size: 1.4rem; }
+    .how-to ol { padding-left: 20px; margin: 10px 0 0; }
+    .how-to li { margin-bottom: 10px; }
+
+    .levels {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 40px 0;
+    }
+    .level-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .level-card:hover { transform: translateY(-5px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+    .level-card h3 { margin-top: 0; color: #00bcd4; }
+    .level-card p { margin: 10px 0; }
+
+    form {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: left;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    form label { font-weight: bold; display: block; margin-top: 15px; }
+    form input, form select, form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    form textarea { resize: vertical; }
+    form button {
+      margin-top: 20px;
+      background: #00bcd4;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+    form button:hover { background: #0097a7; }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 1.8rem; }
+      .lead { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="left">
+      <a href="index.html">Home</a>
+      <a href="bracelets.html">Bracelets</a>
+      <a href="cookies.html">Cookies</a>
+      <a href="comments.html">Comments</a>
+      <a href="cart.html">Cart</a>
+    </div>
+  </nav>
+
+  <main>
+    <h1>Support Tactics & Treats</h1>
+    <p class="lead">Your sponsorship helps us bring more chess, creativity, and fun to the community!</p>
+
+    <section class="how-to">
+      <h2>How It Works</h2>
+      <ol>
+        <li><strong>Choose a Sponsorship Level</strong> — Bronze, Silver, or Gold.</li>
+        <li><strong>Fill Out the Form</strong> — Enter your company name, personal info, and message.</li>
+        <li><strong>Submit Your Request</strong> — We’ll review it and contact you personally.</li>
+      </ol>
+    </section>
+
+    <section class="levels">
+      <div class="level-card">
+        <h3>🥉 Bronze</h3>
+        <p>Perfect for individuals or small supporters.</p>
+        <p><strong>$50 / month</strong></p>
+      </div>
+      <div class="level-card">
+        <h3>🥈 Silver</h3>
+        <p>Great for small businesses or growing teams.</p>
+        <p><strong>$150 / month</strong></p>
+      </div>
+      <div class="level-card">
+        <h3>🥇 Gold</h3>
+        <p>Premium visibility for top supporters.</p>
+        <p><strong>$500 / month</strong></p>
+      </div>
+    </section>
+
+    <form id="sponsorForm">
+      <label for="company">Company / Organization Name:</label>
+      <input type="text" id="company" name="company" placeholder="Enter your company or organization" required>
+
+      <label for="level">Choose Sponsorship Level:</label>
+      <select id="level" name="level" required>
+        <option value="">-- Select Level --</option>
+        <option value="Bronze">Bronze - $50 / month</option>
+        <option value="Silver">Silver - $150 / month</option>
+        <option value="Gold">Gold - $500 / month</option>
+      </select>
+
+      <label for="name">Your Name:</label>
+      <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+
+      <label for="email">Email Address:</label>
+      <input type="email" id="email" name="email" placeholder="Enter your email" required>
+
+      <label for="message">Message (optional):</label>
+      <textarea id="message" name="message" rows="4" placeholder="Tell us a little about your sponsorship goals..."></textarea>
+
+      <button type="submit">Submit Sponsorship Request</button>
+    </form>
+  </main>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+      authDomain: "survival-f35e2.firebaseapp.com",
+      projectId: "survival-f35e2",
+      storageBucket: "survival-f35e2.appspot.com",
+      messagingSenderId: "704462603548",
+      appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const form = document.getElementById("sponsorForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const company = document.getElementById("company").value.trim();
+      const level = document.getElementById("level").value;
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const message = document.getElementById("message").value.trim();
+
+      if (!company || !level || !name || !email) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "sponsorshipRequests"), {
+          company,
+          level,
+          name,
+          email,
+          message,
+          timestamp: serverTimestamp()
+        });
+
+        alert(`Thank you, ${name} from ${company}! Your ${level} sponsorship request has been submitted successfully. We’ll contact you at ${email}.`);
+        form.reset();
+      } catch (error) {
+        console.error("Error submitting sponsorship request:", error);
+        alert("Oops! Something went wrong. Please try again later.");
+      }
+    });
+  </script>
+</body>
+</html>
