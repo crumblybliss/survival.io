@@ -1,133 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bracelets - Tactics & Treats</title>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f1f1f1;
-      color: #333;
-      margin: 0;
-      text-align: center;
-    }
-
-    .navbar {
-      background-color: #0a1d37;
-      color: white;
-      padding: 15px 0;
-      font-size: 18px;
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 100;
-    }
-
-    .navbar a {
-      color: white;
-      margin: 0 20px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .navbar a:hover {
-      text-decoration: underline;
-    }
-
-    .navbar .auth-btn {
-      background-color: #00bcd4;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    .navbar .auth-btn:hover {
-      background-color: #0097a7;
-    }
-
-    h1 {
-      padding-top: 100px;
-    }
-
-    .container {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      padding: 20px;
-    }
-
-    .product {
-      width: 250px;
-      margin: 20px;
-      padding: 20px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
-
-    .product img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-
-    .product h3 {
-      margin: 15px 0;
-      font-size: 18px;
-    }
-
-    .product p {
-      font-size: 16px;
-      color: #555;
-      margin: 8px 0;
-    }
-
-    .product select {
-      padding: 5px;
-      margin: 0 8px 0 0;
-      font-size: 14px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      width: 140px;
-      vertical-align: middle;
-      cursor: pointer;
-    }
-
-    .product button {
-      background-color: #00bcd4;
-      color: white;
-      border: none;
-      padding: 10px;
-      width: 100%;
-      cursor: pointer;
-      border-radius: 5px;
-      margin-top: 10px;
-    }
-
-    .product button:hover {
-      background-color: #0097a7;
-    }
-
-    /* Color indicator circle next to color select */
-    .color-indicator {
-      display: inline-block;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      vertical-align: middle;
-      border: 1px solid #ccc;
-      background-color: transparent;
-      transition: background-color 0.3s ease;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bracelets - Tactics & Treats</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f1f1f1;
+    color: #333;
+    margin: 0;
+    text-align: center;
+  }
+  .navbar {
+    background-color: #0a1d37;
+    color: white;
+    padding: 15px 0;
+    font-size: 18px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .navbar a {
+    color: white;
+    margin: 0 10px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  .navbar .auth-btn {
+    background-color: #00bcd4;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  .navbar .auth-btn:hover { background-color: #0097a7; }
+  h1 { padding-top: 100px; }
+  .container { display: flex; justify-content: center; flex-wrap: wrap; padding: 20px; }
+  .product {
+    width: 250px;
+    margin: 20px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  .product img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+  .product h3 { margin: 15px 0; font-size: 18px; }
+  .product p { font-size: 16px; color: #555; margin: 8px 0; }
+  .product select, .product button { padding: 8px; margin: 5px 0; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer; }
+  .product button { width: 100%; background-color: #00bcd4; color: white; border: none; margin-top: 10px; }
+  .product button:hover { background-color: #0097a7; }
+  .color-indicator {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    vertical-align: middle;
+    border: 1px solid #ccc;
+    margin-left: 6px;
+  }
+</style>
 </head>
-
 <body>
   <div class="navbar">
     <a href="index.html">Home</a>
@@ -158,35 +104,19 @@
     const db = getFirestore(app);
     const auth = getAuth();
 
-    window.addToCart = async (productB64, selectedSize, selectedColor) => {
+    window.addToCart = async (productB64, selectedSize, primaryColor, secondaryColor) => {
       const user = auth.currentUser;
-      if (!user) {
-        alert("Please login to add items to your cart.");
-        return;
-      }
-
-      if (!selectedSize) {
-        alert("Please select a size.");
-        return;
-      }
-
-      if (!selectedColor) {
-        alert("Please select a color.");
-        return;
-      }
+      if (!user) { alert("Please login to add items to your cart."); return; }
+      if (!selectedSize || !primaryColor) { alert("Please select size and primary color."); return; }
 
       const product = JSON.parse(atob(productB64));
       const sizeInfo = product.sizes.find(s => s.size === selectedSize);
 
-      if (!sizeInfo) {
-        alert("Invalid size selected.");
-        return;
-      }
-
       const cartItem = {
         ...product,
-        selectedSize: selectedSize,
-        selectedColor: selectedColor,
+        selectedSize,
+        primaryColor,
+        secondaryColor,
         price: sizeInfo.price
       };
 
@@ -194,35 +124,27 @@
       cart.push(cartItem);
       localStorage.setItem("cart", JSON.stringify(cart));
 
-      alert(`${product.name} (${selectedSize}, ${selectedColor}) added to your cart for $${sizeInfo.price}`);
-
+      alert(`${product.name} (${selectedSize}, ${primaryColor}${secondaryColor?"/"+secondaryColor:""}) added to cart for $${sizeInfo.price}`);
       window.location.href = "cart.html";
     };
 
     const fetchBracelets = async () => {
       const snap = await getDocs(collection(db, "bracelets"));
       const container = document.getElementById("braceletsProducts");
-
-      if (snap.empty) {
-        container.innerHTML = "<p>No bracelets available at the moment.</p>";
-        return;
-      }
+      if (snap.empty) { container.innerHTML = "<p>No bracelets available.</p>"; return; }
 
       snap.forEach(doc => {
         const product = doc.data();
         const imageUrl = product.imageUrl || "default.jpg";
 
-        // sizes dropdown options
         const sizes = Array.isArray(product.sizes) ? product.sizes : [];
-        const sizeOptions = sizes.map(size => {
-          return `<option value="${size.size}">${size.size} - $${size.price}</option>`;
-        }).join("");
+        const sizeOptions = sizes.map(s => `<option value="${s.size}">${s.size} - $${s.price}</option>`).join("");
 
-        // colors dropdown options
-        const colors = Array.isArray(product.colors) ? product.colors : [];
-        const colorOptions = colors.map(color => {
-          return `<option value="${color}">${color}</option>`;
-        }).join("");
+        const primaryColors = Array.isArray(product.colors?.primary) ? product.colors.primary : [];
+        const secondaryColors = Array.isArray(product.colors?.secondary) ? product.colors.secondary : [];
+
+        const primaryOptions = primaryColors.map(c => `<option value="${c}">${c}</option>`).join("");
+        const secondaryOptions = secondaryColors.map(c => `<option value="${c}">${c}</option>`).join("");
 
         const encodedProduct = btoa(JSON.stringify(product));
 
@@ -236,49 +158,46 @@
             <option value="" disabled selected>Select Size</option>
             ${sizeOptions}
           </select>
-          <p>Select Color:
-            <select id="color-${doc.id}" class="color-select">
-              <option value="" disabled selected>Select Color</option>
-              ${colorOptions}
+          <p>Primary Color:
+            <select id="primary-${doc.id}">
+              <option value="" disabled selected>Select Primary Color</option>
+              ${primaryOptions}
             </select>
-            <span id="color-indicator-${doc.id}" class="color-indicator"></span>
+            <span id="primary-indicator-${doc.id}" class="color-indicator"></span>
+          </p>
+          <p>Secondary Color (Optional):
+            <select id="secondary-${doc.id}">
+              <option value="" selected>None</option>
+              ${secondaryOptions}
+            </select>
+            <span id="secondary-indicator-${doc.id}" class="color-indicator"></span>
           </p>
           <button onclick="addToCart(
             '${encodedProduct}', 
             document.getElementById('size-${doc.id}').value,
-            document.getElementById('color-${doc.id}').value
+            document.getElementById('primary-${doc.id}').value,
+            document.getElementById('secondary-${doc.id}').value
           )">Add to Cart</button>
         `;
         container.appendChild(div);
 
-        // Update color indicator when color changes
-        const colorSelect = div.querySelector(`#color-${doc.id}`);
-        const indicator = div.querySelector(`#color-indicator-${doc.id}`);
+        const primarySelect = div.querySelector(`#primary-${doc.id}`);
+        const primaryIndicator = div.querySelector(`#primary-indicator-${doc.id}`);
+        primarySelect.addEventListener('change', () => primaryIndicator.style.backgroundColor = primarySelect.value || 'transparent');
 
-        colorSelect.addEventListener('change', () => {
-          const color = colorSelect.value;
-          if (color) {
-            indicator.style.backgroundColor = color;
-          } else {
-            indicator.style.backgroundColor = 'transparent';
-          }
-        });
+        const secondarySelect = div.querySelector(`#secondary-${doc.id}`);
+        const secondaryIndicator = div.querySelector(`#secondary-indicator-${doc.id}`);
+        secondarySelect.addEventListener('change', () => secondaryIndicator.style.backgroundColor = secondarySelect.value || 'transparent');
       });
     };
 
     onAuthStateChanged(auth, (user) => {
       const btn = document.getElementById("loginButton");
-      if (user) {
-        btn.innerText = "Logout";
-        btn.onclick = () => signOut(auth);
-      } else {
-        btn.innerText = "Login";
-        btn.onclick = () => window.location.href = "login.html";
-      }
+      if (user) { btn.innerText = "Logout"; btn.onclick = () => signOut(auth); }
+      else { btn.innerText = "Login"; btn.onclick = () => window.location.href = "login.html"; }
     });
 
     fetchBracelets();
   </script>
 </body>
-
 </html>
