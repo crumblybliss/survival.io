@@ -1,4 +1,3 @@
-<!-- Save this as cart.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,8 +5,7 @@
   <title>Your Cart</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    /* your existing CSS stays the same */
-    /* Additional style for the "Place Order" button */
+    /* Use your previous CSS, plus: */
     #place-order-btn {
       display: block;
       margin: 30px auto 0;
@@ -19,8 +17,28 @@
       font-size: 16px;
       cursor: pointer;
     }
+
     #place-order-btn:hover {
       background: #0097a7;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #00bcd4;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
     }
   </style>
 </head>
@@ -34,7 +52,7 @@
   <a href="index.html">Home</a>
   <a href="shop.html">Shop</a>
   <a href="cart.html">Cart</a>
-  <a href="admin.html">Admin</a> <!-- link to the admin page -->
+  <a href="admin.html">Admin</a>
 </nav>
 
 <div class="content">
@@ -47,9 +65,7 @@
     <p id="promo-message"></p>
   </div>
 
-  <!-- Place Order Button -->
   <button id="place-order-btn">Place Order</button>
-
   <p id="result-message"></p>
 </div>
 
@@ -57,7 +73,25 @@
 
 <div id="toast" class="toast"></div>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js"></script>
+
 <script>
+  // 🟡 Replace this with your actual config
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "your-project-id.firebaseapp.com",
+    projectId: "your-project-id",
+    storageBucket: "your-project-id.appspot.com",
+    messagingSenderId: "xxxxxxx",
+    appId: "1:xxxxxx:web:xxxxxx"
+  };
+
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
   const cartContainer = document.getElementById('cart-items');
   const totalDisplay = document.getElementById('total-price');
   const promoInput = document.getElementById('promo-code-input');
@@ -141,8 +175,7 @@
     updateTotal();
   };
 
-  // Place order logic
-  placeOrderBtn.onclick = () => {
+  placeOrderBtn.onclick = async () => {
     if (cart.length === 0) return;
 
     const total = cart.reduce((sum, i) => sum + i.price, 0) * (1 - discount);
@@ -150,19 +183,20 @@
       id: 'ORD-' + Date.now(),
       items: cart,
       total: total.toFixed(2),
-      timestamp: new Date().toLocaleString()
+      timestamp: new Date().toISOString()
     };
 
-    // Save to orders in localStorage
-    const orders = JSON.parse(localStorage.getItem('orders')) || [];
-    orders.push(order);
-    localStorage.setItem('orders', JSON.stringify(orders));
-
-    cart = [];
-    saveCart();
-    renderCart();
-    resultMsg.textContent = 'Order placed successfully!';
-    showToast('Order sent to admin page');
+    try {
+      await db.collection('orders').add(order);
+      showToast('Order sent to admin!');
+      resultMsg.textContent = 'Order placed successfully!';
+      cart = [];
+      saveCart();
+      renderCart();
+    } catch (error) {
+      console.error("Error saving order:", error);
+      showToast('Failed to send order.');
+    }
   };
 
   renderCart();
