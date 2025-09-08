@@ -1,361 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Your Cart</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    :root {
-      --primary: #00bcd4;
-      --primary-hover: #0097a7;
-      --background: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #1e293b;
-      --muted: #64748b;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--background);
-      color: var(--text);
-      line-height: 1.6;
-    }
-
-    header {
-      background: var(--card-bg);
-      padding: 20px;
-      text-align: center;
-      border-bottom: 1px solid #e2e8f0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    header h2 {
-      margin: 0;
-      color: var(--primary);
-      font-size: 24px;
-    }
-
-    nav {
-      background: #11263f;
-      padding: 12px 20px;
-      display: flex;
-      justify-content: center;
-      gap: 24px;
-    }
-
-    nav a {
-      color: #f1f5f9;
-      text-decoration: none;
-      font-size: 15px;
-      padding: 6px 12px;
-      border-radius: 6px;
-      transition: 0.3s;
-    }
-
-    nav a:hover {
-      background-color: var(--primary);
-      color: #fff;
-    }
-
-    .content {
-      max-width: 900px;
-      margin: 30px auto;
-      padding: 20px;
-      background: var(--card-bg);
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
-
-    .cart-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding: 16px;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .cart-item:last-child {
-      border-bottom: none;
-    }
-
-    .cart-details h3 {
-      margin: 0;
-      font-size: 18px;
-      color: var(--primary);
-    }
-
-    .cart-details p {
-      margin: 4px 0;
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    .cart-controls button {
-      background: #ef4444;
-      border: none;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: 0.3s;
-    }
-
-    .cart-controls button:hover {
-      background: #dc2626;
-    }
-
-    #total-price {
-      text-align: right;
-      font-size: 18px;
-      font-weight: bold;
-      margin: 20px 0;
-    }
-
-    #promo-code-section {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    #promo-code-input {
-      flex: 1;
-      padding: 8px 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-
-    #apply-promo-btn {
-      padding: 8px 16px;
-      background: var(--primary);
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-size: 14px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    #apply-promo-btn:hover {
-      background: var(--primary-hover);
-    }
-
-    #promo-message {
-      margin-left: 10px;
-      font-size: 14px;
-    }
-
-    #place-order-btn {
-      display: block;
-      margin: 20px auto 0;
-      padding: 12px 20px;
-      background: var(--primary);
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    #place-order-btn:hover {
-      background: var(--primary-hover);
-    }
-
-    #result-message {
-      text-align: center;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-
-    footer {
-      text-align: center;
-      padding: 20px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--primary);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      z-index: 999;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .toast.show {
-      opacity: 1;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Car Shop</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+  h1, h2 { color: #333; }
+  #login-section, #cart-section { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+  input, select, button { margin: 5px 0; padding: 8px; border-radius: 5px; border: 1px solid #ccc; }
+  button { cursor: pointer; background: #007BFF; color: #fff; border: none; }
+  button:hover { background: #0056b3; }
+  ul { list-style: none; padding: 0; }
+  li { padding: 10px; background: #fafafa; margin-bottom: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; }
+  .item-info { display: flex; align-items: center; gap: 10px; }
+  .removeBtn { background: #dc3545; margin-left: 10px; }
+  .removeBtn:hover { background: #a71d2a; }
+</style>
 </head>
 <body>
 
-<header>
-  <h2>Your Cart</h2>
-</header>
+<h1>Car Shop</h1>
 
-<nav>
-  <a href="index.html">Home</a>
-  <a href="shop.html">Shop</a>
-  <a href="cart.html">Cart</a>
-  <a href="admin.html">Admin</a>
-</nav>
-
-<div class="content">
-  <div id="cart-items"></div>
-  <p id="total-price">Total: $0.00</p>
-
-  <div id="promo-code-section">
-    <input type="text" id="promo-code-input" placeholder="Enter promo code" />
-    <button id="apply-promo-btn">Apply</button>
-    <p id="promo-message"></p>
-  </div>
-
-  <button id="place-order-btn">Place Order</button>
-  <p id="result-message"></p>
+<div id="login-section">
+  <h2>Login / Sign Up</h2>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <br>
+  <button id="loginBtn">Login</button>
+  <button id="signupBtn">Sign Up</button>
 </div>
 
-<footer>&copy; 2025 Your Website</footer>
+<div id="cart-section" style="display:none;">
+  <h2>Your Cart</h2>
+  <ul id="cart-list"></ul>
+  <button id="checkoutBtn">Checkout</button>
+</div>
 
-<div id="toast" class="toast"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, addDoc, doc, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js"></script>
+// --- Firebase Config ---
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_ID",
+  appId: "YOUR_APP_ID"
+};
 
-<script>
-  // Firebase config (replace with your own)
-  const firebaseConfig = {
-  apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-  authDomain: "survival-f35e2.firebaseapp.com",
-  projectId: "survival-f35e2",
-  storageBucket: "survival-f35e2.appspot.com",
-  messagingSenderId: "704462603548",
-  appId: "1:704462603548:web:00d1a3fb89f9106a59e6d9"
-  };
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+// Elements
+const loginSection = document.getElementById("login-section");
+const cartSection = document.getElementById("cart-section");
+const cartList = document.getElementById("cart-list");
+const loginBtn = document.getElementById("loginBtn");
+const signupBtn = document.getElementById("signupBtn");
+const checkoutBtn = document.getElementById("checkoutBtn");
 
-  const cartContainer = document.getElementById('cart-items');
-  const totalDisplay = document.getElementById('total-price');
-  const promoInput = document.getElementById('promo-code-input');
-  const promoMsg = document.getElementById('promo-message');
-  const toast = document.getElementById('toast');
-  const resultMsg = document.getElementById('result-message');
-  const placeOrderBtn = document.getElementById('place-order-btn');
+let userUID = null;
+let unsubscribeCart = null;
 
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  let discount = 0;
+// Login
+loginBtn.addEventListener("click", () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  signInWithEmailAndPassword(auth, email, password)
+    .catch(err => alert(err.message));
+});
 
-  function showToast(msg) {
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
+// Sign Up
+signupBtn.addEventListener("click", () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  createUserWithEmailAndPassword(auth, email, password)
+    .catch(err => alert(err.message));
+});
+
+// Auth State
+onAuthStateChanged(auth, user => {
+  if (user) {
+    userUID = user.uid;
+    loginSection.style.display = "none";
+    cartSection.style.display = "block";
+    loadCartRealtime();
+  } else {
+    userUID = null;
+    loginSection.style.display = "block";
+    cartSection.style.display = "none";
+    if (unsubscribeCart) unsubscribeCart();
   }
+});
 
-  function saveCart() {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }
+// Load Cart Real-time
+function loadCartRealtime() {
+  const userCartRef = collection(db, "carts");
 
-  function renderCart() {
-    cartContainer.innerHTML = '';
-    if (cart.length === 0) {
-      cartContainer.innerHTML = '<p>Your cart is empty!</p>';
-      totalDisplay.textContent = 'Total: $0.00';
-      placeOrderBtn.style.display = 'none';
-      return;
-    }
+  if (unsubscribeCart) unsubscribeCart();
 
-    placeOrderBtn.style.display = 'block';
+  unsubscribeCart = onSnapshot(userCartRef, snapshot => {
+    cartList.innerHTML = "";
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      if (data.uid !== userUID) return; // only current user
 
-    cart.forEach((item, i) => {
-      const itemDiv = document.createElement('div');
-      itemDiv.className = 'cart-item';
-      itemDiv.innerHTML = `
-        <div class="cart-details">
-          <h3>${item.name}</h3>
-          <p>Size: ${item.selectedSize}</p>
-          <p>Color: ${item.selectedColor}</p>
-          <p>Price: $${item.price.toFixed(2)}</p>
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div class="item-info">
+          <strong>${data.carName}</strong>
+          Color: <input type="color" value="${data.color || '#ffffff'}" data-id="${docSnap.id}" class="color">
+          Size: 
+          <select data-id="${docSnap.id}" class="size">
+            <option value="small" ${data.size==='small'?'selected':''}>Small</option>
+            <option value="medium" ${data.size==='medium'?'selected':''}>Medium</option>
+            <option value="large" ${data.size==='large'?'selected':''}>Large</option>
+          </select>
         </div>
-        <div class="cart-controls">
-          <button onclick="removeItem(${i})">Remove</button>
-        </div>
+        <button data-id="${docSnap.id}" class="removeBtn">Remove</button>
       `;
-      cartContainer.appendChild(itemDiv);
+      cartList.appendChild(li);
     });
 
-    updateTotal();
+    // Event Listeners
+    document.querySelectorAll(".color").forEach(input => {
+      input.addEventListener("input", e => {
+        updateDoc(doc(db, "carts", e.target.dataset.id), { color: e.target.value });
+      });
+    });
+    document.querySelectorAll(".size").forEach(select => {
+      select.addEventListener("change", e => {
+        updateDoc(doc(db, "carts", e.target.dataset.id), { size: e.target.value });
+      });
+    });
+    document.querySelectorAll(".removeBtn").forEach(btn => {
+      btn.addEventListener("click", e => {
+        deleteDoc(doc(db, "carts", e.target.dataset.id));
+      });
+    });
+  });
+}
+
+// Checkout
+checkoutBtn.addEventListener("click", async () => {
+  const userCartRef = collection(db, "carts");
+  const snapshot = await getDocs(userCartRef);
+  const orders = [];
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    if (data.uid !== userUID) return;
+    orders.push({
+      carName: data.carName,
+      color: data.color || '#ffffff',
+      size: data.size || 'medium',
+      uid: userUID,
+      timestamp: new Date()
+    });
+  });
+
+  for (const order of orders) {
+    await addDoc(collection(db, "orders"), order);
   }
 
-  function updateTotal() {
-    let total = cart.reduce((sum, i) => sum + i.price, 0);
-    const discounted = total * (1 - discount);
-    totalDisplay.textContent = `Total: $${discounted.toFixed(2)}`;
-  }
-
-  function removeItem(index) {
-    cart.splice(index, 1);
-    saveCart();
-    renderCart();
-    showToast('Item removed');
-  }
-
-  document.getElementById('apply-promo-btn').onclick = () => {
-    const code = promoInput.value.trim().toUpperCase();
-    if (code === 'DISCOUNT10') {
-      discount = 0.10;
-      promoMsg.textContent = '10% discount applied!';
-      promoMsg.style.color = '#00bcd4';
-    } else if (code === 'DISCOUNT20') {
-      discount = 0.20;
-      promoMsg.textContent = '20% discount applied!';
-      promoMsg.style.color = '#00bcd4';
-    } else {
-      discount = 0;
-      promoMsg.textContent = 'Invalid promo code.';
-      promoMsg.style.color = '#ef4444';
-    }
-    updateTotal();
-  };
-
-  placeOrderBtn.onclick = async () => {
-    if (cart.length === 0) return;
-
-    const total = cart.reduce((sum, i) => sum + i.price, 0) * (1 - discount);
-    const order = {
-      id: 'ORD-' + Date.now(),
-      items: cart,
-      total: total.toFixed(2),
-      timestamp: new Date().toISOString()
-    };
-
-    try {
-      await db.collection('orders').add(order);
-      showToast('Order sent to admin!');
-      resultMsg.textContent = 'Order placed successfully!';
-      cart = [];
-      saveCart();
-      renderCart();
-    } catch (error) {
-      console.error("Error saving order:", error);
-      showToast('Failed to send order.');
-    }
-  };
-
-  renderCart();
+  alert("Order placed!");
+});
 </script>
+
 </body>
 </html>
