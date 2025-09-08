@@ -1,283 +1,171 @@
+<!-- Save this as cart.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Your Cart - CrumblyBliss</title>
+  <title>Your Cart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    :root {
-      --navy: #0a1d37;
-      --accent: #00bcd4;
-      --light: #f4f7fc;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background-color: var(--light);
-      color: #333;
-      padding: 20px;
-    }
-
-    .container {
-      width: 90%;
-      max-width: 1100px;
-      margin: auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    }
-
-    h2 {
-      text-align: center;
-      font-size: 2.5rem;
-      color: var(--navy);
-      margin-bottom: 30px;
-    }
-
-    .cart-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      background-color: #eef3f9;
-      transition: transform 0.3s;
-    }
-
-    .cart-item:hover {
-      transform: translateY(-4px);
-    }
-
-    .item-details {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      flex: 1;
-    }
-
-    .cart-item img {
-      width: 70px;
-      height: 70px;
-      border-radius: 10px;
-      object-fit: cover;
-    }
-
-    .item-info span {
+    /* your existing CSS stays the same */
+    /* Additional style for the "Place Order" button */
+    #place-order-btn {
       display: block;
-      font-size: 1.1rem;
-      color: #222;
-    }
-
-    .quantity-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .quantity-controls button {
-      padding: 4px 10px;
-      background: var(--accent);
+      margin: 30px auto 0;
+      padding: 12px 20px;
+      background: #00bcd4;
       border: none;
-      border-radius: 5px;
-      font-weight: bold;
-      color: #fff;
-      cursor: pointer;
-    }
-
-    .remove-btn {
-      background: #e74c3c;
-      color: #fff;
-      border: none;
-      padding: 8px 14px;
       border-radius: 6px;
-      font-weight: bold;
+      color: white;
+      font-size: 16px;
       cursor: pointer;
-      transition: background 0.3s;
     }
-
-    .remove-btn:hover {
-      background: #c0392b;
-    }
-
-    .empty-cart {
-      text-align: center;
-      font-size: 1.2rem;
-      color: #666;
-      margin-top: 40px;
-    }
-
-    .checkout-btn {
-      width: 100%;
-      background-color: var(--navy);
-      color: #fff;
-      font-size: 1.4rem;
-      padding: 15px;
-      border: none;
-      border-radius: 8px;
-      margin-top: 30px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s ease;
-    }
-
-    .checkout-btn:hover {
-      background-color: #122b50;
-    }
-
-    #cart-total {
-      text-align: center;
-      font-size: 1.5rem;
-      color: var(--navy);
-      margin-top: 20px;
-    }
-
-    @media (max-width: 768px) {
-      .cart-item {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .item-details {
-        flex-direction: column;
-        align-items: flex-start;
-      }
+    #place-order-btn:hover {
+      background: #0097a7;
     }
   </style>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h2>Your Shopping Cart</h2>
-    <div id="cart-items"></div>
-    <p id="empty-message" class="empty-cart">Your cart is empty.</p>
-    <h3 id="cart-total"></h3>
-    <button id="checkout-btn" class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+
+<header>
+  <h2>Your Cart</h2>
+</header>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="shop.html">Shop</a>
+  <a href="cart.html">Cart</a>
+  <a href="admin.html">Admin</a> <!-- link to the admin page -->
+</nav>
+
+<div class="content">
+  <div id="cart-items"></div>
+  <p id="total-price">Total: $0.00</p>
+
+  <div id="promo-code-section">
+    <input type="text" id="promo-code-input" placeholder="Enter promo code" />
+    <button id="apply-promo-btn">Apply</button>
+    <p id="promo-message"></p>
   </div>
 
-  <script>
-    const firebaseConfig = {
-   apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-    authDomain: "survival-f35e2.firebaseapp.com",
-    projectId: "survival-f35e2",
-    storageBucket: "survival-f35e2.appspot.com",
-    messagingSenderId: "704462603548",
-    appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9",
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+  <!-- Place Order Button -->
+  <button id="place-order-btn">Place Order</button>
 
-    async function loadCart() {
-      const user = auth.currentUser;
-      if (!user) {
-        alert("Please log in to view your cart.");
-        document.getElementById("checkout-btn").style.display = "none";
-        return;
-      }
+  <p id="result-message"></p>
+</div>
 
-      const cartRef = db.collection("carts").doc(user.uid);
-      const doc = await cartRef.get();
+<footer>&copy; 2025 Your Website</footer>
 
-      const cartContainer = document.getElementById("cart-items");
-      const emptyMsg = document.getElementById("empty-message");
-      const totalDisplay = document.getElementById("cart-total");
+<div id="toast" class="toast"></div>
 
-      cartContainer.innerHTML = "";
-      totalDisplay.innerText = "";
+<script>
+  const cartContainer = document.getElementById('cart-items');
+  const totalDisplay = document.getElementById('total-price');
+  const promoInput = document.getElementById('promo-code-input');
+  const promoMsg = document.getElementById('promo-message');
+  const toast = document.getElementById('toast');
+  const resultMsg = document.getElementById('result-message');
+  const placeOrderBtn = document.getElementById('place-order-btn');
 
-      if (!doc.exists || !doc.data().items || doc.data().items.length === 0) {
-        emptyMsg.style.display = "block";
-        document.getElementById("checkout-btn").style.display = "none";
-        return;
-      }
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  let discount = 0;
 
-      const cart = doc.data().items;
-      let cartTotal = 0;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
 
-      emptyMsg.style.display = "none";
-      document.getElementById("checkout-btn").style.display = "block";
+  function saveCart() {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }
 
-      cart.forEach((item, index) => {
-        const quantity = item.quantity || 1;
-        const total = item.price * quantity;
-        cartTotal += total;
-
-        const itemEl = document.createElement("div");
-        itemEl.classList.add("cart-item");
-
-        itemEl.innerHTML = `
-          <div class="item-details">
-            <img src="${item.image || 'placeholder.jpg'}" alt="${item.name}">
-            <div class="item-info">
-              <span><strong>${item.name}</strong> - ${item.category || 'Uncategorized'}</span>
-              <span>$${item.price.toFixed(2)} × ${quantity} = <strong>$${total.toFixed(2)}</strong></span>
-              <div class="quantity-controls">
-                <button onclick="updateQuantity(${index}, -1)">−</button>
-                <span>${quantity}</span>
-                <button onclick="updateQuantity(${index}, 1)">+</button>
-              </div>
-            </div>
-          </div>
-          <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
-        `;
-
-        cartContainer.appendChild(itemEl);
-      });
-
-      totalDisplay.innerText = `Cart Total: $${cartTotal.toFixed(2)}`;
+  function renderCart() {
+    cartContainer.innerHTML = '';
+    if (cart.length === 0) {
+      cartContainer.innerHTML = '<p>Your cart is empty!</p>';
+      totalDisplay.textContent = 'Total: $0.00';
+      placeOrderBtn.style.display = 'none';
+      return;
     }
 
-    async function updateQuantity(index, delta) {
-      const user = auth.currentUser;
-      if (!user) return;
+    placeOrderBtn.style.display = 'block';
 
-      const cartRef = db.collection("carts").doc(user.uid);
-      const doc = await cartRef.get();
-      if (!doc.exists) return;
-
-      const cart = doc.data().items;
-      cart[index].quantity = (cart[index].quantity || 1) + delta;
-      if (cart[index].quantity < 1) cart[index].quantity = 1;
-
-      await cartRef.set({ items: cart });
-      loadCart();
-    }
-
-    async function removeFromCart(index) {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const cartRef = db.collection("carts").doc(user.uid);
-      const doc = await cartRef.get();
-      if (!doc.exists) return;
-
-      const cart = doc.data().items;
-      cart.splice(index, 1);
-
-      await cartRef.set({ items: cart });
-      loadCart();
-    }
-
-    function checkout() {
-      window.location.href = "checkout.html";
-    }
-
-    auth.onAuthStateChanged(user => {
-      if (user) loadCart();
+    cart.forEach((item, i) => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'cart-item';
+      itemDiv.innerHTML = `
+        <div class="cart-details">
+          <h3>${item.name}</h3>
+          <p>Size: ${item.selectedSize}</p>
+          <p>Color: ${item.selectedColor}</p>
+          <p>Price: $${item.price.toFixed(2)}</p>
+        </div>
+        <div class="cart-controls">
+          <button onclick="removeItem(${i})">Remove</button>
+        </div>
+      `;
+      cartContainer.appendChild(itemDiv);
     });
-  </script>
+
+    updateTotal();
+  }
+
+  function updateTotal() {
+    let total = cart.reduce((sum, i) => sum + i.price, 0);
+    const discounted = total * (1 - discount);
+    totalDisplay.textContent = `Total: $${discounted.toFixed(2)}`;
+  }
+
+  function removeItem(index) {
+    cart.splice(index, 1);
+    saveCart();
+    renderCart();
+    showToast('Item removed');
+  }
+
+  document.getElementById('apply-promo-btn').onclick = () => {
+    const code = promoInput.value.trim().toUpperCase();
+    if (code === 'DISCOUNT10') {
+      discount = 0.10;
+      promoMsg.textContent = '10% discount applied!';
+      promoMsg.style.color = '#00bcd4';
+    } else if (code === 'DISCOUNT20') {
+      discount = 0.20;
+      promoMsg.textContent = '20% discount applied!';
+      promoMsg.style.color = '#00bcd4';
+    } else {
+      discount = 0;
+      promoMsg.textContent = 'Invalid promo code.';
+      promoMsg.style.color = '#ff4c4c';
+    }
+    updateTotal();
+  };
+
+  // Place order logic
+  placeOrderBtn.onclick = () => {
+    if (cart.length === 0) return;
+
+    const total = cart.reduce((sum, i) => sum + i.price, 0) * (1 - discount);
+    const order = {
+      id: 'ORD-' + Date.now(),
+      items: cart,
+      total: total.toFixed(2),
+      timestamp: new Date().toLocaleString()
+    };
+
+    // Save to orders in localStorage
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    orders.push(order);
+    localStorage.setItem('orders', JSON.stringify(orders));
+
+    cart = [];
+    saveCart();
+    renderCart();
+    resultMsg.textContent = 'Order placed successfully!';
+    showToast('Order sent to admin page');
+  };
+
+  renderCart();
+</script>
 </body>
 </html>
