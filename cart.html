@@ -5,21 +5,178 @@
   <title>Your Cart</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    /* Use your previous CSS, plus: */
-    #place-order-btn {
-      display: block;
-      margin: 30px auto 0;
+    :root {
+      --primary: #00bcd4;
+      --primary-hover: #0097a7;
+      --background: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--card-bg);
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    header h2 {
+      margin: 0;
+      color: var(--primary);
+      font-size: 24px;
+    }
+
+    nav {
+      background: #11263f;
       padding: 12px 20px;
-      background: #00bcd4;
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    nav a {
+      color: #f1f5f9;
+      text-decoration: none;
+      font-size: 15px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      background-color: var(--primary);
+      color: #fff;
+    }
+
+    .content {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 20px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 16px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+
+    .cart-details h3 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--primary);
+    }
+
+    .cart-details p {
+      margin: 4px 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .cart-controls button {
+      background: #ef4444;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+
+    .cart-controls button:hover {
+      background: #dc2626;
+    }
+
+    #total-price {
+      text-align: right;
+      font-size: 18px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    #promo-code-section {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    #promo-code-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    #apply-promo-btn {
+      padding: 8px 16px;
+      background: var(--primary);
       border: none;
       border-radius: 6px;
       color: white;
-      font-size: 16px;
+      font-size: 14px;
       cursor: pointer;
+      transition: 0.3s;
+    }
+
+    #apply-promo-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    #promo-message {
+      margin-left: 10px;
+      font-size: 14px;
+    }
+
+    #place-order-btn {
+      display: block;
+      margin: 20px auto 0;
+      padding: 12px 20px;
+      background: var(--primary);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
     }
 
     #place-order-btn:hover {
-      background: #0097a7;
+      background: var(--primary-hover);
+    }
+
+    #result-message {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      color: var(--muted);
     }
 
     .toast {
@@ -27,7 +184,7 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: #00bcd4;
+      background: var(--primary);
       color: white;
       padding: 10px 20px;
       border-radius: 8px;
@@ -39,99 +196,6 @@
 
     .toast.show {
       opacity: 1;
-    }     body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--background);
-      color: var(--text);
-    }
-
-    header {
-      background: var(--card-bg);
-      padding: 20px;
-      text-align: center;
-      border-bottom: 1px solid #1a3c5e;
-    }
-
-    header h2 {
-      margin: 0;
-      color: var(--primary);
-    }
-
-    nav {
-      background: #11263f;
-      padding: 10px 20px;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-
-    nav a {
-      color: var(--text);
-      text-decoration: none;
-      padding: 8px 12px;
-      border-radius: 4px;
-      transition: 0.3s;
-    }
-
-    nav a:hover {
-      background-color: var(--primary);
-      color: #fff;
-    }
-
-    .container {
-      max-width: 1000px;
-      margin: 30px auto;
-      padding: 20px;
-    }
-
-    .order-card {
-      background: var(--card-bg);
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    }
-
-    .order-card h3 {
-      color: var(--primary);
-      margin-bottom: 10px;
-    }
-
-    .order-info {
-      margin-bottom: 15px;
-    }
-
-    .order-info p {
-      margin: 4px 0;
-      font-size: 14px;
-    }
-
-    .order-items {
-      border-top: 1px solid #1a3c5e;
-      padding-top: 15px;
-    }
-
-    .item {
-      padding: 10px 0;
-      border-bottom: 1px solid #1a3c5e;
-    }
-
-    .item:last-child {
-      border-bottom: none;
-    }
-
-    .item p {
-      margin: 2px 0;
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    .no-orders {
-      text-align: center;
-      font-size: 18px;
-      color: var(--muted);
-      margin-top: 50px;
     }
   </style>
 </head>
@@ -171,18 +235,17 @@
 <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js"></script>
 
 <script>
-  // 🟡 Replace this with your actual config
+  // Firebase config (replace with your own)
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "your-project-id.firebaseapp.com",
-    projectId: "your-project-id",
-    storageBucket: "your-project-id.appspot.com",
-    messagingSenderId: "xxxxxxx",
-    appId: "1:xxxxxx:web:xxxxxx"
+  apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+  authDomain: "survival-f35e2.firebaseapp.com",
+  projectId: "survival-f35e2",
+  storageBucket: "survival-f35e2.appspot.com",
+  messagingSenderId: "704462603548",
+  appId: "1:704462603548:web:00d1a3fb89f9106a59e6d9"
   };
 
-  // Initialize Firebase
-  const app = firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
   const cartContainer = document.getElementById('cart-items');
@@ -263,7 +326,7 @@
     } else {
       discount = 0;
       promoMsg.textContent = 'Invalid promo code.';
-      promoMsg.style.color = '#ff4c4c';
+      promoMsg.style.color = '#ef4444';
     }
     updateTotal();
   };
