@@ -39,6 +39,99 @@
 
     .toast.show {
       opacity: 1;
+    }     body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--background);
+      color: var(--text);
+    }
+
+    header {
+      background: var(--card-bg);
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid #1a3c5e;
+    }
+
+    header h2 {
+      margin: 0;
+      color: var(--primary);
+    }
+
+    nav {
+      background: #11263f;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      background-color: var(--primary);
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .order-card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .order-card h3 {
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .order-info {
+      margin-bottom: 15px;
+    }
+
+    .order-info p {
+      margin: 4px 0;
+      font-size: 14px;
+    }
+
+    .order-items {
+      border-top: 1px solid #1a3c5e;
+      padding-top: 15px;
+    }
+
+    .item {
+      padding: 10px 0;
+      border-bottom: 1px solid #1a3c5e;
+    }
+
+    .item:last-child {
+      border-bottom: none;
+    }
+
+    .item p {
+      margin: 2px 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .no-orders {
+      text-align: center;
+      font-size: 18px;
+      color: var(--muted);
+      margin-top: 50px;
     }
   </style>
 </head>
