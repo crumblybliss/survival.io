@@ -6,169 +6,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bracelets - Tactics & Treats</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Arial', sans-serif; background-color: #f9f9f9; color: #333; text-align: center; }
 
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f9f9f9;
-      color: #333;
-      text-align: center;
-    }
-
-    /* Navbar */
     .navbar {
       background: linear-gradient(90deg, #0a1d37, #1b3b6f);
-      color: #fff;
-      padding: 15px 0;
-      font-size: 18px;
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 100;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
+      color: #fff; padding: 15px 0; font-size: 18px;
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      display: flex; justify-content: center; align-items: center; gap: 20px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
+    .navbar a { color: white; text-decoration: none; font-weight: bold; padding: 5px 10px; border-radius: 5px; transition: background 0.3s; }
+    .navbar a:hover { background-color: rgba(255, 255, 255, 0.2); }
+    .auth-btn { background-color: #00bcd4; color: white; padding: 8px 18px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; transition: background 0.3s; }
+    .auth-btn:hover { background-color: #0097a7; }
 
-    .navbar a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-      padding: 5px 10px;
-      transition: background 0.3s;
-      border-radius: 5px;
-    }
-
-    .navbar a:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .auth-btn {
-      background-color: #00bcd4;
-      color: white;
-      padding: 8px 18px;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-
-    .auth-btn:hover {
-      background-color: #0097a7;
-    }
-
-    h1 {
-      padding-top: 120px;
-      font-size: 2.5rem;
-      color: #0a1d37;
-      margin-bottom: 20px;
-    }
-
-    .container {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      padding: 20px;
-      gap: 20px;
-      max-width: 1200px;
-      margin: auto;
-    }
+    h1 { padding-top: 120px; font-size: 2.5rem; color: #0a1d37; margin-bottom: 20px; }
+    .container { display: flex; justify-content: center; flex-wrap: wrap; padding: 20px; gap: 20px; max-width: 1200px; margin: auto; }
 
     .product {
-      background-color: #fff;
-      border-radius: 15px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      width: 260px;
-      padding: 15px;
-      transition: transform 0.3s, box-shadow 0.3s;
+      background-color: #fff; border-radius: 15px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      width: 260px; padding: 15px; transition: transform 0.3s, box-shadow 0.3s;
     }
+    .product:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15); }
+    .product img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 10px; transition: transform 0.3s; }
+    .product img:hover { transform: scale(1.05); }
+    .product h3 { font-size: 1.3rem; margin: 10px 0; color: #0a1d37; }
+    .product p { font-size: 0.95rem; color: #555; margin: 8px 0; }
+    .product select { padding: 6px; margin: 5px 0; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; width: 100%; cursor: pointer; }
+    .product button { background-color: #00bcd4; color: white; border: none; padding: 10px; width: 100%; cursor: pointer; border-radius: 8px; font-size: 1rem; margin-top: 10px; transition: background 0.3s; }
+    .product button:hover { background-color: #0097a7; }
+    .color-indicator { display: inline-block; width: 20px; height: 20px; border-radius: 50%; vertical-align: middle; border: 1px solid #ccc; margin-left: 10px; transition: background-color 0.3s ease; }
 
-    .product:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .product img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      transition: transform 0.3s;
-    }
-
-    .product img:hover {
-      transform: scale(1.05);
-    }
-
-    .product h3 {
-      font-size: 1.3rem;
-      margin: 10px 0;
-      color: #0a1d37;
-    }
-
-    .product p {
-      font-size: 0.95rem;
-      color: #555;
-      margin: 8px 0;
-    }
-
-    .product select {
-      padding: 6px;
-      margin: 5px 0;
-      font-size: 14px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      width: 100%;
-      cursor: pointer;
-    }
-
-    .product button {
-      background-color: #00bcd4;
-      color: white;
-      border: none;
-      padding: 10px;
-      width: 100%;
-      cursor: pointer;
-      border-radius: 8px;
-      font-size: 1rem;
-      margin-top: 10px;
-      transition: background 0.3s;
-    }
-
-    .product button:hover {
-      background-color: #0097a7;
-    }
-
-    .color-indicator {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      vertical-align: middle;
-      border: 1px solid #ccc;
-      margin-left: 10px;
-      transition: background-color 0.3s ease;
-    }
-
-    @media screen and (max-width: 768px) {
-      .container {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .navbar {
-        flex-direction: column;
-        gap: 10px;
-      }
-    }
+    @media screen and (max-width: 768px) { .container { flex-direction: column; align-items: center; } .navbar { flex-direction: column; gap: 10px; } }
   </style>
 </head>
 
@@ -187,7 +57,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
@@ -207,17 +77,37 @@
         alert("Please select size, primary color, and secondary color.");
         return;
       }
+
+      const user = auth.currentUser;
+      if (!user) { 
+        alert("Please log in to add products to cart.");
+        return;
+      }
+
       const product = JSON.parse(atob(productB64));
       const sizeInfo = product.sizes.find(s => s.size === selectedSize);
       if (!sizeInfo) { alert("Invalid size selected."); return; }
 
-      const cartItem = { ...product, selectedSize, primaryColor, secondaryColor, price: sizeInfo.price };
-      let cart = JSON.parse(localStorage.getItem("cart")) || [];
-      cart.push(cartItem);
-      localStorage.setItem("cart", JSON.stringify(cart));
+      const cartItem = {
+        uid: user.uid,
+        productName: product.name,
+        productId: product.id || null,
+        selectedSize,
+        primaryColor,
+        secondaryColor,
+        price: sizeInfo.price,
+        type: "bracelet",
+        timestamp: new Date()
+      };
 
-      alert(`${product.name} (${selectedSize}, ${primaryColor}, ${secondaryColor}) added to your cart for $${sizeInfo.price}`);
-      window.location.href = "cart.html";
+      try {
+        await addDoc(collection(db, "carts"), cartItem);
+        alert(`${product.name} (${selectedSize}, ${primaryColor}, ${secondaryColor}) added to your cart for $${sizeInfo.price}`);
+        window.location.href = "cart.html";
+      } catch (err) {
+        console.error("Error adding to cart:", err);
+        alert("Failed to add to cart. Try again.");
+      }
     };
 
     const fetchBracelets = async () => {
@@ -271,18 +161,13 @@
         `;
         container.appendChild(div);
 
-        // Color indicators
         const primarySelect = div.querySelector(`#primaryColor-${doc.id}`);
         const primaryIndicator = div.querySelector(`#primary-indicator-${doc.id}`);
-        primarySelect.addEventListener('change', () => {
-          primaryIndicator.style.backgroundColor = primarySelect.value || 'transparent';
-        });
+        primarySelect.addEventListener('change', () => { primaryIndicator.style.backgroundColor = primarySelect.value || 'transparent'; });
 
         const secondarySelect = div.querySelector(`#secondaryColor-${doc.id}`);
         const secondaryIndicator = div.querySelector(`#secondary-indicator-${doc.id}`);
-        secondarySelect.addEventListener('change', () => {
-          secondaryIndicator.style.backgroundColor = secondarySelect.value || 'transparent';
-        });
+        secondarySelect.addEventListener('change', () => { secondaryIndicator.style.backgroundColor = secondarySelect.value || 'transparent'; });
       });
     };
 
