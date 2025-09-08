@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bracelets - Tactics & Treats</title>
   <style>
-    /* Reset some defaults */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -72,7 +71,6 @@
       margin-bottom: 20px;
     }
 
-    /* Product container */
     .container {
       display: flex;
       justify-content: center;
@@ -83,7 +81,6 @@
       margin: auto;
     }
 
-    /* Product card */
     .product {
       background-color: #fff;
       border-radius: 15px;
@@ -150,7 +147,6 @@
       background-color: #0097a7;
     }
 
-    /* Color indicator circle */
     .color-indicator {
       display: inline-block;
       width: 20px;
@@ -206,22 +202,21 @@
     const db = getFirestore(app);
     const auth = getAuth();
 
-    window.addToCart = async (productB64, selectedSize, selectedColor) => {
-      const user = auth.currentUser;
-      if (!user) { alert("Please login to add items to your cart."); return; }
-      if (!selectedSize) { alert("Please select a size."); return; }
-      if (!selectedColor) { alert("Please select a color."); return; }
-
+    window.addToCart = async (productB64, selectedSize, primaryColor, secondaryColor) => {
+      if (!selectedSize || !primaryColor || !secondaryColor) {
+        alert("Please select size, primary color, and secondary color.");
+        return;
+      }
       const product = JSON.parse(atob(productB64));
       const sizeInfo = product.sizes.find(s => s.size === selectedSize);
       if (!sizeInfo) { alert("Invalid size selected."); return; }
 
-      const cartItem = { ...product, selectedSize, selectedColor, price: sizeInfo.price };
+      const cartItem = { ...product, selectedSize, primaryColor, secondaryColor, price: sizeInfo.price };
       let cart = JSON.parse(localStorage.getItem("cart")) || [];
       cart.push(cartItem);
       localStorage.setItem("cart", JSON.stringify(cart));
 
-      alert(`${product.name} (${selectedSize}, ${selectedColor}) added to your cart for $${sizeInfo.price}`);
+      alert(`${product.name} (${selectedSize}, ${primaryColor}, ${secondaryColor}) added to your cart for $${sizeInfo.price}`);
       window.location.href = "cart.html";
     };
 
@@ -237,13 +232,6 @@
       snap.forEach(doc => {
         const product = doc.data();
         const imageUrl = product.imageUrl || "default.jpg";
-
-        const sizeOptions = (Array.isArray(product.sizes) ? product.sizes : [])
-          .map(s => `<option value="${s.size}">${s.size} - $${s.price}</option>`).join("");
-
-        const colorOptions = (Array.isArray(product.colors) ? product.colors : [])
-          .map(c => `<option value="${c}">${c}</option>`).join("");
-
         const encodedProduct = btoa(JSON.stringify(product));
 
         const div = document.createElement("div");
@@ -251,30 +239,49 @@
         div.innerHTML = `
           <img src="${imageUrl}" alt="${product.name}">
           <h3>${product.name}</h3>
+
           <p>Select Size:</p>
           <select id="size-${doc.id}">
             <option value="" disabled selected>Select Size</option>
-            ${sizeOptions}
+            ${Array.isArray(product.sizes) ? product.sizes.map(s => `<option value="${s.size}">${s.size} - $${s.price}</option>`).join('') : ''}
           </select>
-          <p>Select Color:
-            <select id="color-${doc.id}">
-              <option value="" disabled selected>Select Color</option>
-              ${colorOptions}
+
+          <p>Select Primary Color:
+            <select id="primaryColor-${doc.id}">
+              <option value="" disabled selected>Select Primary</option>
+              ${Array.isArray(product.colors?.primary) ? product.colors.primary.map(c => `<option value="${c}">${c}</option>`).join('') : ''}
             </select>
-            <span id="color-indicator-${doc.id}" class="color-indicator"></span>
+            <span id="primary-indicator-${doc.id}" class="color-indicator"></span>
           </p>
+
+          <p>Select Secondary Color:
+            <select id="secondaryColor-${doc.id}">
+              <option value="" disabled selected>Select Secondary</option>
+              ${Array.isArray(product.colors?.secondary) ? product.colors.secondary.map(c => `<option value="${c}">${c}</option>`).join('') : ''}
+            </select>
+            <span id="secondary-indicator-${doc.id}" class="color-indicator"></span>
+          </p>
+
           <button onclick="addToCart(
             '${encodedProduct}', 
             document.getElementById('size-${doc.id}').value,
-            document.getElementById('color-${doc.id}').value
+            document.getElementById('primaryColor-${doc.id}').value,
+            document.getElementById('secondaryColor-${doc.id}').value
           )">Add to Cart</button>
         `;
         container.appendChild(div);
 
-        const colorSelect = div.querySelector(`#color-${doc.id}`);
-        const indicator = div.querySelector(`#color-indicator-${doc.id}`);
-        colorSelect.addEventListener('change', () => {
-          indicator.style.backgroundColor = colorSelect.value || 'transparent';
+        // Color indicators
+        const primarySelect = div.querySelector(`#primaryColor-${doc.id}`);
+        const primaryIndicator = div.querySelector(`#primary-indicator-${doc.id}`);
+        primarySelect.addEventListener('change', () => {
+          primaryIndicator.style.backgroundColor = primarySelect.value || 'transparent';
+        });
+
+        const secondarySelect = div.querySelector(`#secondaryColor-${doc.id}`);
+        const secondaryIndicator = div.querySelector(`#secondary-indicator-${doc.id}`);
+        secondarySelect.addEventListener('change', () => {
+          secondaryIndicator.style.backgroundColor = secondarySelect.value || 'transparent';
         });
       });
     };
