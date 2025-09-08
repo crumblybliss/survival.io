@@ -1,176 +1,363 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Car Shop</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bracelets - Tactics & Treats</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f1f1f1;
+      color: #333;
+      margin: 0;
+      text-align: center;
+    }
+
+    .navbar {
+      background-color: #0a1d37;
+      color: white;
+      padding: 15px 0;
+      font-size: 18px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+    }
+
+    .navbar a {
+      color: white;
+      margin: 0 20px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
+    .navbar .auth-btn {
+      background-color: #00bcd4;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .navbar .auth-btn:hover {
+      background-color: #0097a7;
+    }
+
+    h1 {
+      padding-top: 100px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 20px;
+    }
+
+    .product {
+      width: 250px;
+      margin: 20px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .product img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .product h3 {
+      margin: 15px 0;
+      font-size: 18px;
+    }
+
+    .product p {
+      font-size: 16px;
+      color: #555;
+      margin: 8px 0;
+    }
+
+    .product select {
+      padding: 5px;
+      margin: 0 8px 0 0;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 140px;
+      vertical-align: middle;
+      cursor: pointer;
+    }
+
+    .product button {
+      background-color: #00bcd4;
+      color: white;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    .product button:hover {
+      background-color: #0097a7;
+    }
+
+    /* Color indicator circle next to color select */
+    .color-indicator {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      vertical-align: middle;
+      border: 1px solid #ccc;
+      background-color: transparent;
+      transition: background-color 0.3s ease;
+    }
+  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bracelets - Tactics & Treats</title>
 <style>
-  body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
-  h1, h2 { color: #333; }
-  #login-section, #cart-section { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-  input, select, button { margin: 5px 0; padding: 8px; border-radius: 5px; border: 1px solid #ccc; }
-  button { cursor: pointer; background: #007BFF; color: #fff; border: none; }
-  button:hover { background: #0056b3; }
-  ul { list-style: none; padding: 0; }
-  li { padding: 10px; background: #fafafa; margin-bottom: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; }
-  .item-info { display: flex; align-items: center; gap: 10px; }
-  .removeBtn { background: #dc3545; margin-left: 10px; }
-  .removeBtn:hover { background: #a71d2a; }
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f1f1f1;
+    color: #333;
+    margin: 0;
+    text-align: center;
+  }
+  .navbar {
+    background-color: #0a1d37;
+    color: white;
+    padding: 15px 0;
+    font-size: 18px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .navbar a {
+    color: white;
+    margin: 0 10px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  .navbar .auth-btn {
+    background-color: #00bcd4;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  .navbar .auth-btn:hover { background-color: #0097a7; }
+  h1 { padding-top: 100px; }
+  .container { display: flex; justify-content: center; flex-wrap: wrap; padding: 20px; }
+  .product {
+    width: 250px;
+    margin: 20px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  .product img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+  .product h3 { margin: 15px 0; font-size: 18px; }
+  .product p { font-size: 16px; color: #555; margin: 8px 0; }
+  .product select, .product button { padding: 8px; margin: 5px 0; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer; }
+  .product button { width: 100%; background-color: #00bcd4; color: white; border: none; margin-top: 10px; }
+  .product button:hover { background-color: #0097a7; }
+  .color-indicator {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    vertical-align: middle;
+    border: 1px solid #ccc;
+    margin-left: 6px;
+  }
 </style>
 </head>
+
 <body>
+  <div class="navbar">
+    <a href="index.html">Home</a>
+@@ -158,71 +104,47 @@ <h1>Bracelets</h1>
+    const db = getFirestore(app);
+    const auth = getAuth();
 
-<h1>Car Shop</h1>
+    window.addToCart = async (productB64, selectedSize, selectedColor) => {
+    window.addToCart = async (productB64, selectedSize, primaryColor, secondaryColor) => {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please login to add items to your cart.");
+        return;
+      }
 
-<div id="login-section">
-  <h2>Login / Sign Up</h2>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <br>
-  <button id="loginBtn">Login</button>
-  <button id="signupBtn">Sign Up</button>
-</div>
+      if (!selectedSize) {
+        alert("Please select a size.");
+        return;
+      }
 
-<div id="cart-section" style="display:none;">
-  <h2>Your Cart</h2>
-  <ul id="cart-list"></ul>
-  <button id="checkoutBtn">Checkout</button>
-</div>
+      if (!selectedColor) {
+        alert("Please select a color.");
+        return;
+      }
+      if (!user) { alert("Please login to add items to your cart."); return; }
+      if (!selectedSize || !primaryColor) { alert("Please select size and primary color."); return; }
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, addDoc, doc, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+      const product = JSON.parse(atob(productB64));
+      const sizeInfo = product.sizes.find(s => s.size === selectedSize);
 
-// --- Firebase Config ---
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_ID",
-  appId: "YOUR_APP_ID"
-};
+      if (!sizeInfo) {
+        alert("Invalid size selected.");
+        return;
+      }
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+      const cartItem = {
+        ...product,
+        selectedSize: selectedSize,
+        selectedColor: selectedColor,
+        selectedSize,
+        primaryColor,
+        secondaryColor,
+        price: sizeInfo.price
+      };
 
-// Elements
-const loginSection = document.getElementById("login-section");
-const cartSection = document.getElementById("cart-section");
-const cartList = document.getElementById("cart-list");
-const loginBtn = document.getElementById("loginBtn");
-const signupBtn = document.getElementById("signupBtn");
-const checkoutBtn = document.getElementById("checkoutBtn");
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.push(cartItem);
+      localStorage.setItem("cart", JSON.stringify(cart));
 
-let userUID = null;
-let unsubscribeCart = null;
+      alert(`${product.name} (${selectedSize}, ${selectedColor}) added to your cart for $${sizeInfo.price}`);
 
-// Login
-loginBtn.addEventListener("click", () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  signInWithEmailAndPassword(auth, email, password)
-    .catch(err => alert(err.message));
-});
+      alert(`${product.name} (${selectedSize}, ${primaryColor}${secondaryColor?"/"+secondaryColor:""}) added to cart for $${sizeInfo.price}`);
+      window.location.href = "cart.html";
+    };
 
-// Sign Up
-signupBtn.addEventListener("click", () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  createUserWithEmailAndPassword(auth, email, password)
-    .catch(err => alert(err.message));
-});
+    const fetchBracelets = async () => {
+      const snap = await getDocs(collection(db, "bracelets"));
+      const container = document.getElementById("braceletsProducts");
 
-// Auth State
-onAuthStateChanged(auth, user => {
-  if (user) {
-    userUID = user.uid;
-    loginSection.style.display = "none";
-    cartSection.style.display = "block";
-    loadCartRealtime();
-  } else {
-    userUID = null;
-    loginSection.style.display = "block";
-    cartSection.style.display = "none";
-    if (unsubscribeCart) unsubscribeCart();
-  }
-});
+      if (snap.empty) {
+        container.innerHTML = "<p>No bracelets available at the moment.</p>";
+        return;
+      }
+      if (snap.empty) { container.innerHTML = "<p>No bracelets available.</p>"; return; }
 
-// Load Cart Real-time
-function loadCartRealtime() {
-  const userCartRef = collection(db, "carts");
+      snap.forEach(doc => {
+        const product = doc.data();
+        const imageUrl = product.imageUrl || "default.jpg";
 
-  if (unsubscribeCart) unsubscribeCart();
+        // sizes dropdown options
+        const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+        const sizeOptions = sizes.map(size => {
+          return `<option value="${size.size}">${size.size} - $${size.price}</option>`;
+        }).join("");
+        const sizeOptions = sizes.map(s => `<option value="${s.size}">${s.size} - $${s.price}</option>`).join("");
 
-  unsubscribeCart = onSnapshot(userCartRef, snapshot => {
-    cartList.innerHTML = "";
-    snapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      if (data.uid !== userUID) return; // only current user
+        const primaryColors = Array.isArray(product.colors?.primary) ? product.colors.primary : [];
+        const secondaryColors = Array.isArray(product.colors?.secondary) ? product.colors.secondary : [];
 
-      const li = document.createElement("li");
-      li.innerHTML = `
-        <div class="item-info">
-          <strong>${data.carName}</strong>
-          Color: <input type="color" value="${data.color || '#ffffff'}" data-id="${docSnap.id}" class="color">
-          Size: 
-          <select data-id="${docSnap.id}" class="size">
-            <option value="small" ${data.size==='small'?'selected':''}>Small</option>
-            <option value="medium" ${data.size==='medium'?'selected':''}>Medium</option>
-            <option value="large" ${data.size==='large'?'selected':''}>Large</option>
+        // colors dropdown options
+        const colors = Array.isArray(product.colors) ? product.colors : [];
+        const colorOptions = colors.map(color => {
+          return `<option value="${color}">${color}</option>`;
+        }).join("");
+        const primaryOptions = primaryColors.map(c => `<option value="${c}">${c}</option>`).join("");
+        const secondaryOptions = secondaryColors.map(c => `<option value="${c}">${c}</option>`).join("");
+
+        const encodedProduct = btoa(JSON.stringify(product));
+
+@@ -236,49 +158,46 @@ <h3>${product.name || "Unnamed Bracelet"}</h3>
+            <option value="" disabled selected>Select Size</option>
+            ${sizeOptions}
           </select>
-        </div>
-        <button data-id="${docSnap.id}" class="removeBtn">Remove</button>
-      `;
-      cartList.appendChild(li);
-    });
+          <p>Select Color:
+            <select id="color-${doc.id}" class="color-select">
+              <option value="" disabled selected>Select Color</option>
+              ${colorOptions}
+          <p>Primary Color:
+            <select id="primary-${doc.id}">
+              <option value="" disabled selected>Select Primary Color</option>
+              ${primaryOptions}
+            </select>
+            <span id="color-indicator-${doc.id}" class="color-indicator"></span>
+            <span id="primary-indicator-${doc.id}" class="color-indicator"></span>
+          </p>
+          <p>Secondary Color (Optional):
+            <select id="secondary-${doc.id}">
+              <option value="" selected>None</option>
+              ${secondaryOptions}
+            </select>
+            <span id="secondary-indicator-${doc.id}" class="color-indicator"></span>
+          </p>
+          <button onclick="addToCart(
+            '${encodedProduct}', 
+            document.getElementById('size-${doc.id}').value,
+            document.getElementById('color-${doc.id}').value
+            document.getElementById('primary-${doc.id}').value,
+            document.getElementById('secondary-${doc.id}').value
+          )">Add to Cart</button>
+        `;
+        container.appendChild(div);
 
-    // Event Listeners
-    document.querySelectorAll(".color").forEach(input => {
-      input.addEventListener("input", e => {
-        updateDoc(doc(db, "carts", e.target.dataset.id), { color: e.target.value });
+        // Update color indicator when color changes
+        const colorSelect = div.querySelector(`#color-${doc.id}`);
+        const indicator = div.querySelector(`#color-indicator-${doc.id}`);
+        const primarySelect = div.querySelector(`#primary-${doc.id}`);
+        const primaryIndicator = div.querySelector(`#primary-indicator-${doc.id}`);
+        primarySelect.addEventListener('change', () => primaryIndicator.style.backgroundColor = primarySelect.value || 'transparent');
+
+        colorSelect.addEventListener('change', () => {
+          const color = colorSelect.value;
+          if (color) {
+            indicator.style.backgroundColor = color;
+          } else {
+            indicator.style.backgroundColor = 'transparent';
+          }
+        });
+        const secondarySelect = div.querySelector(`#secondary-${doc.id}`);
+        const secondaryIndicator = div.querySelector(`#secondary-indicator-${doc.id}`);
+        secondarySelect.addEventListener('change', () => secondaryIndicator.style.backgroundColor = secondarySelect.value || 'transparent');
       });
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      const btn = document.getElementById("loginButton");
+      if (user) {
+        btn.innerText = "Logout";
+        btn.onclick = () => signOut(auth);
+      } else {
+        btn.innerText = "Login";
+        btn.onclick = () => window.location.href = "login.html";
+      }
+      if (user) { btn.innerText = "Logout"; btn.onclick = () => signOut(auth); }
+      else { btn.innerText = "Login"; btn.onclick = () => window.location.href = "login.html"; }
     });
-    document.querySelectorAll(".size").forEach(select => {
-      select.addEventListener("change", e => {
-        updateDoc(doc(db, "carts", e.target.dataset.id), { size: e.target.value });
-      });
-    });
-    document.querySelectorAll(".removeBtn").forEach(btn => {
-      btn.addEventListener("click", e => {
-        deleteDoc(doc(db, "carts", e.target.dataset.id));
-      });
-    });
-  });
-}
 
-// Checkout
-checkoutBtn.addEventListener("click", async () => {
-  const userCartRef = collection(db, "carts");
-  const snapshot = await getDocs(userCartRef);
-  const orders = [];
-
-  snapshot.forEach(docSnap => {
-    const data = docSnap.data();
-    if (data.uid !== userUID) return;
-    orders.push({
-      carName: data.carName,
-      color: data.color || '#ffffff',
-      size: data.size || 'medium',
-      uid: userUID,
-      timestamp: new Date()
-    });
-  });
-
-  for (const order of orders) {
-    await addDoc(collection(db, "orders"), order);
-  }
-
-  alert("Order placed!");
-});
-</script>
-
+    fetchBracelets();
+  </script>
 </body>
+
 </html>
