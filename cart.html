@@ -32,9 +32,6 @@
   .item-info { display: flex; flex-direction: column; gap: 10px; }
   .item-info div { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-  /* Labels & badges */
-  .badge { background: #FF7F50; color: #fff; padding: 2px 6px; border-radius: 5px; font-size: 0.8rem; }
-
   /* Responsive */
   @media (min-width: 600px) {
     #login-section input, #login-section select, #login-section button { width: auto; display: inline-block; }
@@ -56,7 +53,7 @@
 
 <div id="cart-section" class="section" style="display:none;">
   <h2>Your Cart</h2>
-  <ul id="cart-list"></ul>
+  <ul id="cart-list"><li>Loading cart...</li></ul>
   <button id="checkoutBtn">Checkout</button>
 </div>
 
@@ -79,6 +76,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Elements
 const loginSection = document.getElementById("login-section");
 const cartSection = document.getElementById("cart-section");
 const cartList = document.getElementById("cart-list");
@@ -93,14 +91,16 @@ let unsubscribeCart = null;
 loginBtn.addEventListener("click", () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-  signInWithEmailAndPassword(auth, email, password).catch(err => alert(err.message));
+  signInWithEmailAndPassword(auth, email, password)
+    .catch(err => alert(err.message));
 });
 
 // Sign Up
 signupBtn.addEventListener("click", () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-  createUserWithEmailAndPassword(auth, email, password).catch(err => alert(err.message));
+  createUserWithEmailAndPassword(auth, email, password)
+    .catch(err => alert(err.message));
 });
 
 // Auth State
@@ -120,19 +120,32 @@ onAuthStateChanged(auth, user => {
 
 // Load Cart Real-time
 function loadCartRealtime() {
+  if (!userUID) {
+    cartList.innerHTML = "<li>Please log in to see your cart.</li>";
+    return;
+  }
+
   const userCartRef = collection(db, "carts");
+
   if (unsubscribeCart) unsubscribeCart();
 
   unsubscribeCart = onSnapshot(userCartRef, snapshot => {
     cartList.innerHTML = "";
-    snapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      if (data.uid !== userUID) return;
 
+    const userCartItems = snapshot.docs.filter(docSnap => docSnap.data().uid === userUID);
+
+    if (userCartItems.length === 0) {
+      cartList.innerHTML = "<li>Your cart is empty.</li>";
+      return;
+    }
+
+    userCartItems.forEach(docSnap => {
+      const data = docSnap.data();
       const li = document.createElement("li");
+
       li.innerHTML = `
         <div class="item-info">
-          <strong>${data.productName}</strong>
+          <strong>${data.productName || "Unnamed Product"}</strong>
           <div>
             ${data.type === 'bracelet' 
               ? `Color: <input type="color" value="${data.color || '#ffffff'}" data-id="${docSnap.id}" class="color"> Size: 
@@ -150,6 +163,7 @@ function loadCartRealtime() {
       cartList.appendChild(li);
     });
 
+    // Event Listeners
     document.querySelectorAll(".color").forEach(input => {
       input.addEventListener("input", e => updateDoc(doc(db, "carts", e.target.dataset.id), { color: e.target.value }));
     });
@@ -162,6 +176,9 @@ function loadCartRealtime() {
     document.querySelectorAll(".removeBtn").forEach(btn => {
       btn.addEventListener("click", e => deleteDoc(doc(db, "carts", e.target.dataset.id)));
     });
+  }, err => {
+    console.error("Error loading cart:", err);
+    cartList.innerHTML = "<li>Failed to load cart.</li>";
   });
 }
 
