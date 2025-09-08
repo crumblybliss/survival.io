@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Orders - Admin</title>
+<style>
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #fef6f0; padding: 20px; color: #333; }
+  h1 { text-align: center; color: #FF7F50; margin-bottom: 30px; }
+  
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+  th, td { padding: 12px 15px; text-align: left; }
+  th { background: #FF7F50; color: #fff; }
+  tr:nth-child(even) { background: #fff3e0; }
+  tr:hover { background: #ffe5cc; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    table, thead, tbody, th, td, tr { display: block; }
+    thead { display: none; }
+    tr { margin-bottom: 15px; border-bottom: 2px solid #ddd; }
+    td { padding-left: 50%; position: relative; }
+    td::before { 
+      content: attr(data-label); 
+      position: absolute; 
+      left: 15px; 
+      font-weight: bold; 
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>All Orders</h1>
+<table id="orders-table">
+  <thead>
+    <tr>
+      <th>Product Name</th>
+      <th>Type</th>
+      <th>Color</th>
+      <th>Size</th>
+      <th>Flavor</th>
+      <th>User ID</th>
+      <th>Timestamp</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Orders will populate here -->
+  </tbody>
+</table>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+  authDomain: "survival-f35e2.firebaseapp.com",
+  projectId: "survival-f35e2",
+  storageBucket: "survival-f35e2.appspot.com",
+  messagingSenderId: "704462603548",
+  appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const ordersTableBody = document.querySelector("#orders-table tbody");
+
+const ordersRef = collection(db, "orders");
+
+// Real-time listener
+onSnapshot(ordersRef, snapshot => {
+  ordersTableBody.innerHTML = "";
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td data-label="Product Name">${data.productName || "-"}</td>
+      <td data-label="Type">${data.type || "-"}</td>
+      <td data-label="Color">${data.color || "-"}</td>
+      <td data-label="Size">${data.size || "-"}</td>
+      <td data-label="Flavor">${data.flavor || "-"}</td>
+      <td data-label="User ID">${data.uid || "-"}</td>
+      <td data-label="Timestamp">${data.timestamp ? new Date(data.timestamp.seconds*1000).toLocaleString() : "-"}</td>
+    `;
+    ordersTableBody.appendChild(tr);
+  });
+});
+</script>
+
+</body>
+</html>
