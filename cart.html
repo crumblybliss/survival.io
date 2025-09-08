@@ -9,30 +9,36 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #fef6f0; padding: 20px; color: #333; }
 
-  h1 { font-size: 2.5rem; margin-bottom: 20px; text-align: center; color: #FF7F50; }
-  h2 { font-size: 1.5rem; margin-bottom: 15px; color: #333; }
+  h1 { font-size: 2.8rem; text-align: center; color: #FF7F50; margin-bottom: 30px; }
+  h2 { font-size: 1.6rem; margin-bottom: 20px; color: #333; }
 
   /* Sections */
-  .section { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 25px; }
-  #login-section input, #login-section select, #login-section button { display: block; width: 100%; margin-bottom: 12px; padding: 10px; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; }
+  .section { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); margin-bottom: 30px; transition: transform 0.2s; }
+  .section:hover { transform: translateY(-2px); }
 
-  /* Buttons */
-  button { cursor: pointer; background: #FF7F50; color: #fff; border: none; transition: 0.3s; }
+  /* Inputs & Buttons */
+  input, select, button { font-size: 1rem; padding: 12px; border-radius: 8px; border: 1px solid #ccc; }
+  input, select { width: 100%; margin-bottom: 15px; }
+  button { cursor: pointer; background: #FF7F50; color: #fff; border: none; transition: 0.3s; width: 100%; margin-top: 10px; }
   button:hover { background: #FF4500; }
-  .removeBtn { background: #dc3545; margin-left: 10px; }
+
+  .removeBtn { background: #dc3545; margin-left: 10px; width: auto; }
   .removeBtn:hover { background: #a71d2a; }
 
-  /* Cart Items */
+  /* Cart List */
   ul { list-style: none; padding: 0; }
-  li { background: #fff3e0; margin-bottom: 12px; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+  li { background: #fff3e0; margin-bottom: 15px; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
   li:hover { background: #ffe5cc; }
-  .item-info { display: flex; flex-direction: column; gap: 8px; }
-  .item-info div { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .item-info { display: flex; flex-direction: column; gap: 10px; }
+  .item-info div { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  /* Labels & badges */
+  .badge { background: #FF7F50; color: #fff; padding: 2px 6px; border-radius: 5px; font-size: 0.8rem; }
 
   /* Responsive */
   @media (min-width: 600px) {
     #login-section input, #login-section select, #login-section button { width: auto; display: inline-block; }
-    .item-info { flex-direction: row; gap: 15px; }
+    .item-info { flex-direction: row; gap: 20px; }
   }
 </style>
 </head>
@@ -73,7 +79,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Elements
 const loginSection = document.getElementById("login-section");
 const cartSection = document.getElementById("cart-section");
 const cartList = document.getElementById("cart-list");
@@ -145,7 +150,6 @@ function loadCartRealtime() {
       cartList.appendChild(li);
     });
 
-    // Event Listeners
     document.querySelectorAll(".color").forEach(input => {
       input.addEventListener("input", e => updateDoc(doc(db, "carts", e.target.dataset.id), { color: e.target.value }));
     });
