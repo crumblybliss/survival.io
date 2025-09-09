@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recreate User Account</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
+h1 { color: #333; }
+input, button { padding: 0.8rem; margin: 0.5rem 0; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem; }
+button { background: #007bff; color: white; border: none; cursor: pointer; }
+button:hover { background: #0056b3; }
+#log { margin-top: 1rem; width: 100%; max-width: 600px; height: 300px; overflow-y: auto; background: #fff; padding: 1rem; border-radius: 5px; border: 1px solid #ccc; white-space: pre-line; }
+</style>
+</head>
+<body>
+<h1>Recreate User Account</h1>
+<input type="text" id="uidInput" placeholder="Enter UID">
+<button id="recreateBtn">Recreate Account</button>
+<div id="log"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+// --- Replace with your Firebase config ---
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const logEl = document.getElementById('log');
+function log(msg) { logEl.textContent += msg + "\n"; }
+
+document.getElementById('recreateBtn').addEventListener('click', async () => {
+  const uid = document.getElementById('uidInput').value.trim();
+  if(!uid) { alert("Please enter a UID"); return; }
+
+  if(!confirm(`⚠️ This will recreate the account for UID: ${uid}. Proceed?`)) return;
+  log(`Starting recreation for UID: ${uid}...\n`);
+
+  try {
+    // Example: You can customize default values for the recreated account
+    const userRef = doc(db, "users", uid);
+
+    // Optional: check if it exists before recreating
+    const docSnap = await getDoc(userRef);
+    if(docSnap.exists()) {
+      log(`User ${uid} exists. Overwriting...`);
+    }
+
+    await setDoc(userRef, {
+      email: "",          // Leave empty or prefill if you want
+      createdAt: new Date(),
+      lastLogin: null,
+      role: "user"
+    });
+
+    log(`✅ User account recreated for UID: ${uid}`);
+  } catch(err) {
+    log(`❌ Error recreating user: ${err.message}`);
+  }
+});
+</script>
+</body>
+</html>
