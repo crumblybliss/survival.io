@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firebase DB Cleaner</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 2rem;
+}
+h1 { color: #333; }
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    margin: 1rem 0;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 5px;
+}
+button:hover { background: #0056b3; }
+#log { margin-top: 1rem; white-space: pre-line; background: #fff; padding: 1rem; border-radius: 5px; width: 100%; max-width: 600px; height: 300px; overflow-y: auto; border: 1px solid #ccc;}
+</style>
+</head>
+<body>
+<h1>Firebase DB Cleaner</h1>
+<p>This will remove all unnecessary collections and keep only the essential ones.</p>
+<button id="cleanBtn">Clean Database</button>
+<div id="log"></div>
+
+<script type="module">
+// Import Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+// TODO: Replace with your Firebase config
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const logEl = document.getElementById('log');
+
+function log(msg) {
+  logEl.textContent += msg + "\n";
+}
+
+// List of collections to KEEP
+const keepCollections = [
+  "Banners",
+  "activityLogs",
+  "addProduct",
+  "adminLogs",
+  "admin_codes",
+  "bracelets",
+  "carts",
+  "cleaningRequests",
+  "comments",
+  "config",
+  "cookies",
+  "discounts",
+  "orders",
+  "profile_pictures",
+  "promoCodes",
+  "promo_codes",
+  "reviews",
+  "roles",
+  "settings",
+  "siteSettings",
+  "slots",
+  "user_activity",
+  "users"
+];
+
+// Dangerous IDs to delete explicitly
+const deleteDocsById = [
+  "1wH4jZEclMfHtMuqzBpvzTIN3Sq2",
+  "8oO8s3pHmYYWlqD2kmeIOPgMQsI3",
+  "iPZTwMlAlpRAoxM2Q7g49a1HwiJ2"
+];
+
+// Get all collections in Firestore (no official API for listCollections on web, but using known names)
+const allCollections = keepCollections; // Replace if you want to scan dynamically
+
+document.getElementById('cleanBtn').addEventListener('click', async () => {
+  if(!confirm("⚠️ This will delete all unnecessary data! Proceed?")) return;
+
+  log("Starting cleanup...\n");
+
+  try {
+    for (let collName of allCollections) {
+      log(`Checking collection: ${collName}`);
+      const collRef = collection(db, collName);
+      const snapshot = await getDocs(collRef);
+      for (let docSnap of snapshot.docs) {
+        if(deleteDocsById.includes(docSnap.id)) {
+          await deleteDoc(doc(db, collName, docSnap.id));
+          log(`Deleted document: ${collName}/${docSnap.id}`);
+        }
+      }
+    }
+    log("\nCleanup finished successfully!");
+  } catch (err) {
+    console.error(err);
+    log("Error: " + err.message);
+  }
+});
+</script>
+</body>
+</html>
