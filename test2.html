@@ -62,6 +62,9 @@ main { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
 #loginForm input { margin-bottom:12px; padding:10px; border-radius:6px; border:none; }
 #loginForm button { padding:10px; border:none; border-radius:6px; background: var(--accent); color:#fff; cursor:pointer; transition:0.2s; }
 #loginForm button:hover { background:#0c7cd5; }
+
+#cartExtras { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+#cartExtras input { padding:6px; border-radius:6px; border:none; }
 </style>
 </head>
 <body>
@@ -77,6 +80,10 @@ main { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
 <div id="cartPanel">
   <h2>Shopping Cart</h2>
   <div id="cartItems">Cart is empty</div>
+  <div id="cartExtras">
+    <input type="number" id="donationInput" placeholder="Donation $" min="0">
+    <input type="text" id="giftMessageInput" placeholder="Gift message">
+  </div>
   <div><strong>Total: $<span id="cartTotal">0</span></strong></div>
   <button id="checkoutBtn" disabled>Checkout</button>
 </div>
@@ -93,7 +100,7 @@ main { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -116,6 +123,8 @@ const loginForm = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const logoutBtn = document.getElementById("logoutBtn");
+const donationInput = document.getElementById("donationInput");
+const giftMessageInput = document.getElementById("giftMessageInput");
 
 let cart = [];
 let currentUserUid = null;
@@ -123,30 +132,33 @@ let currentUserUid = null;
 openCartBtn.addEventListener("click", ()=>cartPanel.classList.toggle("show"));
 
 // Guest cart
-function loadGuestCart(){ const stored = localStorage.getItem('guestCart'); cart=stored?JSON.parse(stored):[]; updateCartUI(); }
+function loadGuestCart(){ 
+  const stored = localStorage.getItem('guestCart'); 
+  cart = stored?JSON.parse(stored):[]; 
+  updateCartUI(); 
+}
 function saveGuestCart(){ localStorage.setItem('guestCart',JSON.stringify(cart)); }
 
 // User cart
 async function loadUserCart(uid){
-  currentUserUid=uid;
-  const cartSnap=await getDoc(doc(db,"carts",uid));
-  const firestoreCart=cartSnap.exists()?cartSnap.data().items:[];
+  currentUserUid = uid;
+  const cartSnap = await getDoc(doc(db,"carts",uid));
+  const firestoreCart = cartSnap.exists()?cartSnap.data().items:[];
   cart = mergeCarts(firestoreCart,cart);
   updateCartUI();
   saveUserCart();
   localStorage.removeItem('guestCart');
 }
-
 async function saveUserCart(){
   if(currentUserUid) await setDoc(doc(db,"carts",currentUserUid),{items:cart});
   else saveGuestCart();
 }
 
 function mergeCarts(firestoreCart,guestCart){
-  const merged=[...firestoreCart];
+  const merged = [...firestoreCart];
   guestCart.forEach(gc=>{
-    const exist=merged.find(fc=>fc.id===gc.id && fc.size===gc.size && fc.colorPrimary===gc.colorPrimary && fc.colorSecondary===gc.colorSecondary);
-    if(exist) exist.qty+=gc.qty;
+    const exist = merged.find(fc=>fc.id===gc.id && fc.size===gc.size && fc.colorPrimary===gc.colorPrimary && fc.colorSecondary===gc.colorSecondary);
+    if(exist) exist.qty += gc.qty;
     else merged.push(gc);
   });
   return merged;
@@ -154,8 +166,12 @@ function mergeCarts(firestoreCart,guestCart){
 
 // Cart UI
 function updateCartUI(){
-  cartItemsDiv.innerHTML=""; let total=0;
-  if(cart.length===0){ cartItemsDiv.textContent="Cart is empty"; checkoutBtn.disabled=true; }
+  cartItemsDiv.innerHTML=""; 
+  let total=0;
+  if(cart.length===0){ 
+    cartItemsDiv.textContent="Cart is empty"; 
+    checkoutBtn.disabled=true; 
+  }
   else{
     cart.forEach((item,i)=>{
       const div=document.createElement("div"); div.className="cart-item";
@@ -166,7 +182,7 @@ function updateCartUI(){
       plus.onclick=()=>{ item.qty++; updateCartUI(); saveUserCart(); };
       const rm=document.createElement("button"); rm.textContent="Remove"; rm.onclick=()=>{ cart.splice(i,1); updateCartUI(); saveUserCart(); };
       div.appendChild(minus); div.appendChild(plus); div.appendChild(rm); cartItemsDiv.appendChild(div);
-      total+=item.price*item.qty;
+      total += item.price*item.qty;
     });
     checkoutBtn.disabled=false;
   }
@@ -177,22 +193,22 @@ function updateCartUI(){
 // Load products
 async function loadProducts(){
   try{
-    const snapshot=await getDocs(collection(db,"bracelets"));
+    const snapshot = await getDocs(collection(db,"bracelets"));
     if(snapshot.empty){ productsContainer.textContent="No products found."; return; }
     productsContainer.innerHTML="";
     snapshot.forEach(docSnap=>{
-      const p=docSnap.data();
-      const card=document.createElement("div"); card.className="product-card";
-      const h3=document.createElement("h3"); h3.textContent=p.name; card.appendChild(h3);
+      const p = docSnap.data();
+      const card = document.createElement("div"); card.className="product-card";
+      const h3 = document.createElement("h3"); h3.textContent = p.name; card.appendChild(h3);
 
       const selectedColors={primary:'',secondary:''};
 
       // Primary
       if(p.colors?.primary?.length){
-        const primaryDiv=document.createElement("div"); primaryDiv.className="colors";
+        const primaryDiv = document.createElement("div"); primaryDiv.className="colors";
         p.colors.primary.forEach(c=>{
-          const sw=document.createElement("div"); sw.className="color-swatch"; sw.style.background=c;
-          sw.onclick=()=>{ selectedColors.primary=c; Array.from(primaryDiv.children).forEach(ch=>ch.style.border='1px solid #fff'); sw.style.border='3px solid #ff0'; };
+          const sw = document.createElement("div"); sw.className="color-swatch"; sw.style.background=c;
+          sw.onclick = ()=>{ selectedColors.primary=c; Array.from(primaryDiv.children).forEach(ch=>ch.style.border='1px solid #fff'); sw.style.border='3px solid #ff0'; };
           primaryDiv.appendChild(sw);
         });
         card.appendChild(document.createTextNode("Primary:"));
@@ -201,10 +217,10 @@ async function loadProducts(){
 
       // Secondary
       if(p.colors?.secondary?.length){
-        const secondaryDiv=document.createElement("div"); secondaryDiv.className="colors";
+        const secondaryDiv = document.createElement("div"); secondaryDiv.className="colors";
         p.colors.secondary.forEach(c=>{
-          const sw=document.createElement("div"); sw.className="color-swatch"; sw.style.background=c;
-          sw.onclick=()=>{ selectedColors.secondary=c; Array.from(secondaryDiv.children).forEach(ch=>ch.style.border='1px solid #fff'); sw.style.border='3px solid #ff0'; };
+          const sw = document.createElement("div"); sw.className="color-swatch"; sw.style.background=c;
+          sw.onclick = ()=>{ selectedColors.secondary=c; Array.from(secondaryDiv.children).forEach(ch=>ch.style.border='1px solid #fff'); sw.style.border='3px solid #ff0'; };
           secondaryDiv.appendChild(sw);
         });
         card.appendChild(document.createTextNode("Secondary:"));
@@ -212,23 +228,24 @@ async function loadProducts(){
       }
 
       // Sizes
-      const sizeSelect=document.createElement("select");
+      const sizeSelect = document.createElement("select");
       if(p.sizes?.length){
         p.sizes.forEach(s=>{
-          const opt=document.createElement("option"); opt.value=JSON.stringify({price:s.price,size:s.size}); opt.textContent=`${s.size} ($${s.price})`;
+          const opt = document.createElement("option"); opt.value=JSON.stringify({price:s.price,size:s.size}); opt.textContent=`${s.size} ($${s.price})`;
           sizeSelect.appendChild(opt);
         });
       }
       card.appendChild(sizeSelect);
 
       // Add to cart
-      const btn=document.createElement("button"); btn.textContent="Add to Cart";
-      btn.onclick=()=>{
+      const btn = document.createElement("button"); btn.textContent="Add to Cart";
+      btn.onclick = ()=>{
         if(!sizeSelect.value) return;
         const selectedSize=JSON.parse(sizeSelect.value);
         if(!selectedColors.primary){ alert("Select a primary color"); return; }
         const existing=cart.find(c=>c.id===docSnap.id && c.size===selectedSize.size && c.colorPrimary===selectedColors.primary && c.colorSecondary===selectedColors.secondary);
-        if(existing) existing.qty++; else cart.push({...p,id:docSnap.id,qty:1,price:selectedSize.price,size:selectedSize.size,colorPrimary:selectedColors.primary,colorSecondary:selectedColors.secondary});
+        if(existing) existing.qty++; 
+        else cart.push({...p,id:docSnap.id,qty:1,price:selectedSize.price,size:selectedSize.size,colorPrimary:selectedColors.primary,colorSecondary:selectedColors.secondary});
         updateCartUI(); saveUserCart();
       };
       card.appendChild(btn);
@@ -238,13 +255,64 @@ async function loadProducts(){
 }
 
 // Login
-loginForm.addEventListener("submit", async e=>{ e.preventDefault(); try{ await signInWithEmailAndPassword(auth,emailInput.value,passwordInput.value); }catch(err){ alert("Login failed: "+err.message); } });
+loginForm.addEventListener("submit", async e=>{
+  e.preventDefault(); 
+  try{ await signInWithEmailAndPassword(auth,emailInput.value,passwordInput.value); } 
+  catch(err){ alert("Login failed: "+err.message); } 
+});
 logoutBtn.addEventListener("click", ()=>signOut(auth));
 
 // Auth
 onAuthStateChanged(auth,user=>{
-  if(user){ loginModal.classList.add("hidden"); logoutBtn.style.display="block"; loadProducts(); loadUserCart(user.uid); }
-  else{ loginModal.classList.remove("hidden"); productsContainer.innerHTML=""; cart=[]; updateCartUI(); logoutBtn.style.display="none"; currentUserUid=null; loadGuestCart(); }
+  if(user){ 
+    loginModal.classList.add("hidden"); 
+    logoutBtn.style.display="block"; 
+    loadProducts(); 
+    loadUserCart(user.uid); 
+  }
+  else{ 
+    loginModal.classList.remove("hidden"); 
+    productsContainer.innerHTML=""; 
+    cart=[]; 
+    updateCartUI(); 
+    logoutBtn.style.display="none"; 
+    currentUserUid=null; 
+    loadGuestCart(); 
+  }
+});
+
+// Checkout
+checkoutBtn.addEventListener("click", async () => {
+  if(!currentUserUid){ alert("You must be logged in to checkout."); return; }
+  if(!cart.length) return;
+
+  const orderData = {
+    uid: currentUserUid,
+    items: cart.map(item => ({
+      productName: item.name,
+      productId: item.id || null,
+      price: item.price,
+      colorPrimary: item.colorPrimary || null,
+      colorSecondary: item.colorSecondary || null,
+      selectedSize: item.size || null,
+      type: item.type || "bracelet"
+    })),
+    donation: parseFloat(donationInput.value) || 0,
+    giftMessage: giftMessageInput.value || "",
+    total: cart.reduce((sum, i) => sum + i.price * i.qty, 0) + (parseFloat(donationInput.value)||0),
+    timestamp: serverTimestamp()
+  };
+
+  try{
+    await addDoc(collection(db,"orders"), orderData);
+    alert("Order placed!");
+    cart=[]; updateCartUI(); saveUserCart();
+    donationInput.value = "";
+    giftMessageInput.value = "";
+  } catch(err){
+    console.error(err);
+    alert("Failed to place order: " + err.message);
+  }
 });
 
 </script>
