@@ -3,211 +3,153 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bracelets & Cookies Shop</title>
+<title>Bracelets & Cookies — Shop</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  /* Reset & Base */
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #fef6f0; padding: 20px; color: #333; }
+:root {
+  --bg: #0f1b2b;
+  --panel: #111f34;
+  --muted: #9aa8c2;
+  --accent: #1e90ff;
+  --card: #0f233f;
+  --danger: #dc3545;
+  --success: #28a745;
+  --surface: #13233a;
+}
 
-  h1 { font-size: 2.8rem; text-align: center; color: #FF7F50; margin-bottom: 30px; }
-  h2 { font-size: 1.6rem; margin-bottom: 20px; color: #333; }
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--panel) 100%);
+  color: #e6eef8;
+}
 
-  /* Sections */
-  .section { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); margin-bottom: 30px; transition: transform 0.2s; }
-  .section:hover { transform: translateY(-2px); }
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: rgba(18,34,58,0.95);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+header h1 { color: var(--accent); margin: 0; }
+header button { background: var(--accent); border:none; color:#fff; padding:8px 14px; border-radius:8px; cursor:pointer; }
 
-  /* Inputs & Buttons */
-  input, select, button { font-size: 1rem; padding: 12px; border-radius: 8px; border: 1px solid #ccc; }
-  input, select { width: 100%; margin-bottom: 15px; }
-  button { cursor: pointer; background: #FF7F50; color: #fff; border: none; transition: 0.3s; width: 100%; margin-top: 10px; }
-  button:hover { background: #FF4500; }
+main { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+.products { display: flex; flex-wrap: wrap; gap:20px; }
+.product-card {
+  background: var(--card); border-radius:12px; padding:16px; width: 220px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35); display:flex; flex-direction:column; justify-content:space-between;
+}
+.product-card h3 { margin:0 0 8px; color: var(--accent);}
+.product-card p { margin:0 0 8px; color: var(--muted);}
+.product-card button { margin-top:auto; }
 
-  .removeBtn { background: #dc3545; margin-left: 10px; width: auto; }
-  .removeBtn:hover { background: #a71d2a; }
+#cartPanel {
+  position: fixed; right:0; top:0; width:320px; height:100%; background:var(--panel);
+  border-left:1px solid rgba(255,255,255,0.05); padding:16px; display:flex; flex-direction:column;
+  transform: translateX(100%); transition: transform .3s; z-index:999;
+}
+#cartPanel.show { transform: translateX(0); }
+#cartItems { flex:1; overflow:auto; margin-top:10px; }
+.cart-item { display:flex; justify-content: space-between; align-items:center; margin-bottom:10px; }
+.cart-item span { flex:1; }
+.cart-item button { background: var(--danger); border:none; color:#fff; padding:4px 8px; border-radius:6px; cursor:pointer; }
 
-  /* Cart List */
-  ul { list-style: none; padding: 0; }
-  li { background: #fff3e0; margin-bottom: 15px; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
-  li:hover { background: #ffe5cc; }
-  .item-info { display: flex; flex-direction: column; gap: 10px; }
-  .item-info div { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+#checkoutBtn { background: var(--success); border:none; padding:10px 16px; border-radius:8px; cursor:pointer; margin-top:10px; }
 
-  /* Responsive */
-  @media (min-width: 600px) {
-    #login-section input, #login-section select, #login-section button { width: auto; display: inline-block; }
-    .item-info { flex-direction: row; gap: 20px; }
-  }
+#openCartBtn {
+  position: fixed; right:20px; bottom:20px; padding:12px 18px; border-radius:50px;
+  background: var(--accent); border:none; color:#fff; cursor:pointer; z-index:1000;
+}
 </style>
 </head>
 <body>
+<header>
+  <h1>Bracelets & Cookies</h1>
+  <button id="openCartBtn">Cart (0)</button>
+</header>
 
-<h1>Bracelets & Cookies Shop</h1>
+<main>
+  <div class="products" id="productsContainer">
+    <!-- Products will be loaded here -->
+  </div>
+</main>
 
-<div id="login-section" class="section">
-  <h2>Login / Sign Up</h2>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <button id="loginBtn">Login</button>
-  <button id="signupBtn">Sign Up</button>
-</div>
-
-<div id="cart-section" class="section" style="display:none;">
-  <h2>Your Cart</h2>
-  <ul id="cart-list"><li>Loading cart...</li></ul>
+<div id="cartPanel">
+  <h2>Shopping Cart</h2>
+  <div id="cartItems"></div>
+  <div><strong>Total: $<span id="cartTotal">0</span></strong></div>
   <button id="checkoutBtn">Checkout</button>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, addDoc, doc, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-// Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
-  authDomain: "survival-f35e2.firebaseapp.com",
-  projectId: "survival-f35e2",
-  storageBucket: "survival-f35e2.appspot.com",
-  messagingSenderId: "704462603548",
-  appId: "1:704462603548:android:00d1a3fb89f9106a59e6d9"
+  apiKey:"AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+  authDomain:"survival-f35e2.firebaseapp.com",
+  projectId:"survival-f35e2",
 };
-
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Elements
-const loginSection = document.getElementById("login-section");
-const cartSection = document.getElementById("cart-section");
-const cartList = document.getElementById("cart-list");
-const loginBtn = document.getElementById("loginBtn");
-const signupBtn = document.getElementById("signupBtn");
-const checkoutBtn = document.getElementById("checkoutBtn");
+const productsContainer = document.getElementById("productsContainer");
+const cartPanel = document.getElementById("cartPanel");
+const cartItemsDiv = document.getElementById("cartItems");
+const openCartBtn = document.getElementById("openCartBtn");
+const cartTotalSpan = document.getElementById("cartTotal");
 
-let userUID = null;
-let unsubscribeCart = null;
+let cart = [];
 
-// Login
-loginBtn.addEventListener("click", () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  signInWithEmailAndPassword(auth, email, password)
-    .catch(err => alert(err.message));
-});
+openCartBtn.addEventListener("click", ()=>cartPanel.classList.toggle("show"));
 
-// Sign Up
-signupBtn.addEventListener("click", () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  createUserWithEmailAndPassword(auth, email, password)
-    .catch(err => alert(err.message));
-});
+function updateCartUI(){
+  cartItemsDiv.innerHTML="";
+  let total=0;
+  cart.forEach((item,i)=>{
+    const div = document.createElement("div");
+    div.className="cart-item";
+    div.innerHTML = `<span>${item.name} x ${item.qty} - $${item.price*item.qty}</span>`;
+    const rmBtn = document.createElement("button");
+    rmBtn.textContent="Remove";
+    rmBtn.onclick=()=>{ cart.splice(i,1); updateCartUI(); };
+    div.appendChild(rmBtn);
+    cartItemsDiv.appendChild(div);
+    total += item.price*item.qty;
+  });
+  cartTotalSpan.textContent=total.toFixed(2);
+  openCartBtn.textContent = `Cart (${cart.reduce((a,b)=>a+b.qty,0)})`;
+}
 
-// Auth State
-onAuthStateChanged(auth, user => {
-  if (user) {
-    userUID = user.uid;
-    loginSection.style.display = "none";
-    cartSection.style.display = "block";
-    loadCartRealtime();
-  } else {
-    userUID = null;
-    loginSection.style.display = "block";
-    cartSection.style.display = "none";
-    if (unsubscribeCart) unsubscribeCart();
-  }
-});
-
-// Load Cart Real-time
-function loadCartRealtime() {
-  if (!userUID) {
-    cartList.innerHTML = "<li>Please log in to see your cart.</li>";
-    return;
-  }
-
-  const userCartRef = collection(db, "carts");
-
-  if (unsubscribeCart) unsubscribeCart();
-
-  unsubscribeCart = onSnapshot(userCartRef, snapshot => {
-    cartList.innerHTML = "";
-
-    const userCartItems = snapshot.docs.filter(docSnap => docSnap.data().uid === userUID);
-
-    if (userCartItems.length === 0) {
-      cartList.innerHTML = "<li>Your cart is empty.</li>";
-      return;
-    }
-
-    userCartItems.forEach(docSnap => {
-      const data = docSnap.data();
-      const li = document.createElement("li");
-
-      li.innerHTML = `
-        <div class="item-info">
-          <strong>${data.productName || "Unnamed Product"}</strong>
-          <div>
-            ${data.type === 'bracelet' 
-              ? `Color: <input type="color" value="${data.color || '#ffffff'}" data-id="${docSnap.id}" class="color"> Size: 
-              <select data-id="${docSnap.id}" class="size">
-                <option value="small" ${data.size==='small'?'selected':''}>Small</option>
-                <option value="medium" ${data.size==='medium'?'selected':''}>Medium</option>
-                <option value="large" ${data.size==='large'?'selected':''}>Large</option>
-              </select>` 
-              : `Flavor: <input type="text" value="${data.flavor || ''}" data-id="${docSnap.id}" class="flavor">`
-            }
-          </div>
-        </div>
-        <button data-id="${docSnap.id}" class="removeBtn">Remove</button>
-      `;
-      cartList.appendChild(li);
-    });
-
-    // Event Listeners
-    document.querySelectorAll(".color").forEach(input => {
-      input.addEventListener("input", e => updateDoc(doc(db, "carts", e.target.dataset.id), { color: e.target.value }));
-    });
-    document.querySelectorAll(".size").forEach(select => {
-      select.addEventListener("change", e => updateDoc(doc(db, "carts", e.target.dataset.id), { size: e.target.value }));
-    });
-    document.querySelectorAll(".flavor").forEach(input => {
-      input.addEventListener("input", e => updateDoc(doc(db, "carts", e.target.dataset.id), { flavor: e.target.value }));
-    });
-    document.querySelectorAll(".removeBtn").forEach(btn => {
-      btn.addEventListener("click", e => deleteDoc(doc(db, "carts", e.target.dataset.id)));
-    });
-  }, err => {
-    console.error("Error loading cart:", err);
-    cartList.innerHTML = "<li>Failed to load cart.</li>";
+// Load products from Firestore
+async function loadProducts(){
+  const snapshot = await getDocs(collection(db,"products"));
+  snapshot.forEach(docSnap=>{
+    const p = docSnap.data();
+    const card = document.createElement("div");
+    card.className="product-card";
+    card.innerHTML = `
+      <h3>${p.name}</h3>
+      <p>Price: $${p.price}</p>
+      <p>Colors: ${p.colors?.join(", ") || "—"}</p>
+      <p>Sizes: ${p.sizes?.join(", ") || "—"}</p>
+    `;
+    const btn = document.createElement("button");
+    btn.textContent="Add to Cart";
+    btn.onclick=()=>{
+      const existing = cart.find(c=>c.id===docSnap.id);
+      if(existing){ existing.qty+=1; }
+      else { cart.push({...p,id:docSnap.id,qty:1}); }
+      updateCartUI();
+    };
+    card.appendChild(btn);
+    productsContainer.appendChild(card);
   });
 }
 
-// Checkout
-checkoutBtn.addEventListener("click", async () => {
-  const snapshot = await getDocs(collection(db, "carts"));
-  const orders = [];
-
-  snapshot.forEach(docSnap => {
-    const data = docSnap.data();
-    if (data.uid !== userUID) return;
-    orders.push({
-      productName: data.productName,
-      type: data.type,
-      color: data.color || null,
-      size: data.size || null,
-      flavor: data.flavor || null,
-      uid: userUID,
-      timestamp: new Date()
-    });
-  });
-
-  for (const order of orders) {
-    await addDoc(collection(db, "orders"), order);
-  }
-
-  alert("Order placed!");
-});
+loadProducts();
 </script>
-
 </body>
 </html>
