@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Admin Panel — Bracelets & Cookies</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root {
   --bg: #0f1b2b;
@@ -54,8 +53,6 @@ input:focus, select:focus, textarea:focus { box-shadow:0 0 0 4px rgba(30,144,255
 .wrapper { display:flex; align-items:center; margin-bottom:5px; gap:10px; flex-wrap:wrap; }
 .wrapper > div { flex:1; min-width:100px; }
 @media(max-width:900px){ header{ flex-direction:column; align-items:flex-start; gap:6px; } .stats-cards{ flex-direction:column; } }
-
-/* Modal */
 #orderModal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:9999; }
 #orderModal .modal-content { background:var(--panel); padding:20px; border-radius:12px; max-width:600px; width:90%; max-height:80%; overflow:auto; }
 #orderModal .close-btn { float:right; cursor:pointer; background:none; border:none; color:var(--accent); font-size:1.2rem; font-weight:bold; }
@@ -149,7 +146,6 @@ input:focus, select:focus, textarea:focus { box-shadow:0 0 0 4px rgba(30,144,255
   </section>
 </main>
 
-<!-- Notification -->
 <div id="notification"></div>
 
 <!-- Order Modal -->
@@ -287,39 +283,50 @@ async function loadOrders(){
     const data=d.data();
     const tr=document.createElement("tr");
     tr.appendChild(createCell(d.id));
-    tr.appendChild(createCell(data.userUID || "—"));
+    tr.appendChild(createCell(data.uid || "—"));
     tr.appendChild(createCell(data.total ?? "—"));
     tr.appendChild(createCell(data.donation ?? "—"));
-    tr.appendChild(createCell(data.gift || "—"));
+    tr.appendChild(createCell(data.giftMessage || "—"));
     tr.appendChild(createCell(data.status || "—"));
-    tr.appendChild(createCell((data.items||[]).map(i=>i.name).join(", ") || "—"));
+    tr.appendChild(createCell((data.items||[]).map(i=>i.productName).join(", ") || "—"));
     
     const actionTd=document.createElement("td");
     const btn=document.createElement("button"); btn.textContent="View"; btn.className="btn-success";
     btn.onclick=()=>{
       const modal=document.getElementById("orderModal");
       const detailsDiv=document.getElementById("orderDetails");
-      const items=data.items||[];
-      const itemsHTML=items.length
-        ? items.map(i=>{
-          const name=i.name||"Unknown";
-          const qty=i.quantity??1;
-          const color=i.color||"—";
-          const size=i.size||"—";
-          const flavor=i.flavor||"—";
-          return `<li>${name} x${qty} (Color: ${color}, Size: ${size}, Flavor: ${flavor})</li>`;
-        }).join("")
+
+      const userUID = data.uid || "—";
+      const total = data.total ?? "—";
+      const donation = data.donation ?? "—";
+      const gift = data.giftMessage || "—";
+      const status = data.status || "—";
+      const items = data.items || [];
+
+      const itemsHTML = items.length
+        ? items.map(i => {
+            const name = i.productName || "Unknown";
+            const qty = i.quantity ?? 1;
+            const size = i.selectedSize || "—";
+            const color = i.primaryColor || "—";
+            const secondary = i.secondaryColor || "—";
+            const type = i.type || "—";
+            const price = i.price ?? "—";
+            return `<li>${name} (${type}) x${qty} - Size: ${size}, Colors: ${color}/${secondary}, Price: $${price}</li>`;
+          }).join("")
         : "<li>No items</li>";
-      detailsDiv.innerHTML=`
+
+      detailsDiv.innerHTML = `
         <p><strong>Order ID:</strong> ${d.id}</p>
-        <p><strong>User UID:</strong> ${data.userUID||"—"}</p>
-        <p><strong>Total:</strong> $${data.total ?? "—"}</p>
-        <p><strong>Donation:</strong> $${data.donation ?? "—"}</p>
-        <p><strong>Gift:</strong> ${data.gift||"—"}</p>
-        <p><strong>Status:</strong> ${data.status||"—"}</p>
-        <p><strong>Items:</strong></p><ul>${itemsHTML}</ul>
+        <p><strong>User UID:</strong> ${userUID}</p>
+        <p><strong>Total:</strong> $${total}</p>
+        <p><strong>Donation:</strong> $${donation}</p>
+        <p><strong>Gift Message:</strong> ${gift}</p>
+        <p><strong>Status:</strong> ${status}</p>
+        <p><strong>Items:</strong></p>
+        <ul>${itemsHTML}</ul>
       `;
-      modal.style.display="flex";
+      modal.style.display = "flex";
     };
     actionTd.appendChild(btn); tr.appendChild(actionTd);
     tbody.appendChild(tr);
@@ -346,6 +353,10 @@ async function loadProducts(){
 }
 
 function addProduct(){ showNotification("Add product functionality not implemented yet"); }
+
+document.getElementById("orderModal").addEventListener("click", (e)=>{
+  if(e.target.id==="orderModal") e.target.style.display="none";
+});
 </script>
 </body>
 </html>
