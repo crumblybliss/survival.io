@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Panel — Bracelets & Cookies</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  --bg: #0f1b2b;
+  --panel: #111f34;
+  --muted: #9aa8c2;
+  --accent: #1e90ff;
+  --card: #0f233f;
+  --danger: #dc3545;
+  --success: #28a745;
+  --surface: #13233a;
+}
+
+* { box-sizing: border-box; }
+html, body { margin:0; font-family:'Roboto',sans-serif; background: linear-gradient(180deg, var(--bg) 0%, var(--panel) 100%); color:#e6eef8; min-height:100%; }
+
+header {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:18px 24px; background:rgba(18,34,58,0.95);
+  border-bottom:1px solid rgba(255,255,255,0.05); backdrop-filter:blur(4px);
+}
+header h1 { margin:0; font-size:1.4rem; color:var(--accent); }
+header .sub { color:var(--muted); font-size:0.85rem; }
+.controls { display:flex; gap:10px; align-items:center; }
+
+main { max-width:1400px; margin:20px auto; padding:0 20px 60px; }
+.section {
+  background: rgba(17,32,52,0.6); backdrop-filter: blur(10px);
+  border-radius:12px; padding:18px; margin-bottom:20px;
+  box-shadow:0 12px 28px rgba(0,0,0,0.45);
+  border:1px solid rgba(255,255,255,0.03); transition: transform .2s;
+}
+.section:hover { transform: translateY(-2px); }
+h2 { color: var(--accent); margin:0 0 14px 0; }
+
+.table-wrapper { overflow:auto; border-radius:8px; border:1px solid rgba(255,255,255,0.03); }
+table { width:100%; border-collapse:collapse; }
+th, td { padding:12px 14px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.05); }
+th { font-weight:600; }
+tr:hover { background: rgba(30,144,255,0.05); }
+
+button {
+  background: var(--accent); color:#fff; border:0; border-radius:8px;
+  padding:10px 14px; cursor:pointer; font-weight:600; transition: all .12s;
+}
+button:hover { transform: translateY(-2px); opacity:.95; box-shadow:0 4px 18px rgba(30,144,255,0.3); }
+.btn-danger { background: var(--danger); }
+.btn-success { background: var(--success); }
+.btn-ghost { background: transparent; border:1px solid rgba(255,255,255,0.05); color:var(--muted); }
+
+input, select, textarea {
+  width:100%; padding:10px 12px; border-radius:8px;
+  border:1px solid rgba(255,255,255,0.04);
+  background: var(--surface); color: inherit; font-size:0.95rem; outline:none;
+  transition: all .12s;
+}
+input:focus, select:focus, textarea:focus { box-shadow:0 0 0 4px rgba(30,144,255,0.1); }
+
+.stats-cards { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:20px; }
+.stats-card {
+  flex:1; min-width:120px; background:var(--card); padding:16px;
+  border-radius:12px; box-shadow:0 8px 16px rgba(0,0,0,0.35);
+  text-align:center; transition: transform .15s;
+}
+.stats-card:hover { transform: translateY(-2px); }
+.stats-card h3 { margin:0; font-size:1.2rem; color:var(--accent); }
+.stats-card p { margin:4px 0 0; font-size:0.9rem; color:var(--muted); }
+
+#notification {
+  position: fixed; bottom: 20px; right: 20px;
+  padding:12px 16px; border-radius:10px; color:#fff; font-weight:500;
+  display:none; box-shadow:0 6px 22px rgba(0,0,0,0.45);
+  opacity:0; transform:translateY(20px); transition: opacity .3s, transform .3s;
+}
+#notification.show { display:block; opacity:1; transform:translateY(0); }
+#notification.success { background: var(--success); }
+#notification.error { background: var(--danger); }
+
+.collapsible-button { cursor:pointer; display:flex; justify-content:space-between; align-items:center; width:100%; background:none; border:none; padding:0; color:var(--accent); font-size:1.1rem; margin-bottom:5px; }
+.collapsible-content { max-height:0; overflow:hidden; transition:max-height .3s ease, padding .3s ease; padding:0 0; }
+
+.collapsible-content.expanded { padding:10px 0; }
+
+.wrapper { display:flex; align-items:center; margin-bottom:5px; gap:10px; flex-wrap:wrap; }
+.wrapper > div { flex:1; min-width:100px; }
+
+@media(max-width:900px){
+  header{ flex-direction:column; align-items:flex-start; gap:6px; }
+  .stats-cards{ flex-direction:column; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Admin Panel</h1>
+    <div class="sub">Bracelets & Cookies — Manage users, orders & products</div>
+  </div>
+  <div class="controls">
+    <div id="adminEmailPreview" class="sub"></div>
+    <button id="logoutBtn" class="btn-ghost" style="display:none;">Sign out</button>
+  </div>
+</header>
+
+<main>
+  <!-- LOGIN -->
+  <section id="login-section" class="section">
+    <h2>Admin Login</h2>
+    <form id="loginForm" style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="flex:1; min-width:200px;">
+        <label for="adminEmail">Email</label>
+        <input id="adminEmail" type="email" placeholder="Email" required>
+      </div>
+      <div style="flex:1; min-width:200px;">
+        <label for="adminPassword">Password</label>
+        <input id="adminPassword" type="password" placeholder="Password" required>
+      </div>
+      <div style="flex-basis:100%;">
+        <button id="loginBtn" type="submit">Sign in</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ADMIN DASHBOARD -->
+  <section id="admin-section" class="section" style="display:none;">
+    <h2>Dashboard</h2>
+    <div class="stats-cards">
+      <div class="stats-card"><h3 id="totalUsers">0</h3><p>Total Users</p></div>
+      <div class="stats-card"><h3 id="activeUsers">0</h3><p>Active Today</p></div>
+      <div class="stats-card"><h3 id="totalOrders">0</h3><p>Total Orders</p></div>
+      <div class="stats-card"><h3 id="revenue">$0</h3><p>Total Revenue</p></div>
+      <div class="stats-card"><h3 id="donations">$0</h3><p>Donations</p></div>
+    </div>
+
+    <!-- USERS -->
+    <div class="section">
+      <button class="collapsible-button" aria-expanded="false" aria-controls="usersContent">Users ▼</button>
+      <div id="usersContent" class="collapsible-content">
+        <input type="text" id="searchUsers" placeholder="Search Users..." style="margin-bottom:10px;">
+        <div class="table-wrapper">
+          <table id="usersTable">
+            <thead><tr><th>Email</th><th>UID</th><th>Role</th><th>Created</th><th>Action</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="section">
+      <button class="collapsible-button" aria-expanded="false" aria-controls="ordersContent">Orders ▼</button>
+      <div id="ordersContent" class="collapsible-content">
+        <input type="text" id="searchOrders" placeholder="Search Orders..." style="margin-bottom:10px;">
+        <div class="table-wrapper">
+          <table id="ordersTable">
+            <thead><tr><th>Order ID</th><th>User UID</th><th>Total</th><th>Donation</th><th>Gift</th><th>Status</th><th>Items</th><th>Action</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="section">
+      <button class="collapsible-button" aria-expanded="false" aria-controls="productsContent">Products ▼</button>
+      <div id="productsContent" class="collapsible-content">
+        <button type="button" onclick="addProduct()">+ Add Product</button>
+        <div id="productEditorContainer"></div>
+        <div class="table-wrapper">
+          <table id="productsTable">
+            <thead><tr><th>Name</th><th>Price</th><th>Colors</th><th>Sizes</th><th>Flavors</th><th>Action</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<div id="notification"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyCrdPP5q_eZ4OqqcCW1nguD89f5VHLPVU0",
+  authDomain:"survival-f35e2.firebaseapp.com",
+  projectId:"survival-f35e2",
+  storageBucket:"survival-f35e2.appspot.com",
+  messagingSenderId:"704462603548",
+  appId:"1:704462603548:web:00d1a3fb89f9106a59e6d9"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const loginSection = document.getElementById("login-section");
+const adminSection = document.getElementById("admin-section");
+const loginForm = document.getElementById("loginForm");
+const logoutBtn = document.getElementById("logoutBtn");
+const adminEmailPreview = document.getElementById("adminEmailPreview");
+const notification = document.getElementById("notification");
+
+let notificationQueue = [];
+function showNotification(msg,type="success"){
+  notificationQueue.push({msg,type});
+  if(notificationQueue.length>1) return;
+  function next(){
+    if(notificationQueue.length===0) return;
+    const {msg,type} = notificationQueue[0];
+    notification.textContent=msg;
+    notification.className=`show ${type}`;
+    setTimeout(()=>{
+      notificationQueue.shift();
+      next();
+    },3000);
+  }
+  next();
+}
+
+function createCell(text){ return Object.assign(document.createElement("td"), {textContent:(text===0||text)?text:"—"}); }
+
+function toggleSection(btn){
+  const content=document.getElementById(btn.getAttribute("aria-controls"));
+  const expanded=btn.getAttribute("aria-expanded")==='true';
+  btn.setAttribute("aria-expanded",!expanded);
+  if(!expanded){ content.style.maxHeight=content.scrollHeight+"px"; content.classList.add("expanded"); }
+  else { content.style.maxHeight="0"; content.classList.remove("expanded"); }
+}
+document.querySelectorAll(".collapsible-button").forEach(btn=>btn.addEventListener("click",()=>toggleSection(btn)));
+
+loginForm.addEventListener("submit", async e=>{
+  e.preventDefault();
+  const email=document.getElementById("adminEmail").value.trim();
+  const pass=document.getElementById("adminPassword").value;
+  if(!email||!pass){ showNotification("Enter email and password","error"); return; }
+  try{ await signInWithEmailAndPassword(auth,email,pass); }
+  catch(err){ showNotification(err.message,"error"); }
+});
+logoutBtn.addEventListener("click",()=>signOut(auth).catch(err=>showNotification(err.message,"error")));
+
+onAuthStateChanged(auth, async user=>{
+  if(user){
+    loginSection.style.display="none";
+    adminSection.style.display="block";
+    logoutBtn.style.display="inline-block";
+    adminEmailPreview.textContent=user.email;
+    Promise.all([loadDashboard(), loadUsers(), loadOrders(), loadProducts()]);
+  } else {
+    loginSection.style.display="block";
+    adminSection.style.display="none";
+    logoutBtn.style.display="none";
+    adminEmailPreview.textContent="";
+  }
+});
+
+async function loadDashboard(){
+  try{
+    const usersSnap=await getDocs(collection(db,"users"));
+    const ordersSnap=await getDocs(collection(db,"orders"));
+    let totalUsers=usersSnap.size, totalOrders=ordersSnap.size, revenue=0, donations=0, activeUsers=0;
+    const today=new Date().toDateString();
+    usersSnap.forEach(d=>{ const last=d.data().lastLogin; if(last?.toDate?.() && last.toDate().toDateString()===today) activeUsers++; });
+    ordersSnap.forEach(d=>{ const data=d.data(); revenue+=parseFloat(data.total)||0; donations+=parseFloat(data.donation)||0; });
+    document.getElementById("totalUsers").textContent=totalUsers;
+    document.getElementById("activeUsers").textContent=activeUsers;
+    document.getElementById("totalOrders").textContent=totalOrders;
+    document.getElementById("revenue").textContent="$"+revenue;
+    document.getElementById("donations").textContent="$"+donations;
+  }catch(e){ console.error(e); showNotification("Failed to load dashboard","error"); }
+}
+
+async function loadUsers(){
+  const tbody=document.querySelector("#usersTable tbody");
+  tbody.innerHTML="";
+  const snap=await getDocs(collection(db,"users"));
+  snap.forEach(d=>{
+    const data=d.data();
+    const tr=document.createElement("tr");
+    tr.appendChild(createCell(data.email));
+    tr.appendChild(createCell(d.id));
+    tr.appendChild(createCell(data.role));
+    tr.appendChild(createCell(data.createdAt?.toDate?.()?.toLocaleString()));
+    const actionTd=document.createElement("td");
+    const btn=document.createElement("button");
+    btn.textContent="Edit Role"; btn.className="btn-success";
+    btn.onclick=()=>showNotification("Edit user not implemented yet");
+    actionTd.appendChild(btn); tr.appendChild(actionTd);
+    tbody.appendChild(tr);
+  });
+}
+
+async function loadOrders(){
+  const tbody=document.querySelector("#ordersTable tbody"); tbody.innerHTML="";
+  const snap=await getDocs(collection(db,"orders"));
+  snap.forEach(d=>{
+    const data=d.data();
+    const tr=document.createElement("tr");
+    tr.appendChild(createCell(d.id));
+    tr.appendChild(createCell(data.userUID));
+    tr.appendChild(createCell(data.total));
+    tr.appendChild(createCell(data.donation));
+    tr.appendChild(createCell(data.gift));
+    tr.appendChild(createCell(data.status));
+    tr.appendChild(createCell((data.items||[]).map(i=>i.name).join(", ")));
+    const actionTd=document.createElement("td");
+    const btn=document.createElement("button"); btn.textContent="View"; btn.className="btn-success";
+    btn.onclick=()=>showNotification("View order not implemented yet"); actionTd.appendChild(btn); tr.appendChild(actionTd);
+    tbody.appendChild(tr);
+  });
+}
+
+async function loadProducts(){
+  const tbody=document.querySelector("#productsTable tbody"); tbody.innerHTML="";
+  const snap=await getDocs(collection(db,"products"));
+  snap.forEach(d=>{
+    const data=d.data();
+    const tr=document.createElement("tr");
+    tr.appendChild(createCell(data.name));
+    tr.appendChild(createCell(data.price));
+    tr.appendChild(createCell((data.colors||[]).join(", ")));
+    tr.appendChild(createCell((data.sizes||[]).join(", ")));
+    tr.appendChild(createCell((data.flavors||[]).join(", ")));
+    const actionTd=document.createElement("td");
+    const btn=document.createElement("button"); btn.textContent="Edit"; btn.className="btn-success";
+    btn.onclick=()=>showNotification("Edit product not implemented yet"); actionTd.appendChild(btn); tr.appendChild(actionTd);
+    tbody.appendChild(tr);
+  });
+}
+
+function addProduct(){
+  showNotification("Add product functionality not implemented yet");
+}
+
+</script>
+</body>
+</html>
