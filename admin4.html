@@ -149,13 +149,13 @@ input:focus, select:focus, textarea:focus { box-shadow:0 0 0 4px rgba(30,144,255
   </section>
 </main>
 
+<!-- Notification -->
 <div id="notification"></div>
 
 <!-- Order Modal -->
 <div id="orderModal">
   <div class="modal-content">
-    <button class="close-btn" onclick="document.getElementById('orderModal').style.display='none'">&times;</button>
-    <h3>Order Details</h3>
+    <button class="close-btn" onclick="document.getElementById('orderModal').style.display='none'">×</button>
     <div id="orderDetails"></div>
   </div>
 </div>
@@ -267,24 +267,14 @@ async function loadUsers(){
     const actionTd=document.createElement("td");
     const btn=document.createElement("button");
     btn.textContent="Edit Role"; btn.className="btn-success";
-
-    // EDIT ROLE IMPLEMENTATION
-    btn.onclick = async () => {
-      const allowedRoles = ["user","moderator","admin","banned"];
-      const newRole = prompt(`Change role for ${data.email}:`, data.role || "user");
-      if(!newRole || !allowedRoles.includes(newRole.toLowerCase())){
-        showNotification("Invalid role","error"); return;
-      }
-      try{
-        await updateDoc(doc(db,"users",d.id), { role: newRole.toLowerCase() });
-        showNotification(`Role updated to "${newRole}"`);
+    btn.onclick=async ()=>{
+      const newRole = prompt("Enter new role (admin, moderator, user, banned):", data.role||"user");
+      if(newRole){
+        await updateDoc(doc(db,"users",d.id), { role:newRole });
+        showNotification(`Updated role for ${data.email} → ${newRole}`);
         loadUsers();
-      }catch(err){
-        console.error(err);
-        showNotification("Failed to update role","error");
       }
     };
-
     actionTd.appendChild(btn); tr.appendChild(actionTd);
     tbody.appendChild(tr);
   });
@@ -297,31 +287,40 @@ async function loadOrders(){
     const data=d.data();
     const tr=document.createElement("tr");
     tr.appendChild(createCell(d.id));
-    tr.appendChild(createCell(data.userUID));
-    tr.appendChild(createCell(data.total));
-    tr.appendChild(createCell(data.donation));
-    tr.appendChild(createCell(data.gift));
-    tr.appendChild(createCell(data.status));
-    tr.appendChild(createCell((data.items||[]).map(i=>i.name).join(", ")));
+    tr.appendChild(createCell(data.userUID || "—"));
+    tr.appendChild(createCell(data.total ?? "—"));
+    tr.appendChild(createCell(data.donation ?? "—"));
+    tr.appendChild(createCell(data.gift || "—"));
+    tr.appendChild(createCell(data.status || "—"));
+    tr.appendChild(createCell((data.items||[]).map(i=>i.name).join(", ") || "—"));
+    
     const actionTd=document.createElement("td");
     const btn=document.createElement("button"); btn.textContent="View"; btn.className="btn-success";
-
-    // VIEW ORDER IMPLEMENTATION
-    btn.onclick = () => {
-      const modal = document.getElementById("orderModal");
-      const detailsDiv = document.getElementById("orderDetails");
-      detailsDiv.innerHTML = `
+    btn.onclick=()=>{
+      const modal=document.getElementById("orderModal");
+      const detailsDiv=document.getElementById("orderDetails");
+      const items=data.items||[];
+      const itemsHTML=items.length
+        ? items.map(i=>{
+          const name=i.name||"Unknown";
+          const qty=i.quantity??1;
+          const color=i.color||"—";
+          const size=i.size||"—";
+          const flavor=i.flavor||"—";
+          return `<li>${name} x${qty} (Color: ${color}, Size: ${size}, Flavor: ${flavor})</li>`;
+        }).join("")
+        : "<li>No items</li>";
+      detailsDiv.innerHTML=`
         <p><strong>Order ID:</strong> ${d.id}</p>
-        <p><strong>User UID:</strong> ${data.userUID}</p>
-        <p><strong>Total:</strong> $${data.total}</p>
-        <p><strong>Donation:</strong> $${data.donation}</p>
-        <p><strong>Gift:</strong> ${data.gift}</p>
-        <p><strong>Status:</strong> ${data.status}</p>
-        <p><strong>Items:</strong> ${(data.items||[]).map(i=>`${i.name} (x${i.quantity||1})`).join(", ")}</p>
+        <p><strong>User UID:</strong> ${data.userUID||"—"}</p>
+        <p><strong>Total:</strong> $${data.total ?? "—"}</p>
+        <p><strong>Donation:</strong> $${data.donation ?? "—"}</p>
+        <p><strong>Gift:</strong> ${data.gift||"—"}</p>
+        <p><strong>Status:</strong> ${data.status||"—"}</p>
+        <p><strong>Items:</strong></p><ul>${itemsHTML}</ul>
       `;
-      modal.style.display = "flex";
+      modal.style.display="flex";
     };
-
     actionTd.appendChild(btn); tr.appendChild(actionTd);
     tbody.appendChild(tr);
   });
@@ -340,7 +339,8 @@ async function loadProducts(){
     tr.appendChild(createCell((data.flavors||[]).join(", ")));
     const actionTd=document.createElement("td");
     const btn=document.createElement("button"); btn.textContent="Edit"; btn.className="btn-success";
-    btn.onclick=()=>showNotification("Edit product not implemented yet"); actionTd.appendChild(btn); tr.appendChild(actionTd);
+    btn.onclick=()=>showNotification("Edit product not implemented yet");
+    actionTd.appendChild(btn); tr.appendChild(actionTd);
     tbody.appendChild(tr);
   });
 }
